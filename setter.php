@@ -1,7 +1,13 @@
 <?php
 header('Content-Type: application/json');
 try {
-    $pdo = new PDO('sqlite:database.db');
+    // Connect to MySQL instead of the previous SQLite database
+    $dbHost = 'localhost';
+    $dbName = 'coin_db';
+    $dbUser = 'root';
+    $dbPass = '';
+    $dsn = "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4";
+    $pdo = new PDO($dsn, $dbUser, $dbPass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $input = json_decode(file_get_contents('php://input'), true);
