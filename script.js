@@ -153,7 +153,7 @@ const dashboardData = {
             }
         });
     }
-    localStorage.setItem('kycStatus', JSON.stringify(kycStatus));
+    // localStorage.setItem('kycStatus', JSON.stringify(kycStatus));
     if (data.personalData && data.personalData.password) {
         data.personalData.passwordHash = await hashPassword(data.personalData.password);
         delete data.personalData.password;
@@ -190,9 +190,9 @@ const dashboardData = {
             formData: data.formData,
             defaultKYCStatus: data.defaultKYCStatus
         };
-        localStorage.setItem('dashboardDataIn', JSON.stringify(inData));
-        localStorage.setItem('dashboardDataInOut', JSON.stringify(outData));
-        localStorage.setItem('kycStatus', JSON.stringify(kycStatus));
+        // localStorage.setItem('dashboardDataIn', JSON.stringify(inData));
+        // localStorage.setItem('dashboardDataInOut', JSON.stringify(outData));
+        // localStorage.setItem('kycStatus', JSON.stringify(kycStatus));
 
         $.ajax({
             url: 'setter.php',
@@ -334,7 +334,7 @@ const dashboardData = {
                 kycStatus[key].status = String(value);
                 kycStatus[key].date = when;
             }
-            localStorage.setItem('kycStatus', JSON.stringify(kycStatus));
+            // localStorage.setItem('kycStatus', JSON.stringify(kycStatus));
             updateKYCProgress();
         }
     }
