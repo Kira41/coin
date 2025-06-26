@@ -1,113 +1,5 @@
 $(document).ready(async function () {
     // ======================== إعداد البيانات ========================
-const dashboardData = {
-        personalData: {
-                balance: "5000 $",
-                totalDepots: "1200 $",
-                totalRetraits: "800 $",
-                nbTransactions: "10",
-                fullName: "Ahmed Kouraychi",
-                compteverifie: "Vérifié",
-		compteverifie01: "1",
-                niveauavance: "Niveau 2",
-                passwordHash: "6ce0330487c92a564b80836c30f81d5b33da46b4e0acaafa94c2211e38f1e01a",
-                passwordStrength: "Fort",
-		passwordStrengthBar: "90%",
-		emailNotifications: "1",
-		smsNotifications: "1",
-		loginAlerts: "1",
-		transactionAlerts: "1",
-		twoFactorAuth: "0",
-		emailaddress: "Mider22@gmail.com",
-		address: "Sousse, Tunisie",
-		phone: "+21690000000",
-		dob: "2025-06-11",
-		nationality: "ca",
-		btcAddress: "",
-		ethAddress: "0xABC123...",
-		usdtAddress: "TRc123456...",
-		widhrawbankname: "Banque Nationale",
-		widhrawusername: "Société de services financiers",
-		widhrawacountnumber: "1234567890",
-		widhrawiben: "SA1234567890123456789012",
-		widhrawswift: "BNPARABIC",
-		wallets: []
-  },
-  transactions: [
-    { operationNumber: "#12345", type: "Dépôt", amount: "$100", date: "06/01/2025", status: "complet", statusClass: "bg-success" },
-    { operationNumber: "#12344", type: "Retrait", amount: "$200", date: "05/28/2025", status: "complet", statusClass: "bg-success" },
-    { operationNumber: "#12343", type: "Dépôt", amount: "$300", date: "05/25/2025", status: "complet", statusClass: "bg-success" },
-    { operationNumber: "#12342", type: "Retrait", amount: "$150", date: "05/20/2025", status: "En cours", statusClass: "bg-warning" }
-  ],
-  notifications: [
-    { type: "info", title: "Mise à jour du système", message: "Le système sera mis à jour vendredi prochain.", time: "Il y a 2 heures", alertClass: "alert-info" },
-    { type: "success", title: "Dépôt réussi", message: "Un montant de 500 $ a été déposé avec succès.", time: "Il y a un jour", alertClass: "alert-success" },
-    { type: "warning", title: "Vérification KYC", message: "Merci de vérifier votre identité.", time: "Il y a 3 jours", alertClass: "alert-warning" }
-  ],
-  deposits: [
-    { date: "2025/06/01", amount: "$500", method: "Carte", status: "En cours", statusClass: "bg-warning" },
-    { date: "2025/05/15", amount: "$300", method: "Banque", status: "complet", statusClass: "bg-success" },
-    { date: "2025/05/02", amount: "$400", method: "Bitcoin", status: "complet", statusClass: "bg-success" }
-  ],
-  retraits: [
-    { date: "2025/05/28", amount: "$200", method: "Banque", status: "complet", statusClass: "bg-success" },
-    { date: "2025/05/20", amount: "$150", method: "Bitcoin", status: "En cours", statusClass: "bg-warning" },
-    { date: "2025/05/10", amount: "$300", method: "Paypal", status: "complet", statusClass: "bg-success" }
-  ],
-  tradingHistory: [
-    { temps: "2025/06/09 14:30", paireDevises: "BTC/USD", type: "Acheter", statutTypeClass: "bg-success", montant: "$1,000", prix: "$500", statut: "complet", statutClass: "bg-success", profitPerte: "+$175.50", profitClass: "text-success" },
-    { temps: "2025/06/09 13:15", paireDevises: "ETH/USD", type: "Vendre", statutTypeClass: "bg-success", montant: "$500", prix: "$2,850", statut: "complet", statutClass: "bg-success", profitPerte: "-$25.00", profitClass: "text-danger" },
-    { temps: "2025/06/09 12:00", paireDevises: "ADA/USD", type: "Acheter", statutTypeClass: "bg-danger", montant: "$300", prix: "$0.45", statut: "En cours", statutClass: "bg-warning", profitPerte: "-", profitClass: "" }
-  ],
-  loginHistory: [
-    { date: "2025/06/09 15:00", ip: "192.168.0.1", device: "Chrome - Windows" },
-    { date: "2025/06/08 18:20", ip: "192.168.0.2", device: "Firefox - Android" },
-    { date: "2025/06/07 09:10", ip: "192.168.0.3", device: "Safari - iOS" },
-    { date: "2025/06/06 23:45", ip: "192.168.0.4", device: "Edge - Windows" },
-    { date: "2025/06/05 08:30", ip: "192.168.0.5", device: "Chrome - macOS" }
-  ],
-  formData: {
-    profileEditForm: {
-      fullNameInput: "Ahmed Kouraychi",
-      email: "Mider22@gmail.com",
-      phoneInput: "+21690000000",
-      birthdate: "2025-06-11",
-      nationalityInput: "ca",
-      addressInput: "Sousse, Tunisie"
-    },
-    bankAccountForm: {
-      defaultBankName: "tunisa BAN",
-      defaultAccountName: "Ahmed kouraychi",
-      defaultAccountNumber: "1234567890",
-      defaultIban: "SA1234567890123456789012",
-      defaultSwiftCode: "NCBKSAJE"
-    },
-    bankWithdrawForm: {
-      withdrawAmount: "1000",
-      bankName: "bank",
-      accountHolder: "ahmed",
-      accountNumber: "4546545",
-      iban: "15454",
-      swiftCode: "111111111",
-      withdrawNotes: "ssss",
-      saveBankInfo: "1"
-    }
-  },
-  defaultKYCStatus: {
-    enregistrementducomptestat: { status: "0", date: "" },
-    confirmationdeladresseemailstat: { status: "0", date: "" },
-    telechargerlesdocumentsdidentitestat: { status: "0", date: "" },
-    verificationdeladressestat: { status: "0", date: "" },
-    revisionfinalestat: { status: "0", date: "" }
-  }
-};
-
-    const dashboardDataInOut = JSON.parse(JSON.stringify(dashboardData));
-    const dashboardDataIn = { personalData: {} };
-    ['widhrawbankname','widhrawusername','widhrawacountnumber','widhrawiben','widhrawswift'].forEach(k => {
-        dashboardDataIn.personalData[k] = dashboardDataInOut.personalData[k];
-        delete dashboardDataInOut.personalData[k];
-    });
 
     async function loadDashboardData() {
         try {
@@ -118,16 +10,13 @@ const dashboardData = {
         } catch (e) {
             // ignore
         }
-        return null;
+        return {};
     }
 
-    let data = await loadDashboardData();
-    const loadSucceeded = !!(data && Object.keys(data).length);
-    if (!loadSucceeded) {
-        const dataIn = dashboardDataIn;
-        const dataOut = dashboardDataInOut;
-        data = Object.assign({}, dataOut, { personalData: Object.assign({}, (dataOut.personalData || {}), (dataIn.personalData || {})) });
-    }
+    const dashboardData = await loadDashboardData();
+    let data = dashboardData || {};
+    const loadSucceeded = !!(Object.keys(data).length);
+    data.personalData = data.personalData || {};
     if (data.personalData.balance === undefined) {
         const fallback = data.personalData.soldeTotal || data.personalData.soldeintrade || data.personalData.soldedisponible1;
         data.personalData.balance = fallback || '0 $';
@@ -158,7 +47,6 @@ const dashboardData = {
             }
         });
     }
-    // localStorage.setItem('kycStatus', JSON.stringify(kycStatus));
     if (data.personalData && data.personalData.password) {
         data.personalData.passwordHash = await hashPassword(data.personalData.password);
         delete data.personalData.password;
@@ -182,27 +70,6 @@ const dashboardData = {
     }
 
     function saveData() {
-        const inData = { personalData: {} };
-        ['widhrawbankname','widhrawusername','widhrawacountnumber','widhrawiben','widhrawswift'].forEach(k => {
-            inData.personalData[k] = data.personalData[k];
-        });
-        const outPersonal = Object.assign({}, data.personalData);
-        ['widhrawbankname','widhrawusername','widhrawacountnumber','widhrawiben','widhrawswift'].forEach(k => delete outPersonal[k]);
-        const outData = {
-            personalData: outPersonal,
-            transactions: data.transactions,
-            notifications: data.notifications,
-            deposits: data.deposits,
-            retraits: data.retraits,
-            tradingHistory: data.tradingHistory,
-            loginHistory: data.loginHistory,
-            formData: data.formData,
-            defaultKYCStatus: data.defaultKYCStatus
-        };
-        // localStorage.setItem('dashboardDataIn', JSON.stringify(inData));
-        // localStorage.setItem('dashboardDataInOut', JSON.stringify(outData));
-        // localStorage.setItem('kycStatus', JSON.stringify(kycStatus));
-
         $.ajax({
             url: 'setter.php',
             method: 'POST',
@@ -343,7 +210,6 @@ const dashboardData = {
                 kycStatus[key].status = String(value);
                 kycStatus[key].date = when;
             }
-            // localStorage.setItem('kycStatus', JSON.stringify(kycStatus));
             updateKYCProgress();
         }
     }
