@@ -15,12 +15,22 @@ This project is a simple PHP web interface that stores data in a database and ex
    sqlite3 database.db < create_tables.sql
    ```
 
-   If you prefer MySQL, run the SQL files on your MySQL server instead.
+   If you prefer MySQL, run the MySQL specific scripts instead:
+
+   ```bash
+   mysql -u <user> -p <database> < create_tables.mysql.sql
+   ```
 
 2. (Optional) Populate the database with example entries:
 
    ```bash
    sqlite3 database.db < seed_data.sql
+   ```
+
+   For MySQL use:
+
+   ```bash
+   mysql -u <user> -p <database> < seed_data.mysql.sql
    ```
 
 ## Running the server
