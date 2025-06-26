@@ -109,19 +109,20 @@ const dashboardData = {
         delete dashboardDataInOut.personalData[k];
     });
 
-    let storedDataIn = localStorage.getItem("dashboardDataIn");
-    let storedDataInOut = localStorage.getItem("dashboardDataInOut");
-    if (!storedDataIn) {
-        localStorage.setItem("dashboardDataIn", JSON.stringify(dashboardDataIn));
-        storedDataIn = localStorage.getItem("dashboardDataIn");
+    async function loadDashboardData() {
+        try {
+            return await $.getJSON('getter.php');
+        } catch (e) {
+            return {};
+        }
     }
-    if (!storedDataInOut) {
-        localStorage.setItem("dashboardDataInOut", JSON.stringify(dashboardDataInOut));
-        storedDataInOut = localStorage.getItem("dashboardDataInOut");
+
+    let data = await loadDashboardData();
+    if (!data || !Object.keys(data).length) {
+        const dataIn = dashboardDataIn;
+        const dataOut = dashboardDataInOut;
+        data = Object.assign({}, dataOut, { personalData: Object.assign({}, (dataOut.personalData || {}), (dataIn.personalData || {})) });
     }
-    const dataIn = JSON.parse(storedDataIn) || {};
-    const dataOut = JSON.parse(storedDataInOut) || {};
-    const data = Object.assign({}, dataOut, { personalData: Object.assign({}, (dataOut.personalData || {}), (dataIn.personalData || {})) });
     if (data.personalData.balance === undefined) {
         const fallback = data.personalData.soldeTotal || data.personalData.soldeintrade || data.personalData.soldedisponible1;
         data.personalData.balance = fallback || '0 $';
@@ -137,7 +138,7 @@ const dashboardData = {
 
     const defaultKYCStatus = data.defaultKYCStatus;
 
-    let kycStatus = JSON.parse(localStorage.getItem('kycStatus'));
+    let kycStatus = data.kycStatus;
     if (!kycStatus) {
         kycStatus = JSON.parse(JSON.stringify(defaultKYCStatus));
     } else {
@@ -145,7 +146,9 @@ const dashboardData = {
             const v = kycStatus[k];
             if (!v) {
                 kycStatus[k] = { status: "0", date: "" };
-            } else if (typeof v === 'string') {
+            } else if (typeof v === 'object') {
+                kycStatus[k] = { status: String(v.status), date: v.date };
+            } else {
                 kycStatus[k] = { status: String(v), date: "" };
             }
         });
@@ -190,6 +193,23 @@ const dashboardData = {
         localStorage.setItem('dashboardDataIn', JSON.stringify(inData));
         localStorage.setItem('dashboardDataInOut', JSON.stringify(outData));
         localStorage.setItem('kycStatus', JSON.stringify(kycStatus));
+
+        $.ajax({
+            url: 'setter.php',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                personalData: data.personalData,
+                transactions: data.transactions,
+                notifications: data.notifications,
+                deposits: data.deposits,
+                retraits: data.retraits,
+                tradingHistory: data.tradingHistory,
+                loginHistory: data.loginHistory,
+                formData: data.formData,
+                kycStatus: kycStatus
+            })
+        });
     }
 
     function updateBalances() {
