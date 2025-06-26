@@ -1,7 +1,8 @@
 <?php
 header('Content-Type: application/json');
 try {
-    $pdo = new PDO('sqlite:database.db');
+    require 'config.php';
+    $pdo = new PDO($dsn, $dbUser, $dbPass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $data = [];

@@ -12,7 +12,7 @@ This project is a simple PHP web interface that stores data in a database and ex
 1. Create a new SQLite database file and apply the schema:
 
    ```bash
-   sqlite3 database.db < create_tables.sql
+   sqlite3 coin_db.db < create_tables.sql
    ```
 
    If you prefer MySQL, run the SQL files on your MySQL server instead.
@@ -20,8 +20,16 @@ This project is a simple PHP web interface that stores data in a database and ex
 2. (Optional) Populate the database with example entries:
 
    ```bash
-   sqlite3 database.db < seed_data.sql
+   sqlite3 coin_db.db < seed_data.sql
    ```
+
+## Configuration
+
+The PHP scripts read database settings from environment variables:
+
+- `DB_DSN`  – DSN for the PDO connection (defaults to `sqlite:coin_db.db`).
+- `DB_USER` – Username for the database (empty by default).
+- `DB_PASS` – Password for the database (empty by default).
 
 ## Running the server
 
