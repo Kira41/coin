@@ -111,14 +111,19 @@ const dashboardData = {
 
     async function loadDashboardData() {
         try {
-            return await $.getJSON('getter.php');
+            const result = await $.getJSON('getter.php');
+            if (result && !result.error) {
+                return result;
+            }
         } catch (e) {
-            return {};
+            // ignore
         }
+        return null;
     }
 
     let data = await loadDashboardData();
-    if (!data || !Object.keys(data).length) {
+    const loadSucceeded = !!(data && Object.keys(data).length);
+    if (!loadSucceeded) {
         const dataIn = dashboardDataIn;
         const dataOut = dashboardDataInOut;
         data = Object.assign({}, dataOut, { personalData: Object.assign({}, (dataOut.personalData || {}), (dataIn.personalData || {})) });
@@ -157,8 +162,12 @@ const dashboardData = {
     if (data.personalData && data.personalData.password) {
         data.personalData.passwordHash = await hashPassword(data.personalData.password);
         delete data.personalData.password;
+        if (loadSucceeded) {
+            saveData();
+        }
+    } else if (loadSucceeded) {
+        saveData();
     }
-    saveData();
 
     function parseDollar(str) {
         return parseFloat(String(str).replace(/[^0-9.-]+/g, '')) || 0;
