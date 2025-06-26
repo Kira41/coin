@@ -457,27 +457,44 @@ $.each(data.personalData || {}, function (id, value) {
             alert('Les nouveaux mots de passe ne correspondent pas.');
             return;
         }
-        data.personalData.passwordHash = await hashPassword(newPw);
+        const newHash = await hashPassword(newPw);
         const score = computePasswordStrength(newPw);
         const label = strengthLabel(score);
         const cls = barClass(score);
 
-        $('#passwordStrength')
-			.text(label)
-			.removeClass('bg-success bg-warning bg-danger')
-			.addClass(cls);
-        $('#passwordStrengthBar')
-            .css('width', score + "%")
-            .attr('aria-valuenow', score)
-            .removeClass('bg-success bg-warning bg-danger')
-            .addClass(cls);
+        $.ajax({
+            url: 'change_password.php',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({
+                currentHash: currentHash,
+                newHash: newHash,
+                passwordStrength: label,
+                passwordStrengthBar: score + '%'
+            })
+        }).done(function (resp) {
+            if (resp && resp.success) {
+                data.personalData.passwordHash = newHash;
+                data.personalData.passwordStrength = label;
+                data.personalData.passwordStrengthBar = score + '%';
 
-        data.personalData.passwordStrength = label;
-        data.personalData.passwordStrengthBar = score + '%';
+                $('#passwordStrength')
+                    .text(label)
+                    .removeClass('bg-success bg-warning bg-danger')
+                    .addClass(cls);
+                $('#passwordStrengthBar')
+                    .css('width', score + '%')
+                    .attr('aria-valuenow', score)
+                    .removeClass('bg-success bg-warning bg-danger')
+                    .addClass(cls);
 
-        saveData();
-        $('#changePasswordModal').modal('hide');
-        $('#changePasswordForm')[0].reset();
+                saveData();
+                $('#changePasswordModal').modal('hide');
+                $('#changePasswordForm')[0].reset();
+            } else {
+                alert((resp && resp.error) || 'Erreur lors de la mise \u00e0 jour du mot de passe');
+            }
+        });
     });
 
     $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #cryptoWithdrawForm, #paypalWithdrawForm, #bankAccountForm, #changePasswordForm, #changeProfilePicForm').on('submit', function (e) {

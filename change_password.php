@@ -1,0 +1,47 @@
+<?php
+session_start();
+header('Content-Type: application/json');
+
+if (!isset($_SESSION['user_id'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'error' => 'Unauthorized']);
+    exit;
+}
+
+$input = json_decode(file_get_contents('php://input'), true);
+if (!$input) {
+    echo json_encode(['success' => false, 'error' => 'Invalid JSON']);
+    exit;
+}
+
+$currentHash = $input['currentHash'] ?? '';
+$newHash = $input['newHash'] ?? '';
+$strength = $input['passwordStrength'] ?? null;
+$strengthBar = $input['passwordStrengthBar'] ?? null;
+
+try {
+    $dbHost = 'localhost';
+    $dbName = 'coin_db';
+    $dbUser = 'root';
+    $dbPass = '';
+    $dsn = "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4";
+    $pdo = new PDO($dsn, $dbUser, $dbPass);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    $userId = (int)$_SESSION['user_id'];
+    $stmt = $pdo->prepare('SELECT passwordHash FROM personal_data WHERE id = ?');
+    $stmt->execute([$userId]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$row || $row['passwordHash'] !== $currentHash) {
+        echo json_encode(['success' => false, 'error' => 'Incorrect current password']);
+        exit;
+    }
+
+    $stmt = $pdo->prepare('UPDATE personal_data SET passwordHash = ?, passwordStrength = ?, passwordStrengthBar = ? WHERE id = ?');
+    $stmt->execute([$newHash, $strength, $strengthBar, $userId]);
+
+    echo json_encode(['success' => true]);
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'error' => $e->getMessage()]);
+}
+?>
