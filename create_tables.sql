@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS personal_data (
 
 CREATE TABLE IF NOT EXISTS transactions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     operationNumber TEXT,
     type TEXT,
     amount TEXT,
@@ -43,6 +44,7 @@ CREATE TABLE IF NOT EXISTS transactions (
 
 CREATE TABLE IF NOT EXISTS notifications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     type TEXT,
     title TEXT,
     message TEXT,
@@ -52,6 +54,7 @@ CREATE TABLE IF NOT EXISTS notifications (
 
 CREATE TABLE IF NOT EXISTS deposits (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     date TEXT,
     amount TEXT,
     method TEXT,
@@ -61,6 +64,7 @@ CREATE TABLE IF NOT EXISTS deposits (
 
 CREATE TABLE IF NOT EXISTS retraits (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     date TEXT,
     amount TEXT,
     method TEXT,
@@ -70,6 +74,7 @@ CREATE TABLE IF NOT EXISTS retraits (
 
 CREATE TABLE IF NOT EXISTS trading_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     temps TEXT,
     paire_devises TEXT,
     type TEXT,
@@ -84,6 +89,7 @@ CREATE TABLE IF NOT EXISTS trading_history (
 
 CREATE TABLE IF NOT EXISTS login_history (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     date TEXT,
     ip TEXT,
     device TEXT
@@ -91,6 +97,7 @@ CREATE TABLE IF NOT EXISTS login_history (
 
 CREATE TABLE IF NOT EXISTS kyc_status (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     step_name TEXT,
     status TEXT,
     date TEXT
@@ -98,6 +105,7 @@ CREATE TABLE IF NOT EXISTS kyc_status (
 
 CREATE TABLE IF NOT EXISTS form_fields (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
     form_name TEXT,
     field_name TEXT,
     field_value TEXT

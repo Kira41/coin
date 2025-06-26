@@ -1,3 +1,10 @@
+<?php
+session_start();
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
+}
+?>
 <!DOCTYPE html>
 
 <html dir="ltr" lang="fr">
@@ -118,7 +125,7 @@
 <hr class="dropdown-divider"/>
 </li>
 <li>
-<a class="dropdown-item text-danger" href="#" onclick="logout()">
+<a class="dropdown-item text-danger" href="logout.php">
 <i class="fas fa-sign-out-alt me-2"></i>Se déconnecter </a>
 </li>
 </ul>
