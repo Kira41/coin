@@ -58,6 +58,7 @@ try {
     updateTable($pdo, 'retraits', ['date','amount','method','status','statusClass'], $input['retraits'] ?? null, $userId);
     updateTable($pdo, 'trading_history', ['temps','paire_devises','type','statutTypeClass','montant','prix','statut','statutClass','profitPerte','profitClass'], $input['tradingHistory'] ?? null, $userId);
     updateTable($pdo, 'login_history', ['date','ip','device'], $input['loginHistory'] ?? null, $userId);
+    updateTable($pdo, 'wallets', ['id','currency','network','address','label'], $input['wallets'] ?? null, $userId);
 
     if (isset($input['kycStatus'])) {
         $pdo->prepare('DELETE FROM kyc_status WHERE user_id = ?')->execute([$userId]);
