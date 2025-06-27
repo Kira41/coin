@@ -254,6 +254,26 @@ $(document).ready(async function () {
         defaultSwiftCode: 'swiftCode'
     };
 
+    // Mapping of crypto currency codes to display names
+    const currencyNames = {
+        btc: 'Bitcoin',
+        bch: 'Bitcoin Cash',
+        eth: 'Ethereum',
+        ltc: 'Litecoin',
+        usdt: 'Tether',
+        usdc: 'USD Coin'
+    };
+
+    // Supported networks for each crypto currency
+    const networksByCurrency = {
+        btc: ['Bitcoin'],
+        bch: ['BCH'],
+        eth: ['ERC20'],
+        ltc: ['Litecoin'],
+        usdt: ['ERC20', 'BEP20', 'TRC20'],
+        usdc: ['ERC20']
+    };
+
     function syncBankAccountToWithdraw(force = false) {
         const src = data.formData['bankAccountForm'] || {};
         data.formData['bankWithdrawForm'] = data.formData['bankWithdrawForm'] || {};
@@ -626,22 +646,6 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
     });
 
     // ======================== Gestion des portefeuilles ========================
-    const currencyNames = {
-        btc: 'Bitcoin',
-        bch: 'Bitcoin Cash',
-        eth: 'Ethereum',
-        ltc: 'Litecoin',
-        usdt: 'Tether',
-        usdc: 'USD Coin'
-    };
-    const networksByCurrency = {
-        btc: ['Bitcoin'],
-        bch: ['BCH'],
-        eth: ['ERC20'],
-        ltc: ['Litecoin'],
-        usdt: ['ERC20', 'BEP20', 'TRC20'],
-        usdc: ['ERC20']
-    };
 
     function populateNetworks() {
         const currency = $('#walletCurrency').val();
