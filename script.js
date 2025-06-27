@@ -682,6 +682,20 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
     updateCryptoDepositAddress();
 
     let editingWalletId = null;
+    let walletEditMode = false; // false for add, true for edit
+
+    $('#addWalletModal').on('show.bs.modal', function () {
+        if (!walletEditMode) {
+            $('#addWalletModalLabel').text('Ajouter un nouveau portefeuille');
+            $('#addWalletBtn').text('Ajouter');
+            $('#walletCurrency').prop('disabled', false);
+            $('#walletNetwork').prop('disabled', false);
+            $('#walletCurrency').val('');
+            populateNetworks();
+            $('#walletAddressNew').val('');
+            $('#walletLabel').val('');
+        }
+    });
 
     function renderWalletTable() {
         const $tbody = $('#walletTableBody');
@@ -702,42 +716,28 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
 
     $(document).on('click', '.wallet-delete', function () {
         const id = $(this).data('id');
-        if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
-            walletApi('delete', { id }).done(() => {
-                data.personalData.wallets = (data.personalData.wallets || []).filter(w => w.id !== id);
-                renderWalletTable();
-            });
-        }
+        if (!confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) return;
+        data.personalData.wallets = (data.personalData.wallets || []).filter(w => w.id !== id);
+        renderWalletTable();
+        walletApi('delete', { id });
     });
 
     $(document).on('click', '.wallet-edit', function () {
         editingWalletId = $(this).data('id');
         const wallet = (data.personalData.wallets || []).find(w => w.id === editingWalletId);
         if (!wallet) return;
-        $('#editWalletCurrency').val(currencyNames[wallet.currency] || wallet.currency);
-        $('#editWalletNetwork').val(wallet.network);
-        $('#editWalletAddress').val(wallet.address || '');
-        $('#editWalletLabel').val(wallet.label || '');
-        $('#editWalletModal').modal('show');
+        walletEditMode = true;
+        $('#addWalletModalLabel').text('Modifier le portefeuille');
+        $('#addWalletBtn').text('Enregistrer');
+        $('#walletCurrency').val(wallet.currency).prop('disabled', true);
+        populateNetworks();
+        $('#walletNetwork').val(wallet.network).prop('disabled', true);
+        $('#walletAddressNew').val(wallet.address || '');
+        $('#walletLabel').val(wallet.label || '');
+        $('#addWalletModal').modal('show');
     });
 
-    $('#saveWalletBtn').on('click', function () {
-        const address = $('#editWalletAddress').val().trim();
-        const label = $('#editWalletLabel').val().trim();
-        if (!address) {
-            alert('Veuillez remplir tous les champs requis.');
-            return;
-        }
-        const wallet = (data.personalData.wallets || []).find(w => w.id === editingWalletId);
-        if (!wallet) return;
-        wallet.address = address;
-        wallet.label = label;
-        walletApi('edit', { id: editingWalletId, address, label }).done(() => {
-            renderWalletTable();
-            $('#editWalletModal').modal('hide');
-        });
-    });
-
+    // Save wallet (add or edit)
     $('#addWalletBtn').on('click', function () {
         const currency = $('#walletCurrency').val();
         const network = $('#walletNetwork').val();
@@ -747,23 +747,40 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
             alert('Veuillez remplir tous les champs requis.');
             return;
         }
-        const wallet = {
-            id: String(Date.now()),
-            currency,
-            network,
-            address,
-            label
-        };
-        data.personalData.wallets = data.personalData.wallets || [];
-        data.personalData.wallets.push(wallet);
-        saveForm('addWalletForm');
-        walletApi('add', wallet).done(res => { if(res.id) wallet.id = res.id; });
-        renderWalletTable();
+
+        if (walletEditMode) {
+            const wallet = (data.personalData.wallets || []).find(w => w.id === editingWalletId);
+            if (!wallet) return;
+            wallet.address = address;
+            wallet.label = label;
+            walletApi('edit', { id: editingWalletId, address, label }).done(() => {
+                renderWalletTable();
+            });
+        } else {
+            const wallet = {
+                id: String(Date.now()),
+                currency,
+                network,
+                address,
+                label
+            };
+            data.personalData.wallets = data.personalData.wallets || [];
+            data.personalData.wallets.push(wallet);
+            saveForm('addWalletForm');
+            walletApi('add', wallet).done(res => { if(res.id) wallet.id = res.id; });
+            renderWalletTable();
+        }
+
         $('#addWalletModal').modal('hide');
-        $('#walletCurrency').val('');
+        $('#walletCurrency').prop('disabled', false).val('');
         populateNetworks();
+        $('#walletNetwork').prop('disabled', false);
         $('#walletAddressNew').val('');
         $('#walletLabel').val('');
+        $('#addWalletModalLabel').text('Ajouter un nouveau portefeuille');
+        $('#addWalletBtn').text('Ajouter');
+        walletEditMode = false;
+        editingWalletId = null;
     });
     // ======================== Gestion des historiques ========================
     function renderDepositHistory() {
