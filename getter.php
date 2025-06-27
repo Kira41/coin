@@ -1,7 +1,6 @@
 <?php
-$dbPath = __DIR__ . '/database.sqlite';
-$dsn = 'sqlite:' . $dbPath;
-$pdo = new PDO($dsn);
+$dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
+$pdo = new PDO($dsn, 'root', '');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 1;

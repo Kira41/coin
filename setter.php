@@ -1,6 +1,6 @@
 <?php
-$dbPath = __DIR__ . '/database.sqlite';
-$pdo = new PDO('sqlite:' . $dbPath);
+$dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
+$pdo = new PDO($dsn, 'root', '');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $input = file_get_contents('php://input');
