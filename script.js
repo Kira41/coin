@@ -567,6 +567,7 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
     saveForm(this.id);
     if (this.id === 'bankAccountForm') {
         syncBankAccountToWithdraw(true);
+        showBootstrapAlert('bankAccountAlert', 'Vos informations bancaires ont \xE9t\xE9 mises \xE0 jour.', 'success');
     }
 
         const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');

@@ -1061,6 +1061,7 @@ if (!isset($_SESSION['user_id'])) {
 <div class="alert alert-info">
 <i class="fas fa-info-circle me-2"></i> Ces informations seront utilisées pour les retraits automatiques.
                       </div>
+<div id="bankAccountAlert"></div>
 <form id="bankAccountForm">
 <div class="mb-3">
 <label class="form-label" for="defaultBankName">Nom de la banque</label>
