@@ -299,6 +299,15 @@ $(document).ready(async function () {
 
     syncBankAccountToWithdraw();
 
+    // When bank account information changes, immediately update withdraw form
+    // and persist the values.
+    $('#bankAccountForm input').on('input', function () {
+        data.formData['bankAccountForm'] = data.formData['bankAccountForm'] || {};
+        data.formData['bankAccountForm'][this.id] = $(this).val();
+        syncBankAccountToWithdraw(true);
+        saveData();
+    });
+
     renderWalletTable();
     // ======================== تعبئة البيانات الشخصية ========================
 $.each(data.personalData || {}, function (id, value) {
