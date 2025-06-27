@@ -64,6 +64,15 @@ $(document).ready(async function () {
         }) + ' $';
     }
 
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     function saveData() {
         const pd = { ...data.personalData };
         const wallets = pd.wallets || [];
@@ -115,8 +124,8 @@ $(document).ready(async function () {
         };
         const icon = icons[type] || icons.info;
         const alertHtml = `
-            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-                <i class="fas ${icon} me-2"></i>${message}
+            <div class="alert alert-${escapeHtml(type)} alert-dismissible fade show" role="alert">
+                <i class="fas ${escapeHtml(icon)} me-2"></i>${escapeHtml(message)}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>`;
         $('#'+containerId).html(alertHtml);
@@ -197,13 +206,13 @@ $(document).ready(async function () {
             const info = stepInfo[k] || { label: k, desc: '' };
             $history.append(`
                 <div class="timeline-item">
-                    <div class="timeline-date">${date || '-'}</div>
+                    <div class="timeline-date">${escapeHtml(date || '-')}</div>
                     <div class="timeline-content">
                         <div class="d-flex align-items-center mb-2">
-                            <span class="badge ${badgeClass} me-2">${statusTxt}</span>
-                            <h6 class="mb-0">${info.label}</h6>
+                            <span class="badge ${escapeHtml(badgeClass)} me-2">${escapeHtml(statusTxt)}</span>
+                            <h6 class="mb-0">${escapeHtml(info.label)}</h6>
                         </div>
-                        <p class="text-muted small">${info.desc}</p>
+                        <p class="text-muted small">${escapeHtml(info.desc)}</p>
                     </div>
                 </div>`);
         });
@@ -353,10 +362,10 @@ $.each(data.personalData || {}, function (id, value) {
     if (data.notifications?.length > 0) {
         data.notifications.forEach(n => {
             $notifications.append(`
-                <div class="alert ${n.alertClass}">
-                    <strong>${n.title}</strong>
-                    <p class="mb-0">${n.message}</p>
-                    <small>${n.time}</small>
+                <div class="alert ${escapeHtml(n.alertClass)}">
+                    <strong>${escapeHtml(n.title)}</strong>
+                    <p class="mb-0">${escapeHtml(n.message)}</p>
+                    <small>${escapeHtml(n.time)}</small>
                 </div>`);
         });
     } else {
@@ -368,11 +377,11 @@ $.each(data.personalData || {}, function (id, value) {
         data.transactions.forEach(t => {
             $tbody.append(`
                 <tr>
-                    <td>${t.operationNumber}</td>
-                    <td>${t.type}</td>
-                    <td>${t.amount}</td>
-                    <td>${t.date}</td>
-                    <td><span class="badge ${t.statusClass}">${t.status}</span></td>
+                    <td>${escapeHtml(t.operationNumber)}</td>
+                    <td>${escapeHtml(t.type)}</td>
+                    <td>${escapeHtml(t.amount)}</td>
+                    <td>${escapeHtml(t.date)}</td>
+                    <td><span class="badge ${escapeHtml(t.statusClass)}">${escapeHtml(t.status)}</span></td>
                 </tr>`);
         });
     } else {
@@ -395,12 +404,12 @@ $.each(data.personalData || {}, function (id, value) {
                     <a class="dropdown-item" href="#">
                         <div class="d-flex">
                             <div class="flex-shrink-0">
-                                <i class="${iconClass}"></i>
+                                <i class="${escapeHtml(iconClass)}"></i>
                             </div>
                             <div class="flex-grow-1 ms-3">
-                                <div class="fw-bold">${notification.title}</div>
-                                <div class="small text-muted">${notification.message}</div>
-                                <div class="small text-muted">${notification.time}</div>
+                                <div class="fw-bold">${escapeHtml(notification.title)}</div>
+                                <div class="small text-muted">${escapeHtml(notification.message)}</div>
+                                <div class="small text-muted">${escapeHtml(notification.time)}</div>
                             </div>
                         </div>
                     </a>
@@ -615,7 +624,7 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
         const displayFile = (fileName) => {
             $area.html(`
                 <i class="fas fa-file-alt fa-3x mb-3"></i>
-                <h5>${fileName}</h5>
+                <h5>${escapeHtml(fileName)}</h5>
                 <p class="text-muted">Cliquez pour modifier le profil</p>`);
         };
         $area.on('click', () => $input.click());
@@ -653,7 +662,7 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
         const $net = $('#walletNetwork');
         $net.empty().append('<option value="">-- Choisissez le réseau --</option>');
         (networksByCurrency[currency] || []).forEach(n => {
-            $net.append(`<option value="${n}">${n}</option>`);
+            $net.append(`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`);
         });
     }
     $('#walletCurrency').on('change', populateNetworks);
@@ -689,13 +698,13 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
         const $tbody = $('#walletTableBody');
         $tbody.empty();
         (data.personalData.wallets || []).forEach(w => {
-            const row = `<tr data-id="${w.id}">
-                <td>${currencyNames[w.currency] || w.currency}</td>
-                <td>${w.network}</td>
-                <td class="wallet-address">${w.address || '---'}</td>
+            const row = `<tr data-id="${escapeHtml(w.id)}">
+                <td>${escapeHtml(currencyNames[w.currency] || w.currency)}</td>
+                <td>${escapeHtml(w.network)}</td>
+                <td class="wallet-address">${escapeHtml(w.address || '---')}</td>
                 <td>
-                    <button class="btn btn-sm btn-outline-primary me-1 wallet-edit" data-id="${w.id}"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-outline-danger wallet-delete" data-id="${w.id}"><i class="fas fa-trash"></i></button>
+                    <button class="btn btn-sm btn-outline-primary me-1 wallet-edit" data-id="${escapeHtml(w.id)}"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-danger wallet-delete" data-id="${escapeHtml(w.id)}"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>`;
             $tbody.append(row);
@@ -787,10 +796,10 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
             data.deposits.forEach(d => {
                 $tbodyDeposits.append(`
                     <tr>
-                        <td>${d.date}</td>
-                        <td>${d.amount}</td>
-                        <td>${d.method}</td>
-                        <td><span class="badge ${d.statusClass}">${d.status}</span></td>
+                        <td>${escapeHtml(d.date)}</td>
+                        <td>${escapeHtml(d.amount)}</td>
+                        <td>${escapeHtml(d.method)}</td>
+                        <td><span class="badge ${escapeHtml(d.statusClass)}">${escapeHtml(d.status)}</span></td>
                     </tr>`);
             });
         } else {
@@ -805,10 +814,10 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
             data.retraits.forEach(r => {
                 $tbodyRetraits.append(`
                     <tr>
-                        <td>${r.date}</td>
-                        <td>${r.amount}</td>
-                        <td>${r.method}</td>
-                        <td><span class="badge ${r.statusClass}">${r.status}</span></td>
+                        <td>${escapeHtml(r.date)}</td>
+                        <td>${escapeHtml(r.amount)}</td>
+                        <td>${escapeHtml(r.method)}</td>
+                        <td><span class="badge ${escapeHtml(r.statusClass)}">${escapeHtml(r.status)}</span></td>
                     </tr>`);
             });
         } else {
@@ -842,13 +851,13 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
             data.tradingHistory.forEach(trade => {
                 $tbodyTrading.append(`
                     <tr>
-                        <td>${trade.temps}</td>
-                        <td>${trade.paireDevises}</td>
-                        <td><span class="badge ${trade.statutTypeClass}">${trade.type}</span></td>
-                        <td>${trade.montant}</td>
-                        <td>${trade.prix}</td>
-                        <td><span class="badge ${trade.statutClass}">${trade.statut}</span></td>
-                        <td class="${trade.profitClass || ''}">${trade.profitPerte}</td>
+                        <td>${escapeHtml(trade.temps)}</td>
+                        <td>${escapeHtml(trade.paireDevises)}</td>
+                        <td><span class="badge ${escapeHtml(trade.statutTypeClass)}">${escapeHtml(trade.type)}</span></td>
+                        <td>${escapeHtml(trade.montant)}</td>
+                        <td>${escapeHtml(trade.prix)}</td>
+                        <td><span class="badge ${escapeHtml(trade.statutClass)}">${escapeHtml(trade.statut)}</span></td>
+                        <td class="${escapeHtml(trade.profitClass || '')}">${escapeHtml(trade.profitPerte)}</td>
                     </tr>`);
             });
         } else {
@@ -1151,9 +1160,9 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
         data.loginHistory.slice(0, 5).forEach(h => {
             $loginHistoryBody.append(`
                 <tr>
-                    <td>${h.date}</td>
-                    <td>${h.ip}</td>
-                    <td>${h.device}</td>
+                    <td>${escapeHtml(h.date)}</td>
+                    <td>${escapeHtml(h.ip)}</td>
+                    <td>${escapeHtml(h.device)}</td>
                 </tr>`);
         });
     } else {
