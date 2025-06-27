@@ -2,10 +2,7 @@
 session_start();
 header('Content-Type: application/json');
 try {
-    $dbHost = 'localhost';
-    $dbName = 'coin_db';
-    $dbUser = 'root';
-    $dbPass = '';
+    require __DIR__ . '/config.php';
     $dsn = "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4";
     $pdo = new PDO($dsn, $dbUser, $dbPass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
