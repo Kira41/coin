@@ -1218,6 +1218,41 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 </div>
 </div>
+<!-- Modal: Modifier Portefeuille -->
+<div class="modal fade" id="editWalletModal" tabindex="-1" aria-labelledby="editWalletModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editWalletModalLabel">Modifier le portefeuille</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editWalletForm">
+                    <div class="mb-3">
+                        <label class="form-label" for="editWalletCurrency">Crypto-monnaie</label>
+                        <input class="form-control" id="editWalletCurrency" disabled type="text"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="editWalletNetwork">Réseau</label>
+                        <input class="form-control" id="editWalletNetwork" disabled type="text"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="editWalletAddress">Adresse du portefeuille</label>
+                        <input class="form-control" id="editWalletAddress" required type="text"/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="editWalletLabel">Nom du portefeuille (optionnel)</label>
+                        <input class="form-control" id="editWalletLabel" type="text"/>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-primary" id="saveWalletBtn">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+</div>
 <!-- Modal: Historique des connexions -->
 <div class="modal fade" id="loginHistoryModal" tabindex="-1" aria-labelledby="loginHistoryModalLabel" aria-hidden="true">
   <div class="modal-dialog">
