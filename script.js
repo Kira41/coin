@@ -1,4 +1,3 @@
-<script>
 let dashboardData = null;
 // Retrieve the current user ID from localStorage. Fallback to 1 if not found.
 const userId = localStorage.getItem('user_id') || 1;
@@ -1030,4 +1029,3 @@ function initializeUI() {
         $loginHistoryBody.html('<tr><td colspan="3" class="text-center">Aucune donnée disponible</td></tr>');
     }
 });
-</script>
