@@ -20,10 +20,8 @@ $strength = $input['passwordStrength'] ?? null;
 $strengthBar = $input['passwordStrengthBar'] ?? null;
 
 try {
-    require __DIR__ . '/config.php';
-    $dsn = "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4";
-    $pdo = new PDO($dsn, $dbUser, $dbPass);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    require_once __DIR__ . '/database.php';
+    $pdo = db_connect();
 
     $userId = (int)$_SESSION['user_id'];
     $stmt = $pdo->prepare('SELECT passwordHash FROM personal_data WHERE id = ?');
