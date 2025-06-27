@@ -1217,6 +1217,41 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 </div>
 </div>
+<!-- Modal: Modifier portefeuille -->
+<div class="modal fade" id="editWalletModal" tabindex="-1" aria-labelledby="editWalletModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="editWalletModalLabel">Modifier le portefeuille</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editWalletForm">
+          <div class="mb-3">
+            <label class="form-label" for="editWalletCurrency">Crypto-monnaie</label>
+            <input type="text" class="form-control" id="editWalletCurrency" disabled>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editWalletNetwork">Réseau</label>
+            <input type="text" class="form-control" id="editWalletNetwork" disabled>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editWalletAddress">Adresse du portefeuille</label>
+            <input type="text" class="form-control" id="editWalletAddress" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editWalletLabel">Nom du portefeuille (optionnel)</label>
+            <input type="text" class="form-control" id="editWalletLabel">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+        <button type="button" class="btn btn-primary" id="saveWalletEditBtn">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 <!-- Modal: Historique des connexions -->
 <div class="modal fade" id="loginHistoryModal" tabindex="-1" aria-labelledby="loginHistoryModalLabel" aria-hidden="true">
