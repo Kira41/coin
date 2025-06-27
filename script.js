@@ -711,13 +711,12 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
     }
 
     $(document).on('click', '.wallet-delete', function () {
-        const id = $(this).data('id');
-        const $row = $(this).closest('tr');
+        const id = String($(this).data('id'));
         if (!confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) return;
         walletApi('delete', { id }).done(res => {
             if (res && res.success) {
-                data.personalData.wallets = (data.personalData.wallets || []).filter(w => w.id !== id);
-                $row.remove();
+                data.personalData.wallets = (data.personalData.wallets || []).filter(w => String(w.id) !== id);
+                renderWalletTable();
             } else {
                 alert((res && res.error) || "Erreur lors de la suppression");
             }
@@ -725,8 +724,8 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
     });
 
     $(document).on('click', '.wallet-edit', function () {
-        editingWalletId = $(this).data('id');
-        const wallet = (data.personalData.wallets || []).find(w => w.id === editingWalletId);
+        editingWalletId = String($(this).data('id'));
+        const wallet = (data.personalData.wallets || []).find(w => String(w.id) === editingWalletId);
         if (!wallet) return;
         $('#editWalletCurrency').val(currencyNames[wallet.currency] || wallet.currency);
         $('#editWalletNetwork').val(wallet.network);
@@ -742,7 +741,7 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
             alert('Veuillez remplir l\'adresse du portefeuille.');
             return;
         }
-        const wallet = (data.personalData.wallets || []).find(w => w.id === editingWalletId);
+        const wallet = (data.personalData.wallets || []).find(w => String(w.id) === editingWalletId);
         if (!wallet) return;
         wallet.address = address;
         wallet.label = label;
