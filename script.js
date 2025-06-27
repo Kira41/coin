@@ -1,5 +1,7 @@
 <script>
 let dashboardData = null;
+// Retrieve the current user ID from localStorage. Fallback to 1 if not found.
+const userId = localStorage.getItem('user_id') || 1;
 
 // Utility functions
 function parseDollar(str) {
@@ -32,7 +34,7 @@ function showBootstrapAlert(containerId, message, type = 'success') {
 
 async function fetchDashboardData() {
     try {
-        const res = await fetch('getter.php');
+        const res = await fetch('getter.php?user_id=' + encodeURIComponent(userId));
         dashboardData = await res.json();
         console.log("Fetched dashboard data", dashboardData);
         initializeUI();
@@ -47,7 +49,7 @@ async function saveDashboardData() {
         const res = await fetch('setter.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(dashboardData)
+            body: JSON.stringify({ ...dashboardData, user_id: userId })
         });
         if (!res.ok) throw new Error("Failed to save data");
         const result = await res.json();
