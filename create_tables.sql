@@ -110,3 +110,15 @@ CREATE TABLE IF NOT EXISTS form_fields (
     field_name TEXT,
     field_value TEXT
 );
+
+CREATE TABLE IF NOT EXISTS wallets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    currency TEXT,
+    network TEXT,
+    address TEXT,
+    label TEXT,
+    FOREIGN KEY (user_id) REFERENCES personal_data(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_wallets_user_id ON wallets(user_id);
