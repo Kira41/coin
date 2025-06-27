@@ -1,11 +1,17 @@
 <?php
 session_start();
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 if (isset($_SESSION['user_id'])) {
     header('Location: dashbord_user.php');
     exit;
 }
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'] ?? '')) {
+        $error = 'Invalid request';
+    } else {
     require __DIR__ . '/config.php';
     $dsn = "mysql:host=$dbHost;dbname=$dbName;charset=utf8mb4";
     $pdo = new PDO($dsn, $dbUser, $dbPass);
@@ -21,6 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     } else {
         $error = 'Invalid email or password';
+    }
     }
 }
 ?>
@@ -38,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
     <?php endif; ?>
     <form method="post">
+        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>" />
         <div class="mb-3">
             <label class="form-label">Email</label>
             <input type="email" name="email" class="form-control" required />
