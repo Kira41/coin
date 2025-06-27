@@ -8,6 +8,11 @@ try {
     $pdo = new PDO($dsn, $dbUser, $dbPass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    function clean_decimal($v) {
+        if ($v === null || $v === '') return null;
+        return preg_replace('/[^0-9.\-]/', '', $v);
+    }
+
     $input = json_decode(file_get_contents('php://input'), true);
     if (!$input) {
         throw new Exception('Invalid JSON');
@@ -31,11 +36,21 @@ try {
         $sql = "INSERT INTO personal_data ($cols) VALUES ($place) ON DUPLICATE KEY UPDATE " . implode(',', $updateCols);
         $stmt = $pdo->prepare($sql);
         $stmt->bindValue(1, $userId, PDO::PARAM_INT);
+        $numericMap = ['balance'=>'decimal','totalDepots'=>'decimal','totalRetraits'=>'decimal','nbTransactions'=>'int'];
         foreach ($input['personalData'] as $k => $v) {
-            $stmt->bindValue(':' . $k, $v);
+            if (isset($numericMap[$k])) {
+                if ($numericMap[$k] === 'int') {
+                    $stmt->bindValue(':' . $k, (int)preg_replace('/[^0-9-]/', '', $v), PDO::PARAM_INT);
+                } else {
+                    $stmt->bindValue(':' . $k, clean_decimal($v));
+                }
+            } else {
+                $stmt->bindValue(':' . $k, $v);
+            }
         }
         $stmt->execute();
     }
+
 
     function updateTable($pdo, $table, $fields, $rows, $userId) {
         if ($rows === null || !is_array($rows)) return;
@@ -54,6 +69,7 @@ try {
             $vals[] = $userId;
             foreach ($dataFields as $f) { $vals[] = $row[$f] ?? null; }
             $stmt->execute($vals);
+
         }
     }
 

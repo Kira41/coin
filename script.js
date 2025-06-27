@@ -48,13 +48,7 @@ $(document).ready(async function () {
             }
         });
     }
-    if (data.personalData && data.personalData.password) {
-        data.personalData.passwordHash = await hashPassword(data.personalData.password);
-        delete data.personalData.password;
-        if (loadSucceeded) {
-            saveData();
-        }
-    } else if (loadSucceeded) {
+    if (loadSucceeded) {
         saveData();
     }
 
@@ -491,11 +485,6 @@ $.each(data.personalData || {}, function (id, value) {
         return Math.min(score, 100);
     }
 
-    async function hashPassword(pwd) {
-        const enc = new TextEncoder().encode(pwd);
-        const buffer = await crypto.subtle.digest('SHA-256', enc);
-        return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
 
     function strengthLabel(score) {
         if (score >= 90) return 'Fort';
@@ -513,16 +502,10 @@ $.each(data.personalData || {}, function (id, value) {
         const current = $('#currentPassword').val();
         const newPw = $('#newPassword').val();
         const confirm = $('#confirmPassword').val();
-        const currentHash = await hashPassword(current);
-        if (currentHash !== data.personalData.passwordHash) {
-            alert('Mot de passe actuel incorrect');
-            return;
-        }
         if (newPw !== confirm) {
             alert('Les nouveaux mots de passe ne correspondent pas.');
             return;
         }
-        const newHash = await hashPassword(newPw);
         const score = computePasswordStrength(newPw);
         const label = strengthLabel(score);
         const cls = barClass(score);
@@ -532,14 +515,13 @@ $.each(data.personalData || {}, function (id, value) {
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({
-                currentHash: currentHash,
-                newHash: newHash,
+                currentPassword: current,
+                newPassword: newPw,
                 passwordStrength: label,
                 passwordStrengthBar: score + '%'
             })
         }).done(function (resp) {
             if (resp && resp.success) {
-                data.personalData.passwordHash = newHash;
                 data.personalData.passwordStrength = label;
                 data.personalData.passwordStrengthBar = score + '%';
 
