@@ -14,8 +14,8 @@ if (!$input) {
     exit;
 }
 
-$currentHash = $input['currentHash'] ?? '';
-$newHash = $input['newHash'] ?? '';
+$currentPassword = $input['currentPassword'] ?? '';
+$newPassword = $input['newPassword'] ?? '';
 $strength = $input['passwordStrength'] ?? null;
 $strengthBar = $input['passwordStrengthBar'] ?? null;
 
@@ -32,11 +32,12 @@ try {
     $stmt = $pdo->prepare('SELECT passwordHash FROM personal_data WHERE id = ?');
     $stmt->execute([$userId]);
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
-    if (!$row || $row['passwordHash'] !== $currentHash) {
+    if (!$row || !password_verify($currentPassword, $row['passwordHash'])) {
         echo json_encode(['success' => false, 'error' => 'Incorrect current password']);
         exit;
     }
 
+    $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
     $stmt = $pdo->prepare('UPDATE personal_data SET passwordHash = ?, passwordStrength = ?, passwordStrengthBar = ? WHERE id = ?');
     $stmt->execute([$newHash, $strength, $strengthBar, $userId]);
 

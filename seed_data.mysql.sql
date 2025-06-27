@@ -1,7 +1,7 @@
 INSERT INTO personal_data (
     balance, totalDepots, totalRetraits, nbTransactions, fullName, compteverifie, compteverifie01, niveauavance, passwordHash, passwordStrength, passwordStrengthBar, emailNotifications, smsNotifications, loginAlerts, transactionAlerts, twoFactorAuth, emailaddress, address, phone, dob, nationality, btcAddress, ethAddress, usdtAddress, widhrawbankname, widhrawusername, widhrawacountnumber, widhrawiben, widhrawswift
 ) VALUES (
-    '5000 $', '1200 $', '800 $', '10', 'Ahmed Kouraychi', 'Vérifié', '1', 'Niveau 2', '6ce0330487c92a564b80836c30f81d5b33da46b4e0acaafa94c2211e38f1e01a', 'Fort', '90%', '1', '1', '1', '1', '0', 'Mider22@gmail.com', 'Sousse, Tunisie', '+21690000000', '2025-06-11', 'ca', '', '0xABC123...', 'TRc123456...', 'Banque Nationale', 'Société de services financiers', '1234567890', 'SA1234567890123456789012', 'BNPARABIC'
+    '5000 $', '1200 $', '800 $', '10', 'Ahmed Kouraychi', 'Vérifié', '1', 'Niveau 2', '$2b$10$xOMK7an7pZTpM8GKYISa1On.tsvzPqt9OiE8vqgZh7FgsL9HGNKMG', 'Fort', '90%', '1', '1', '1', '1', '0', 'Mider22@gmail.com', 'Sousse, Tunisie', '+21690000000', '2025-06-11', 'ca', '', '0xABC123...', 'TRc123456...', 'Banque Nationale', 'Société de services financiers', '1234567890', 'SA1234567890123456789012', 'BNPARABIC'
 );
 
 INSERT INTO transactions (user_id, operationNumber, type, amount, date, status, statusClass) VALUES
