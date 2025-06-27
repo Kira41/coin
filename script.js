@@ -716,10 +716,16 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
 
     $(document).on('click', '.wallet-delete', function () {
         const id = $(this).data('id');
+        const $row = $(this).closest('tr');
         if (!confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) return;
-        data.personalData.wallets = (data.personalData.wallets || []).filter(w => w.id !== id);
-        renderWalletTable();
-        walletApi('delete', { id });
+        walletApi('delete', { id }).done(res => {
+            if (res && res.success) {
+                data.personalData.wallets = (data.personalData.wallets || []).filter(w => w.id !== id);
+                $row.remove();
+            } else {
+                alert((res && res.error) || "Erreur lors de la suppression");
+            }
+        });
     });
 
     $(document).on('click', '.wallet-edit', function () {
@@ -753,8 +759,12 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
             if (!wallet) return;
             wallet.address = address;
             wallet.label = label;
-            walletApi('edit', { id: editingWalletId, address, label }).done(() => {
-                renderWalletTable();
+            walletApi('edit', { id: editingWalletId, address, label }).done(res => {
+                if (res && res.success) {
+                    renderWalletTable();
+                } else {
+                    alert((res && res.error) || "Erreur lors de la mise à jour");
+                }
             });
         } else {
             const wallet = {
