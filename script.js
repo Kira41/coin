@@ -1,7 +1,13 @@
 <script>
 let dashboardData = null;
 // Retrieve the current user ID from localStorage. Fallback to 1 if not found.
-const userId = localStorage.getItem('user_id') || 1;
+let userId;
+try {
+    userId = localStorage.getItem('user_id');
+} catch (e) {
+    userId = null;
+}
+userId = userId || 1;
 
 // Utility functions
 function parseDollar(str) {
