@@ -8,6 +8,11 @@ try {
     $pdo = new PDO($dsn, $dbUser, $dbPass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    function clean_decimal($v) {
+        if ($v === null || $v === '') return null;
+        return preg_replace('/[^0-9.\-]/', '', $v);
+    }
+
     $input = json_decode(file_get_contents('php://input'), true);
     if (!$input) {
         throw new Exception('Invalid JSON');
@@ -29,23 +34,46 @@ try {
         $place = '?,:' . implode(',:', $fields);
         $stmt = $pdo->prepare("INSERT INTO personal_data ($cols) VALUES ($place)");
         $stmt->bindValue(1, $userId, PDO::PARAM_INT);
+        $numericMap = ['balance'=>'decimal','totalDepots'=>'decimal','totalRetraits'=>'decimal','nbTransactions'=>'int'];
         foreach ($input['personalData'] as $k => $v) {
-            $stmt->bindValue(':' . $k, $v);
+            if (isset($numericMap[$k])) {
+                if ($numericMap[$k] === 'int') {
+                    $stmt->bindValue(':' . $k, (int)preg_replace('/[^0-9-]/', '', $v), PDO::PARAM_INT);
+                } else {
+                    $stmt->bindValue(':' . $k, clean_decimal($v));
+                }
+            } else {
+                $stmt->bindValue(':' . $k, $v);
+            }
         }
         $stmt->execute();
     }
 
-    function updateTable($pdo, $table, $fields, $rows, $userId) {
+function updateTable($pdo, $table, $fields, $rows, $userId) {
         if ($rows === null) return;
         $pdo->prepare("DELETE FROM $table WHERE user_id = ?")->execute([$userId]);
         if (!is_array($rows)) return;
         $cols = 'user_id,' . implode(',', $fields);
         $placeholders = implode(',', array_fill(0, count($fields) + 1, '?'));
         $stmt = $pdo->prepare("INSERT INTO $table ($cols) VALUES ($placeholders)");
+        $decimalMap = [
+            'transactions'=>['amount'],
+            'deposits'=>['amount'],
+            'retraits'=>['amount'],
+            'trading_history'=>['montant','prix','profitPerte']
+        ];
         foreach ($rows as $row) {
-            $vals = [$userId];
-            foreach ($fields as $f) { $vals[] = $row[$f] ?? null; }
-            $stmt->execute($vals);
+            $idx = 1;
+            $stmt->bindValue($idx++, $userId, PDO::PARAM_INT);
+            foreach ($fields as $f) {
+                $val = $row[$f] ?? null;
+                if (isset($decimalMap[$table]) && in_array($f, $decimalMap[$table], true)) {
+                    $stmt->bindValue($idx++, clean_decimal($val));
+                } else {
+                    $stmt->bindValue($idx++, $val);
+                }
+            }
+            $stmt->execute();
         }
     }
 
