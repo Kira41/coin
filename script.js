@@ -70,12 +70,27 @@ $(document).ready(async function () {
     }
 
     function saveData() {
+        const allowed = [
+            'balance','totalDepots','totalRetraits','nbTransactions','fullName',
+            'compteverifie','compteverifie01','niveauavance','passwordHash',
+            'passwordStrength','passwordStrengthBar','emailNotifications',
+            'smsNotifications','loginAlerts','transactionAlerts','twoFactorAuth',
+            'emailaddress','address','phone','dob','nationality','btcAddress',
+            'ethAddress','usdtAddress','widhrawbankname','widhrawusername',
+            'widhrawacountnumber','widhrawiben','widhrawswift'
+        ];
+        const pd = {};
+        allowed.forEach(f => {
+            if (Object.prototype.hasOwnProperty.call(data.personalData, f)) {
+                pd[f] = data.personalData[f];
+            }
+        });
         $.ajax({
             url: 'setter.php',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({
-                personalData: data.personalData,
+                personalData: pd,
                 transactions: data.transactions,
                 notifications: data.notifications,
                 deposits: data.deposits,
