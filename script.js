@@ -681,6 +681,8 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
     });
     updateCryptoDepositAddress();
 
+    let editingWalletId = null;
+
     function renderWalletTable() {
         const $tbody = $('#walletTableBody');
         $tbody.empty();
@@ -701,22 +703,39 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
     $(document).on('click', '.wallet-delete', function () {
         const id = $(this).data('id');
         if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
-            walletApi('delete', { id });
-            data.personalData.wallets = (data.personalData.wallets || []).filter(w => w.id !== id);
-            renderWalletTable();
+            walletApi('delete', { id }).done(() => {
+                data.personalData.wallets = (data.personalData.wallets || []).filter(w => w.id !== id);
+                renderWalletTable();
+            });
         }
     });
 
     $(document).on('click', '.wallet-edit', function () {
-        const id = $(this).data('id');
-        const wallet = (data.personalData.wallets || []).find(w => w.id === id);
+        editingWalletId = $(this).data('id');
+        const wallet = (data.personalData.wallets || []).find(w => w.id === editingWalletId);
         if (!wallet) return;
-        const newAddr = prompt('Entrez la nouvelle adresse', wallet.address || '');
-        if (newAddr !== null) {
-            wallet.address = newAddr;
-            walletApi('edit', { id, address: newAddr, label: wallet.label });
-            renderWalletTable();
+        $('#editWalletCurrency').val(currencyNames[wallet.currency] || wallet.currency);
+        $('#editWalletNetwork').val(wallet.network);
+        $('#editWalletAddress').val(wallet.address || '');
+        $('#editWalletLabel').val(wallet.label || '');
+        $('#editWalletModal').modal('show');
+    });
+
+    $('#saveWalletBtn').on('click', function () {
+        const address = $('#editWalletAddress').val().trim();
+        const label = $('#editWalletLabel').val().trim();
+        if (!address) {
+            alert('Veuillez remplir tous les champs requis.');
+            return;
         }
+        const wallet = (data.personalData.wallets || []).find(w => w.id === editingWalletId);
+        if (!wallet) return;
+        wallet.address = address;
+        wallet.label = label;
+        walletApi('edit', { id: editingWalletId, address, label }).done(() => {
+            renderWalletTable();
+            $('#editWalletModal').modal('hide');
+        });
     });
 
     $('#addWalletBtn').on('click', function () {
