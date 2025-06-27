@@ -12,11 +12,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
-    $hash = hash('sha256', $password);
     $stmt = $pdo->prepare('SELECT id, passwordHash FROM personal_data WHERE emailaddress = ?');
     $stmt->execute([$email]);
     $user = $stmt->fetch(PDO::FETCH_ASSOC);
-    if ($user && $user['passwordHash'] === $hash) {
+    if ($user && password_verify($password, $user['passwordHash'])) {
         $_SESSION['user_id'] = $user['id'];
         header('Location: dashbord_user.php');
         exit;
