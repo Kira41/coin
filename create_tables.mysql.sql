@@ -1,9 +1,9 @@
 CREATE TABLE IF NOT EXISTS personal_data (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    balance TEXT,
-    totalDepots TEXT,
-    totalRetraits TEXT,
-    nbTransactions TEXT,
+    balance DECIMAL(18,2),
+    totalDepots DECIMAL(18,2),
+    totalRetraits DECIMAL(18,2),
+    nbTransactions INT,
     fullName TEXT,
     compteverifie TEXT,
     compteverifie01 TEXT,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS transactions (
     user_id INT NOT NULL,
     operationNumber TEXT,
     type TEXT,
-    amount TEXT,
+    amount DECIMAL(18,2),
     date TEXT,
     status TEXT,
     statusClass TEXT
@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS deposits (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     date TEXT,
-    amount TEXT,
+    amount DECIMAL(18,2),
     method TEXT,
     status TEXT,
     statusClass TEXT
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS retraits (
     id INT AUTO_INCREMENT PRIMARY KEY,
     user_id INT NOT NULL,
     date TEXT,
-    amount TEXT,
+    amount DECIMAL(18,2),
     method TEXT,
     status TEXT,
     statusClass TEXT
@@ -79,11 +79,11 @@ CREATE TABLE IF NOT EXISTS trading_history (
     paire_devises TEXT,
     type TEXT,
     statutTypeClass TEXT,
-    montant TEXT,
-    prix TEXT,
+    montant DECIMAL(18,2),
+    prix DECIMAL(18,2),
     statut TEXT,
     statutClass TEXT,
-    profitPerte TEXT,
+    profitPerte DECIMAL(18,2),
     profitClass TEXT
 );
 
