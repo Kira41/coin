@@ -93,6 +93,15 @@ $(document).ready(async function () {
         });
     }
 
+    function walletApi(action, payload) {
+        return $.ajax({
+            url: 'wallet_api.php',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify(Object.assign({ action: action }, payload))
+        });
+    }
+
     function updateBalances() {
         const bal = formatDollar(parseDollar(data.personalData.balance));
         $('#soldeTotal').text(bal);
@@ -692,8 +701,8 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
     $(document).on('click', '.wallet-delete', function () {
         const id = $(this).data('id');
         if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
+            walletApi('delete', { id });
             data.personalData.wallets = (data.personalData.wallets || []).filter(w => w.id !== id);
-            saveData();
             renderWalletTable();
         }
     });
@@ -705,7 +714,7 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
         const newAddr = prompt('Entrez la nouvelle adresse', wallet.address || '');
         if (newAddr !== null) {
             wallet.address = newAddr;
-            saveData();
+            walletApi('edit', { id, address: newAddr, label: wallet.label });
             renderWalletTable();
         }
     });
@@ -720,7 +729,7 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
             return;
         }
         const wallet = {
-            id: Date.now(),
+            id: String(Date.now()),
             currency,
             network,
             address,
@@ -729,7 +738,7 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
         data.personalData.wallets = data.personalData.wallets || [];
         data.personalData.wallets.push(wallet);
         saveForm('addWalletForm');
-        saveData();
+        walletApi('add', wallet).done(res => { if(res.id) wallet.id = res.id; });
         renderWalletTable();
         $('#addWalletModal').modal('hide');
         $('#walletCurrency').val('');
