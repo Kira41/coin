@@ -263,6 +263,24 @@ $(document).ready(async function () {
         defaultSwiftCode: 'swiftCode'
     };
 
+    const bankPersonalMap = {
+        defaultBankName: 'widhrawbankname',
+        defaultAccountName: 'widhrawusername',
+        defaultAccountNumber: 'widhrawacountnumber',
+        defaultIban: 'widhrawiben',
+        defaultSwiftCode: 'widhrawswift'
+    };
+
+    function updateBankPersonalData() {
+        Object.entries(bankPersonalMap).forEach(([fieldId, pdKey]) => {
+            const val = $('#' + fieldId).val();
+            if (val !== undefined) {
+                data.personalData[pdKey] = val;
+                $('#' + pdKey).text(val);
+            }
+        });
+    }
+
     // Mapping of crypto currency codes to display names
     const currencyNames = {
         btc: 'Bitcoin',
@@ -305,6 +323,7 @@ $(document).ready(async function () {
         data.formData['bankAccountForm'] = data.formData['bankAccountForm'] || {};
         data.formData['bankAccountForm'][this.id] = $(this).val();
         syncBankAccountToWithdraw(true);
+        updateBankPersonalData();
         saveData();
     });
 
@@ -567,6 +586,7 @@ $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #c
     saveForm(this.id);
     if (this.id === 'bankAccountForm') {
         syncBankAccountToWithdraw(true);
+        updateBankPersonalData();
     }
 
         const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
