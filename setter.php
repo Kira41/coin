@@ -23,11 +23,13 @@ try {
     $pdo->beginTransaction();
 
     if (!empty($input['personalData'])) {
-        $pdo->prepare('DELETE FROM personal_data WHERE id = ?')->execute([$userId]);
         $fields = array_keys($input['personalData']);
         $cols = 'id,' . implode(',', $fields);
         $place = '?,:' . implode(',:', $fields);
-        $stmt = $pdo->prepare("INSERT INTO personal_data ($cols) VALUES ($place)");
+        $updateCols = [];
+        foreach ($fields as $f) { $updateCols[] = "$f = VALUES($f)"; }
+        $sql = "INSERT INTO personal_data ($cols) VALUES ($place) ON DUPLICATE KEY UPDATE " . implode(',', $updateCols);
+        $stmt = $pdo->prepare($sql);
         $stmt->bindValue(1, $userId, PDO::PARAM_INT);
         foreach ($input['personalData'] as $k => $v) {
             $stmt->bindValue(':' . $k, $v);
@@ -36,15 +38,21 @@ try {
     }
 
     function updateTable($pdo, $table, $fields, $rows, $userId) {
-        if ($rows === null) return;
-        $pdo->prepare("DELETE FROM $table WHERE user_id = ?")->execute([$userId]);
-        if (!is_array($rows)) return;
-        $cols = 'user_id,' . implode(',', $fields);
-        $placeholders = implode(',', array_fill(0, count($fields) + 1, '?'));
-        $stmt = $pdo->prepare("INSERT INTO $table ($cols) VALUES ($placeholders)");
+        if ($rows === null || !is_array($rows)) return;
+        $hasId = in_array('id', $fields);
+        $dataFields = array_diff($fields, ['id']);
+        $cols = ($hasId ? 'id,' : '') . 'user_id,' . implode(',', $dataFields);
+        $placeholders = implode(',', array_fill(0, ($hasId ? 1 : 0) + 1 + count($dataFields), '?'));
+        $updates = [];
+        foreach ($dataFields as $f) { $updates[] = "$f = VALUES($f)"; }
+        $sql = "INSERT INTO $table ($cols) VALUES ($placeholders)";
+        if ($hasId) { $sql .= " ON DUPLICATE KEY UPDATE " . implode(',', $updates); }
+        $stmt = $pdo->prepare($sql);
         foreach ($rows as $row) {
-            $vals = [$userId];
-            foreach ($fields as $f) { $vals[] = $row[$f] ?? null; }
+            $vals = [];
+            if ($hasId) $vals[] = $row['id'] ?? null;
+            $vals[] = $userId;
+            foreach ($dataFields as $f) { $vals[] = $row[$f] ?? null; }
             $stmt->execute($vals);
         }
     }
@@ -58,19 +66,31 @@ try {
     updateTable($pdo, 'wallets', ['id','currency','network','address','label'], $input['wallets'] ?? null, $userId);
 
     if (isset($input['kycStatus'])) {
-        $pdo->prepare('DELETE FROM kyc_status WHERE user_id = ?')->execute([$userId]);
-        $stmt = $pdo->prepare('INSERT INTO kyc_status (user_id, step_name, status, date) VALUES (?,?,?,?)');
+        $checkKyc = $pdo->prepare('SELECT id FROM kyc_status WHERE user_id = ? AND step_name = ?');
+        $insertKyc = $pdo->prepare('INSERT INTO kyc_status (user_id, step_name, status, date) VALUES (?,?,?,?)');
+        $updateKyc = $pdo->prepare('UPDATE kyc_status SET status = ?, date = ? WHERE user_id = ? AND step_name = ?');
         foreach ($input['kycStatus'] as $step => $info) {
-            $stmt->execute([$userId, $step, $info['status'] ?? '', $info['date'] ?? '']);
+            $checkKyc->execute([$userId, $step]);
+            if ($checkKyc->fetch()) {
+                $updateKyc->execute([$info['status'] ?? '', $info['date'] ?? '', $userId, $step]);
+            } else {
+                $insertKyc->execute([$userId, $step, $info['status'] ?? '', $info['date'] ?? '']);
+            }
         }
     }
 
     if (isset($input['formData'])) {
-        $pdo->prepare('DELETE FROM form_fields WHERE user_id = ?')->execute([$userId]);
-        $stmt = $pdo->prepare('INSERT INTO form_fields (user_id, form_name, field_name, field_value) VALUES (?,?,?,?)');
+        $checkField = $pdo->prepare('SELECT id FROM form_fields WHERE user_id = ? AND form_name = ? AND field_name = ?');
+        $insertField = $pdo->prepare('INSERT INTO form_fields (user_id, form_name, field_name, field_value) VALUES (?,?,?,?)');
+        $updateField = $pdo->prepare('UPDATE form_fields SET field_value = ? WHERE user_id = ? AND form_name = ? AND field_name = ?');
         foreach ($input['formData'] as $form => $fields) {
             foreach ($fields as $name => $val) {
-                $stmt->execute([$userId, $form, $name, $val]);
+                $checkField->execute([$userId, $form, $name]);
+                if ($checkField->fetch()) {
+                    $updateField->execute([$val, $userId, $form, $name]);
+                } else {
+                    $insertField->execute([$userId, $form, $name, $val]);
+                }
             }
         }
     }
