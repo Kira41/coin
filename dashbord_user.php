@@ -1217,49 +1217,6 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 </div>
 </div>
-<!-- Modal: Modifier Portefeuille -->
-<div class="modal fade" id="editWalletModal" tabindex="-1" aria-labelledby="editWalletModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="editWalletModalLabel">Modifier le portefeuille</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
-      </div>
-      <div class="modal-body">
-        <form id="editWalletForm">
-          <div class="mb-3">
-            <label class="form-label" for="editWalletCurrency">Crypto-monnaie</label>
-            <select class="form-select" id="editWalletCurrency" disabled>
-              <option value="btc">Bitcoin</option>
-              <option value="bch">Bitcoin Cash</option>
-              <option value="eth">Ethereum</option>
-              <option value="ltc">Litecoin</option>
-              <option value="usdt">Tether</option>
-              <option value="usdc">USD Coin</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label" for="editWalletNetwork">Réseau</label>
-            <select class="form-select" id="editWalletNetwork" disabled>
-              <option value="">-- Choisissez le réseau --</option>
-            </select>
-          </div>
-          <div class="mb-3">
-            <label class="form-label" for="editWalletAddress">Adresse du portefeuille</label>
-            <input type="text" class="form-control" id="editWalletAddress" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label" for="editWalletLabel">Nom du portefeuille (optionnel)</label>
-            <input type="text" class="form-control" id="editWalletLabel">
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-        <button type="button" class="btn btn-primary" id="editWalletBtn">Enregistrer</button>
-      </div>
-    </div>
-  </div>
 </div>
 <!-- Modal: Historique des connexions -->
 <div class="modal fade" id="loginHistoryModal" tabindex="-1" aria-labelledby="loginHistoryModalLabel" aria-hidden="true">
