@@ -241,7 +241,29 @@ $(document).ready(async function () {
         saveData();
     }
 
-    ['profileEditForm','bankDepositForm','cardDepositForm','cryptoDepositForm','bankWithdrawForm','cryptoWithdrawForm','paypalWithdrawForm','bankAccountForm','changePasswordForm','changeProfilePicForm','addWalletForm'].forEach(populateForm);
+    const bankFieldMap = {
+        defaultBankName: 'bankName',
+        defaultAccountName: 'accountHolder',
+        defaultAccountNumber: 'accountNumber',
+        defaultIban: 'iban',
+        defaultSwiftCode: 'swiftCode'
+    };
+
+    function syncBankAccountToWithdraw(force = false) {
+        const src = data.formData['bankAccountForm'] || {};
+        data.formData['bankWithdrawForm'] = data.formData['bankWithdrawForm'] || {};
+        Object.entries(bankFieldMap).forEach(([from, to]) => {
+            const val = src[from];
+            if (val !== undefined && (force || !data.formData['bankWithdrawForm'][to])) {
+                data.formData['bankWithdrawForm'][to] = val;
+                $(`#bankWithdrawForm #${to}`).val(val);
+            }
+        });
+    }
+
+['profileEditForm','bankDepositForm','cardDepositForm','cryptoDepositForm','bankWithdrawForm','cryptoWithdrawForm','paypalWithdrawForm','bankAccountForm','changePasswordForm','changeProfilePicForm','addWalletForm'].forEach(populateForm);
+
+    syncBankAccountToWithdraw();
 
     renderWalletTable();
     // ======================== تعبئة البيانات الشخصية ========================
@@ -497,9 +519,12 @@ $.each(data.personalData || {}, function (id, value) {
         });
     });
 
-    $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #cryptoWithdrawForm, #paypalWithdrawForm, #bankAccountForm, #changePasswordForm, #changeProfilePicForm').on('submit', function (e) {
-        e.preventDefault();
-        saveForm(this.id);
+$('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #cryptoWithdrawForm, #paypalWithdrawForm, #bankAccountForm, #changePasswordForm, #changeProfilePicForm').on('submit', function (e) {
+    e.preventDefault();
+    saveForm(this.id);
+    if (this.id === 'bankAccountForm') {
+        syncBankAccountToWithdraw(true);
+    }
 
         const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
 
