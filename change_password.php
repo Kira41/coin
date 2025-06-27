@@ -13,6 +13,11 @@ if (!$input) {
     echo json_encode(['success' => false, 'error' => 'Invalid JSON']);
     exit;
 }
+if (!isset($input['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $input['csrf_token'])) {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
+    exit;
+}
 
 $currentPassword = $input['currentPassword'] ?? '';
 $newPassword = $input['newPassword'] ?? '';

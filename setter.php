@@ -15,6 +15,11 @@ try {
     if (!$input) {
         throw new Exception('Invalid JSON');
     }
+    if (!isset($input['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $input['csrf_token'])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
+        exit;
+    }
 
     if (!isset($_SESSION['user_id'])) {
         http_response_code(401);

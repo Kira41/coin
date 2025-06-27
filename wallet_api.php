@@ -15,6 +15,11 @@ try {
     if (!$input || !isset($input['action'])) {
         throw new Exception('Invalid request');
     }
+    if (!isset($input['csrf_token']) || !hash_equals($_SESSION['csrf_token'] ?? '', $input['csrf_token'])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => 'Invalid CSRF token']);
+        exit;
+    }
     $action = $input['action'];
     switch ($action) {
         case 'add':
