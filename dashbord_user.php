@@ -4,6 +4,9 @@ if (!isset($_SESSION['user_id'])) {
     header('Location: login.php');
     exit;
 }
+if (!isset($_SESSION['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 ?>
 <!DOCTYPE html>
 
@@ -11,6 +14,7 @@ if (!isset($_SESSION['user_id'])) {
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<meta name="csrf-token" content="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>"/>
 <title>Tableau de bord</title>
 <!-- Bootstrap RTL CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
@@ -206,6 +210,7 @@ if (!isset($_SESSION['user_id'])) {
                     </div>
 <div class="card-body">
 <form id="tradingForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <div class="mb-3">
 <label class="form-label" for="tradeAmount">Montant</label>
 <div class="input-group">
@@ -484,6 +489,7 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 </div>
 <form id="bankDepositForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <div class="mb-3">
 <label class="form-label" for="bankDepositAmount">Montant à déposer</label>
 <div class="input-group">
@@ -514,6 +520,7 @@ if (!isset($_SESSION['user_id'])) {
 <i class="fas fa-info-circle me-2"></i> Vous pouvez déposer de l'argent en utilisant une carte de crédit ou de débit. Le montant sera ajouté à votre compte immédiatement.
                           </div>
 <form id="cardDepositForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <div class="mb-3">
 <label class="form-label" for="cardDepositAmount">Montant à déposer</label>
 <div class="input-group">
@@ -586,6 +593,7 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 </div>
 <form id="cryptoDepositForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <div class="mb-3">
 <label class="form-label" for="cryptoAmount">Montant à déposer (en dollars américains)</label>
 <div class="input-group">
@@ -683,6 +691,7 @@ if (!isset($_SESSION['user_id'])) {
 <i class="fas fa-info-circle me-2"></i> Entrez les coordonnées de votre compte bancaire pour retirer des fonds. La demande de retrait sera traitée sous 1 à 3 jours ouvrables.
                           </div>
 <form id="bankWithdrawForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <div class="mb-3">
 <label class="form-label" for="withdrawAmount">Montant à retirer</label>
 <div class="input-group">
@@ -730,6 +739,7 @@ if (!isset($_SESSION['user_id'])) {
 <i class="fas fa-info-circle me-2"></i> Entrez l’adresse de votre portefeuille numérique pour retirer des fonds. La demande de retrait sera traitée dans un délai de 1 à 24 heures.
                           </div>
 <form id="cryptoWithdrawForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <div class="mb-3">
 <label class="form-label" for="cryptoWithdrawAmount">Montant à retirer</label>
 <div class="input-group">
@@ -784,6 +794,7 @@ if (!isset($_SESSION['user_id'])) {
 <i class="fas fa-info-circle me-2"></i> Entrez l’adresse e-mail associée à votre compte PayPal. La demande de retrait sera traitée dans un délai de 1 à 24 heures.
                           </div>
 <form id="paypalWithdrawForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <div class="mb-3">
 <label class="form-label" for="paypalWithdrawAmount">Montant à retirer</label>
 <div class="input-group">
@@ -1004,6 +1015,7 @@ if (!isset($_SESSION['user_id'])) {
 <!-- نموذج تعديل المعلومات الشخصية -->
 <div id="ProfilEditForm" style="display: none;">
 <form id="profileEditForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <div class="mb-3 row">
 <label class="col-sm-3 col-form-label" for="fullNameInput">Nom complet</label>
 <div class="col-sm-9">
@@ -1063,6 +1075,7 @@ if (!isset($_SESSION['user_id'])) {
                       </div>
 <div id="bankAccountAlert"></div>
 <form id="bankAccountForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <div class="mb-3">
 <label class="form-label" for="defaultBankName">Nom de la banque</label>
 <input class="form-control" id="defaultBankName" placeholder="Entrez le Nom de la banque" type="text" value=""/>
@@ -1126,6 +1139,7 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 <div class="modal-body">
 <form id="changePasswordForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <div class="mb-3">
 <label class="form-label" for="currentPassword">Mot de passe actuel</label>
 <input class="form-control" name="currentPassword" id="currentPassword" required="" type="password"/>
@@ -1160,6 +1174,7 @@ if (!isset($_SESSION['user_id'])) {
 <img alt="Image Profil" class="rounded-circle Profil-img mb-3" src="https://via.placeholder.com/150"/>
 </div>
 <form id="changeProfilePicForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <div class="mb-3">
 <label class="form-label" for="ProfilPicture">Choisissez une nouvelle image</label>
 <input accept="image/*" class="form-control" id="ProfilPicture" type="file"/>
@@ -1183,6 +1198,7 @@ if (!isset($_SESSION['user_id'])) {
 </div>
 <div class="modal-body">
 <form id="addWalletForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
 <div class="mb-3">
 <label class="form-label" for="walletCurrency">Choisissez la crypto-monnaie</label>
 <select class="form-select" id="walletCurrency" required="">
@@ -1228,6 +1244,7 @@ if (!isset($_SESSION['user_id'])) {
       </div>
       <div class="modal-body">
         <form id="editWalletForm">
+<input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['csrf_token']); ?>">
           <div class="mb-3">
             <label class="form-label" for="editWalletCurrency">Crypto-monnaie</label>
             <input type="text" class="form-control" id="editWalletCurrency" disabled>

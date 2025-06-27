@@ -1,4 +1,5 @@
 $(document).ready(async function () {
+    const csrfToken = $('meta[name="csrf-token"]').attr('content');
     // ======================== إعداد البيانات ========================
 
     async function loadDashboardData() {
@@ -91,7 +92,8 @@ $(document).ready(async function () {
                 tradingHistory: data.tradingHistory,
                 loginHistory: data.loginHistory,
                 formData: data.formData,
-                kycStatus: kycStatus
+                kycStatus: kycStatus,
+                csrf_token: csrfToken
             })
         });
     }
@@ -101,7 +103,7 @@ $(document).ready(async function () {
             url: 'wallet_api.php',
             method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify(Object.assign({ action: action }, payload))
+            data: JSON.stringify(Object.assign({ action: action, csrf_token: csrfToken }, payload))
         });
     }
 
@@ -250,6 +252,9 @@ $(document).ready(async function () {
     function saveForm(formId) {
         const formData = {};
         $(`#${formId}`).find('input, textarea, select').each(function () {
+            if (this.type === 'hidden' || this.name === 'csrf_token') {
+                return; // don't persist CSRF tokens
+            }
             if (this.id) {
                 formData[this.id] = $(this).is(':checkbox') ? (this.checked ? '1' : '0') : $(this).val();
             }
@@ -527,7 +532,8 @@ $.each(data.personalData || {}, function (id, value) {
                 currentPassword: current,
                 newPassword: newPw,
                 passwordStrength: label,
-                passwordStrengthBar: score + '%'
+                passwordStrengthBar: score + '%',
+                csrf_token: csrfToken
             })
         }).done(function (resp) {
             if (resp && resp.success) {
