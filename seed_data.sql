@@ -64,3 +64,7 @@ INSERT INTO form_fields (user_id, form_name, field_name, field_value) VALUES
 (1,'bankWithdrawForm','swiftCode','111111111'),
 (1,'bankWithdrawForm','withdrawNotes','ssss'),
 (1,'bankWithdrawForm','saveBankInfo','1');
+
+INSERT INTO wallets (id, user_id, currency, network, address, label) VALUES
+('1',1,'btc','Bitcoin','bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kygt080','Mon BTC'),
+('2',1,'eth','ERC20','0xabc123def456abc123def456abc123def456abcd','Mon ETH');

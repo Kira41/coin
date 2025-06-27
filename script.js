@@ -17,6 +17,7 @@ $(document).ready(async function () {
     let data = dashboardData || {};
     const loadSucceeded = !!(Object.keys(data).length);
     data.personalData = data.personalData || {};
+    data.personalData.wallets = dashboardData.wallets || [];
     if (data.personalData.balance === undefined) {
         const fallback = data.personalData.soldeTotal || data.personalData.soldeintrade || data.personalData.soldedisponible1;
         data.personalData.balance = fallback || '0 $';
@@ -70,12 +71,16 @@ $(document).ready(async function () {
     }
 
     function saveData() {
+        const pd = { ...data.personalData };
+        const wallets = pd.wallets || [];
+        delete pd.wallets;
         $.ajax({
             url: 'setter.php',
             method: 'POST',
             contentType: 'application/json',
             data: JSON.stringify({
-                personalData: data.personalData,
+                personalData: pd,
+                wallets: wallets,
                 transactions: data.transactions,
                 notifications: data.notifications,
                 deposits: data.deposits,

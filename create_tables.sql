@@ -110,3 +110,12 @@ CREATE TABLE IF NOT EXISTS form_fields (
     field_name TEXT,
     field_value TEXT
 );
+
+CREATE TABLE IF NOT EXISTS wallets (
+    id TEXT PRIMARY KEY,
+    user_id INTEGER NOT NULL,
+    currency TEXT,
+    network TEXT,
+    address TEXT,
+    label TEXT
+);

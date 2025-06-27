@@ -41,6 +41,10 @@ try {
     $stmt->execute([$userId]);
     $data['loginHistory'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    $stmt = $pdo->prepare("SELECT id, currency, network, address, label FROM wallets WHERE user_id = ?");
+    $stmt->execute([$userId]);
+    $data['wallets'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
     $kyc = [];
     $stmt = $pdo->prepare("SELECT step_name, status, date FROM kyc_status WHERE user_id = ?");
     $stmt->execute([$userId]);
