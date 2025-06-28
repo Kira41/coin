@@ -51,6 +51,9 @@ async function fetchDashboardData() {
     try {
         const res = await fetch('getter.php?user_id=' + encodeURIComponent(userId));
         dashboardData = await res.json();
+        if (dashboardData.wallets && !dashboardData.personalData.wallets) {
+            dashboardData.personalData.wallets = dashboardData.wallets;
+        }
         console.log("Fetched dashboard data", dashboardData);
         updatePlatformBankDetails();
         initializeUI();
