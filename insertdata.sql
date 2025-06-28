@@ -32,4 +32,5 @@ INSERT INTO loginHistory (user_id, date, ip, device) VALUES (1, '2025/06/08 18:2
 INSERT INTO loginHistory (user_id, date, ip, device) VALUES (1, '2025/06/07 09:10', '192.168.0.3', 'Safari - iOS');
 INSERT INTO loginHistory (user_id, date, ip, device) VALUES (1, '2025/06/06 23:45', '192.168.0.4', 'Edge - Windows');
 INSERT INTO loginHistory (user_id, date, ip, device) VALUES (1, '2025/06/05 08:30', '192.168.0.5', 'Chrome - macOS');
-INSERT INTO bank_withdrawl_info VALUES ('My Bank', 'Company Ltd', '987654321', 'IBAN987654', 'SWIFT987');
+INSERT INTO bank_withdrawl_info (user_id, widhrawBankName, widhrawAccountName, widhrawAccountNumber, widhrawIban, widhrawSwiftCode)
+VALUES (1, 'My Bank', 'Company Ltd', '987654321', 'IBAN987654', 'SWIFT987');
