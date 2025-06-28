@@ -303,20 +303,41 @@ function initializeUI() {
         $notifications.html('<p>Aucune notification disponible.</p>');
     }
 
-    const $tbody = $('#transactionsRecents');
-    if (dashboardData.transactions?.length > 0) {
-        dashboardData.transactions.slice(0, 10).forEach(t => {
-            $tbody.append(`
-                <tr>
-                    <td>${t.operationNumber}</td>
-                    <td>${t.type}</td>
-                    <td>${t.amount}</td>
-                    <td>${t.date}</td>
-                    <td><span class="badge ${t.statusClass}">${t.status}</span></td>
-                </tr>`);
+    function generateOperationNumber() {
+        return '#' + Date.now();
+    }
+
+    function addTransactionRecord(type, amount, status = 'En cours', statusClass = 'bg-warning') {
+        const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
+        dashboardData.transactions = dashboardData.transactions || [];
+        dashboardData.transactions.unshift({
+            operationNumber: generateOperationNumber(),
+            type,
+            amount,
+            date: today,
+            status,
+            statusClass
         });
-    } else {
-        $tbody.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
+        dashboardData.transactions = dashboardData.transactions.slice(0, 10);
+    }
+
+    function renderRecentTransactions() {
+        const $tbody = $('#transactionsRecents');
+        $tbody.empty();
+        if (dashboardData.transactions?.length > 0) {
+            dashboardData.transactions.slice(0, 5).forEach(t => {
+                $tbody.append(`
+                    <tr>
+                        <td>${t.operationNumber}</td>
+                        <td>${t.type}</td>
+                        <td>${t.amount}</td>
+                        <td>${t.date}</td>
+                        <td><span class="badge ${t.statusClass}">${t.status}</span></td>
+                    </tr>`);
+            });
+        } else {
+            $tbody.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
+        }
     }
 
     const notificationIcons = {
@@ -503,8 +524,10 @@ function initializeUI() {
                     statusClass: 'bg-warning'
                 });
                 dashboardData.retraits = dashboardData.retraits.slice(0, 10);
+                addTransactionRecord('Retrait', formatDollar(amt));
                 updateBalances();
                 renderWithdrawHistory();
+                renderRecentTransactions();
                 showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
                 saveDashboardData();
             }
@@ -540,6 +563,8 @@ function initializeUI() {
                 dashboardData.deposits = dashboardData.deposits.slice(0, 10);
                 renderDepositHistory();
                 updateBalances();
+                addTransactionRecord('Dépôt', formatDollar(amt));
+                renderRecentTransactions();
                 showBootstrapAlert('depositAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
                 saveDashboardData();
             }
@@ -550,6 +575,11 @@ function initializeUI() {
             dashboardData.personalData.userAccountNumber = $('#defaultAccountNumber').val();
             dashboardData.personalData.userIban = $('#defaultIban').val();
             dashboardData.personalData.userSwiftCode = $('#defaultSwiftCode').val();
+            $('#bankName').val($('#defaultBankName').val());
+            $('#accountHolder').val($('#defaultAccountName').val());
+            $('#accountNumber').val($('#defaultAccountNumber').val());
+            $('#iban').val($('#defaultIban').val());
+            $('#swiftCode').val($('#defaultSwiftCode').val());
             saveDashboardData();
         }
     });
@@ -740,6 +770,7 @@ function initializeUI() {
 
     renderDepositHistory();
     renderWithdrawHistory();
+    renderRecentTransactions();
 
     const apiPairs = {
         BTCUSD: 'BTCUSDT',
@@ -807,8 +838,10 @@ function initializeUI() {
         dashboardData.tradingHistory = dashboardData.tradingHistory || [];
         dashboardData.tradingHistory.unshift(order);
         dashboardData.tradingHistory = dashboardData.tradingHistory.slice(0, 5);
+        addTransactionRecord('Trading', order.montant, order.statut, order.statutClass);
         saveDashboardData();
         renderTradingHistory();
+        renderRecentTransactions();
     }
 
     function finalizeOrder(order, exitPrice) {
@@ -824,6 +857,11 @@ function initializeUI() {
         order.profitClass = profit >= 0 ? 'text-success' : 'text-danger';
         order.statut = 'complet';
         order.statutClass = 'bg-success';
+        const tx = (dashboardData.transactions || []).find(t => t.amount === order.montant && t.type === 'Trading' && t.status === 'En cours');
+        if (tx) {
+            tx.status = 'complet';
+            tx.statusClass = 'bg-success';
+        }
         if (order.ocoId) {
             dashboardData.tradingHistory.forEach(o => {
                 if (o !== order && o.ocoId === order.ocoId && o.statut === 'En cours') {
@@ -839,6 +877,7 @@ function initializeUI() {
         saveDashboardData();
         updateBalances();
         renderTradingHistory();
+        renderRecentTransactions();
     }
 
     function completeOrder(order) {
