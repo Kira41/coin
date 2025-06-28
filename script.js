@@ -537,7 +537,23 @@ function initializeUI() {
                 dashboardData.personalData.userAccountNumber = $('#accountNumber').val();
                 dashboardData.personalData.userIban = $('#iban').val();
                 dashboardData.personalData.userSwiftCode = $('#swiftCode').val();
+
+                dashboardData.bankWithdrawInfo = {
+                    widhrawBankName: $('#bankName').val(),
+                    widhrawAccountName: $('#accountHolder').val(),
+                    widhrawAccountNumber: $('#accountNumber').val(),
+                    widhrawIban: $('#iban').val(),
+                    widhrawSwiftCode: $('#swiftCode').val()
+                };
+
+                $('#defaultBankName').val($('#bankName').val());
+                $('#defaultAccountName').val($('#accountHolder').val());
+                $('#defaultAccountNumber').val($('#accountNumber').val());
+                $('#defaultIban').val($('#iban').val());
+                $('#defaultSwiftCode').val($('#swiftCode').val());
+
                 saveDashboardData();
+                updatePlatformBankDetails();
             }
         } else if (['bankDepositForm', 'cardDepositForm', 'cryptoDepositForm'].includes(this.id)) {
             const amountField = {
@@ -575,12 +591,21 @@ function initializeUI() {
             dashboardData.personalData.userAccountNumber = $('#defaultAccountNumber').val();
             dashboardData.personalData.userIban = $('#defaultIban').val();
             dashboardData.personalData.userSwiftCode = $('#defaultSwiftCode').val();
+
+            dashboardData.bankWithdrawInfo = {
+                widhrawBankName: $('#defaultBankName').val(),
+                widhrawAccountName: $('#defaultAccountName').val(),
+                widhrawAccountNumber: $('#defaultAccountNumber').val(),
+                widhrawIban: $('#defaultIban').val(),
+                widhrawSwiftCode: $('#defaultSwiftCode').val()
+            };
             $('#bankName').val($('#defaultBankName').val());
             $('#accountHolder').val($('#defaultAccountName').val());
             $('#accountNumber').val($('#defaultAccountNumber').val());
             $('#iban').val($('#defaultIban').val());
             $('#swiftCode').val($('#defaultSwiftCode').val());
             saveDashboardData();
+            updatePlatformBankDetails();
             showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
         }
     });
@@ -707,16 +732,31 @@ function initializeUI() {
         }
     });
 
+    let currentEditWalletId = null;
     $(document).on('click', '.wallet-edit', function () {
         const id = $(this).data('id');
         const wallet = (dashboardData.personalData.wallets || []).find(w => w.id === id);
         if (!wallet) return;
-        const newAddr = prompt('Entrez la nouvelle adresse', wallet.address || '');
-        if (newAddr !== null) {
-            wallet.address = newAddr;
-            saveDashboardData();
-            renderWalletTable();
+        currentEditWalletId = id;
+        $('#editWalletAddress').val(wallet.address || '');
+        $('#editWalletLabel').val(wallet.label || '');
+        $('#editWalletModal').modal('show');
+    });
+
+    $('#saveWalletEditBtn').on('click', function () {
+        const address = $('#editWalletAddress').val().trim();
+        const label = $('#editWalletLabel').val().trim();
+        if (!address) {
+            alert('Veuillez saisir une adresse.');
+            return;
         }
+        const wallet = (dashboardData.personalData.wallets || []).find(w => w.id === currentEditWalletId);
+        if (!wallet) return;
+        wallet.address = address;
+        wallet.label = label;
+        saveDashboardData();
+        renderWalletTable();
+        $('#editWalletModal').modal('hide');
     });
 
     $('#addWalletBtn').on('click', function () {
