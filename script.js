@@ -605,7 +605,13 @@ function initializeUI() {
             $('#swiftCode').val($('#defaultSwiftCode').val());
             saveDashboardData();
             updatePlatformBankDetails();
-            showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
+            $('#bankAccountAlert').html(`
+                <div id="withdrawAlert">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle me-2"></i>Votre demande sera traitée dans les plus brefs délais.
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>`);
 
         }
     });
