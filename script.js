@@ -586,7 +586,7 @@ function initializeUI() {
             $('#iban').val($('#defaultIban').val());
             $('#swiftCode').val($('#defaultSwiftCode').val());
             saveDashboardData();
-            showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
+            showBootstrapAlert('bankAccountAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
         }
     });
 
