@@ -736,6 +736,7 @@ function initializeUI() {
         const $tbodyDeposits = $('#historiqueDepots');
         $tbodyDeposits.empty();
         if (dashboardData.deposits?.length > 0) {
+            dashboardData.deposits.sort((a, b) => new Date(b.date) - new Date(a.date));
             dashboardData.deposits.slice(0, 10).forEach(d => {
                 $tbodyDeposits.append(`
                     <tr>
@@ -754,6 +755,7 @@ function initializeUI() {
         const $tbodyRetraits = $('#historiqueRetraits');
         $tbodyRetraits.empty();
         if (dashboardData.retraits?.length > 0) {
+            dashboardData.retraits.sort((a, b) => new Date(b.date) - new Date(a.date));
             dashboardData.retraits.slice(0, 10).forEach(r => {
                 $tbodyRetraits.append(`
                     <tr>
