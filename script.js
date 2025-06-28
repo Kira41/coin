@@ -581,6 +581,7 @@ function initializeUI() {
             $('#iban').val($('#defaultIban').val());
             $('#swiftCode').val($('#defaultSwiftCode').val());
             saveDashboardData();
+            showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
         }
     });
 
@@ -633,10 +634,10 @@ function initializeUI() {
     const networksByCurrency = {
         btc: ['Bitcoin'],
         bch: ['BCH'],
-        eth: ['ERC20'],
+        eth: ['ERC20', 'BEP20', 'TRC20'],
         ltc: ['Litecoin'],
         usdt: ['ERC20', 'BEP20', 'TRC20'],
-        usdc: ['ERC20']
+        usdc: ['ERC20', 'BEP20', 'TRC20']
     };
 
     function populateNetworks() {
@@ -649,6 +650,20 @@ function initializeUI() {
     }
 
     $('#walletCurrency').on('change', populateNetworks);
+
+    function populateCryptoNetwork() {
+        const currency = $('#cryptoCurrencyWithdraw').val() || $('#cryptoCurrency').val();
+        const $net = $('#cryptoNetwork');
+        if ($net.length === 0) return;
+        $net.empty().append('<option value="">-- Choisissez le réseau --</option>');
+        (networksByCurrency[currency] || []).forEach(n => {
+            $net.append(`<option value="${n}">${n}</option>`);
+        });
+    }
+
+    $('#cryptoCurrencyWithdraw').on('change', populateCryptoNetwork);
+    $('#cryptoCurrency').on('change', populateCryptoNetwork);
+    populateCryptoNetwork();
 
     function updateCryptoDepositAddress() {
         const currency = $('#cryptoCurrency').val();
