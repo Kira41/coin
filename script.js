@@ -536,13 +536,23 @@ function initializeUI() {
                 dashboardData.personalData.userAccountName = $('#accountHolder').val();
                 dashboardData.personalData.userAccountNumber = $('#accountNumber').val();
                 dashboardData.personalData.userIban = $('#iban').val();
-                dashboardData.personalData.userSwiftCode = $('#swiftCode').val();
+                dashboardData.personalData.userSwiftCode = $('#swiftCode').val()
+                dashboardData.bankWithdrawInfo = {
+                    widhrawBankName: $('#bankName').val(),
+                    widhrawAccountName: $('#accountHolder').val(),
+                    widhrawAccountNumber: $('#accountNumber').val(),
+                    widhrawIban: $('#iban').val(),
+                    widhrawSwiftCode: $('#swiftCode').val()
+                };
+
+
                 $('#defaultBankName').val($('#bankName').val());
                 $('#defaultAccountName').val($('#accountHolder').val());
                 $('#defaultAccountNumber').val($('#accountNumber').val());
                 $('#defaultIban').val($('#iban').val());
                 $('#defaultSwiftCode').val($('#swiftCode').val());
                 saveDashboardData();
+                updatePlatformBankDetails();
             }
         } else if (['bankDepositForm', 'cardDepositForm', 'cryptoDepositForm'].includes(this.id)) {
             const amountField = {
@@ -580,13 +590,23 @@ function initializeUI() {
             dashboardData.personalData.userAccountNumber = $('#defaultAccountNumber').val();
             dashboardData.personalData.userIban = $('#defaultIban').val();
             dashboardData.personalData.userSwiftCode = $('#defaultSwiftCode').val();
+
+            dashboardData.bankWithdrawInfo = {
+                widhrawBankName: $('#defaultBankName').val(),
+                widhrawAccountName: $('#defaultAccountName').val(),
+                widhrawAccountNumber: $('#defaultAccountNumber').val(),
+                widhrawIban: $('#defaultIban').val(),
+                widhrawSwiftCode: $('#defaultSwiftCode').val()
+            };
             $('#bankName').val($('#defaultBankName').val());
             $('#accountHolder').val($('#defaultAccountName').val());
             $('#accountNumber').val($('#defaultAccountNumber').val());
             $('#iban').val($('#defaultIban').val());
             $('#swiftCode').val($('#defaultSwiftCode').val());
             saveDashboardData();
-            showBootstrapAlert('bankAccountAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
+            updatePlatformBankDetails();
+            showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
+
         }
     });
 
