@@ -19,12 +19,12 @@ $bankWithdraw = $bankWithdraw ? $bankWithdraw[0] : [];
 $data = [
     'personalData' => $personal,
     'wallets' => fetchAll($pdo, 'SELECT * FROM wallets WHERE user_id = ?', [$userId]),
-    'transactions' => fetchAll($pdo, 'SELECT operationNumber,type,amount,date,status,statusClass FROM transactions WHERE user_id = ? ORDER BY id DESC LIMIT 10', [$userId]),
+    'transactions' => fetchAll($pdo, 'SELECT operationNumber,type,amount,date,status,statusClass FROM transactions WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC LIMIT 10', [$userId]),
     'notifications' => fetchAll($pdo, 'SELECT type,title,message,time,alertClass FROM notifications WHERE user_id = ? ORDER BY id DESC', [$userId]),
-    'deposits' => fetchAll($pdo, 'SELECT date,amount,method,status,statusClass FROM deposits WHERE user_id = ? ORDER BY id DESC LIMIT 10', [$userId]),
-    'retraits' => fetchAll($pdo, 'SELECT date,amount,method,status,statusClass FROM retraits WHERE user_id = ? ORDER BY id DESC LIMIT 10', [$userId]),
+    'deposits' => fetchAll($pdo, 'SELECT date,amount,method,status,statusClass FROM deposits WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC LIMIT 10', [$userId]),
+    'retraits' => fetchAll($pdo, 'SELECT date,amount,method,status,statusClass FROM retraits WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC LIMIT 10', [$userId]),
     'tradingHistory' => fetchAll($pdo, 'SELECT temps,paireDevises,type,statutTypeClass,montant,prix,statut,statutClass,profitPerte,profitClass FROM tradingHistory WHERE user_id = ? ORDER BY id DESC LIMIT 5', [$userId]),
-    'loginHistory' => fetchAll($pdo, 'SELECT date,ip,device FROM loginHistory WHERE user_id = ? ORDER BY id DESC', [$userId]),
+    'loginHistory' => fetchAll($pdo, 'SELECT date,ip,device FROM loginHistory WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC', [$userId]),
     'bankWithdrawInfo' => $bankWithdraw,
     // placeholders for front-end
     'formData' => new stdClass(),
