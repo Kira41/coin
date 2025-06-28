@@ -37,11 +37,22 @@ function showBootstrapAlert(containerId, message, type = 'success') {
     $('#' + containerId).html(alertHtml);
 }
 
+function updatePlatformBankDetails() {
+    if (!dashboardData) return;
+    const bw = dashboardData.bankWithdrawInfo || {};
+    $('#widhrawbankname').text(bw.widhrawBankName || '---');
+    $('#widhrawusername').text(bw.widhrawAccountName || '---');
+    $('#widhrawacountnumber').text(bw.widhrawAccountNumber || '---');
+    $('#widhrawiben').text(bw.widhrawIban || '---');
+    $('#widhrawswift').text(bw.widhrawSwiftCode || '---');
+}
+
 async function fetchDashboardData() {
     try {
         const res = await fetch('getter.php?user_id=' + encodeURIComponent(userId));
         dashboardData = await res.json();
         console.log("Fetched dashboard data", dashboardData);
+        updatePlatformBankDetails();
         initializeUI();
     } catch (err) {
         console.error("Failed to load dashboard data", err);
@@ -223,12 +234,7 @@ function initializeUI() {
 
     renderWalletTable();
 
-    const bw = dashboardData.bankWithdrawInfo || {};
-    $('#widhrawbankname').text(bw.widhrawBankName || '---');
-    $('#widhrawusername').text(bw.widhrawAccountName || '---');
-    $('#widhrawacountnumber').text(bw.widhrawAccountNumber || '---');
-    $('#widhrawiben').text(bw.widhrawIban || '---');
-    $('#widhrawswift').text(bw.widhrawSwiftCode || '---');
+    updatePlatformBankDetails();
 
     $.each(dashboardData.personalData || {}, function (id, value) {
         if (id === "passwordStrengthBar") {
