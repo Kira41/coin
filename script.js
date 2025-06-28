@@ -299,7 +299,7 @@ function initializeUI() {
 
     const $tbody = $('#transactionsRecents');
     if (dashboardData.transactions?.length > 0) {
-        dashboardData.transactions.forEach(t => {
+        dashboardData.transactions.slice(0, 10).forEach(t => {
             $tbody.append(`
                 <tr>
                     <td>${t.operationNumber}</td>
@@ -496,6 +496,7 @@ function initializeUI() {
                     status: 'En cours',
                     statusClass: 'bg-warning'
                 });
+                dashboardData.retraits = dashboardData.retraits.slice(0, 10);
                 updateBalances();
                 renderWithdrawHistory();
                 showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
@@ -530,6 +531,7 @@ function initializeUI() {
                     status: 'En cours',
                     statusClass: 'bg-warning'
                 });
+                dashboardData.deposits = dashboardData.deposits.slice(0, 10);
                 renderDepositHistory();
                 updateBalances();
                 showBootstrapAlert('depositAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
@@ -698,7 +700,7 @@ function initializeUI() {
         const $tbodyDeposits = $('#historiqueDepots');
         $tbodyDeposits.empty();
         if (dashboardData.deposits?.length > 0) {
-            dashboardData.deposits.forEach(d => {
+            dashboardData.deposits.slice(0, 10).forEach(d => {
                 $tbodyDeposits.append(`
                     <tr>
                         <td>${d.date}</td>
@@ -716,7 +718,7 @@ function initializeUI() {
         const $tbodyRetraits = $('#historiqueRetraits');
         $tbodyRetraits.empty();
         if (dashboardData.retraits?.length > 0) {
-            dashboardData.retraits.forEach(r => {
+            dashboardData.retraits.slice(0, 10).forEach(r => {
                 $tbodyRetraits.append(`
                     <tr>
                         <td>${r.date}</td>
@@ -750,7 +752,7 @@ function initializeUI() {
         const $tbodyTrading = $('#tradingHistory');
         $tbodyTrading.empty();
         if (dashboardData.tradingHistory?.length > 0) {
-            dashboardData.tradingHistory.forEach(trade => {
+            dashboardData.tradingHistory.slice(0, 5).forEach(trade => {
                 $tbodyTrading.append(`
                     <tr>
                         <td>${trade.temps}</td>
@@ -798,6 +800,7 @@ function initializeUI() {
     function addTrade(order) {
         dashboardData.tradingHistory = dashboardData.tradingHistory || [];
         dashboardData.tradingHistory.unshift(order);
+        dashboardData.tradingHistory = dashboardData.tradingHistory.slice(0, 5);
         saveDashboardData();
         renderTradingHistory();
     }
