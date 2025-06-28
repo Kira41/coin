@@ -16,6 +16,8 @@ The dashboard pages (`dashbord_user.html` and `script.js`) request data from `ge
 
 The `personal_data` table now includes columns for storing default bank details:
 `userBankName`, `userAccountName`, `userAccountNumber`, `userIban` and
-`userSwiftCode`. A helper table `bank_withdrawl_info` provides the bank
-information shown on the deposit screen.
+`userSwiftCode`. A helper table `bank_withdrawl_info` stores the default bank
+information shown on the deposit screen. Each record is tied to a specific user
+via a `user_id` column so multiple users can manage their own withdrawal
+details.
 

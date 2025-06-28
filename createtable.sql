@@ -49,6 +49,7 @@ CREATE TABLE retraits (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, d
 CREATE TABLE tradingHistory (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, temps TEXT, paireDevises TEXT, type TEXT, statutTypeClass TEXT, montant TEXT, prix TEXT, statut TEXT, statutClass TEXT, profitPerte TEXT, profitClass TEXT);
 CREATE TABLE loginHistory (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, date TEXT, ip TEXT, device TEXT);
 CREATE TABLE bank_withdrawl_info (
+    user_id INTEGER PRIMARY KEY,
     widhrawBankName TEXT,
     widhrawAccountName TEXT,
     widhrawAccountNumber TEXT,

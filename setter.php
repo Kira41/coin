@@ -71,6 +71,20 @@ try {
         }
     }
 
+    if (isset($data['bankWithdrawInfo']) && is_array($data['bankWithdrawInfo'])) {
+        $bw = $data['bankWithdrawInfo'];
+        $cols = ['user_id','widhrawBankName','widhrawAccountName','widhrawAccountNumber','widhrawIban','widhrawSwiftCode'];
+        $place = '(' . implode(',', array_fill(0, count($cols), '?')) . ')';
+        $pdo->prepare('DELETE FROM bank_withdrawl_info WHERE user_id = ?')->execute([$userId]);
+        $sql = 'INSERT INTO bank_withdrawl_info (' . implode(',', $cols) . ') VALUES ' . $place;
+        $stmt = $pdo->prepare($sql);
+        $values = [$userId];
+        foreach (array_slice($cols,1) as $c) {
+            $values[] = $bw[$c] ?? null;
+        }
+        $stmt->execute($values);
+    }
+
     $pdo->commit();
     header('Content-Type: application/json');
     echo json_encode(['status' => 'ok']);
