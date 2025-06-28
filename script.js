@@ -223,6 +223,13 @@ function initializeUI() {
 
     renderWalletTable();
 
+    const bw = dashboardData.bankWithdrawInfo || {};
+    $('#widhrawbankname').text(bw.widhrawBankName || '---');
+    $('#widhrawusername').text(bw.widhrawAccountName || '---');
+    $('#widhrawacountnumber').text(bw.widhrawAccountNumber || '---');
+    $('#widhrawiben').text(bw.widhrawIban || '---');
+    $('#widhrawswift').text(bw.widhrawSwiftCode || '---');
+
     $.each(dashboardData.personalData || {}, function (id, value) {
         if (id === "passwordStrengthBar") {
             const $bar = $('#' + id);
@@ -258,6 +265,18 @@ function initializeUI() {
             }
         }
     });
+
+    $('#bankName').val(dashboardData.personalData.userBankName || '');
+    $('#accountHolder').val(dashboardData.personalData.userAccountName || '');
+    $('#accountNumber').val(dashboardData.personalData.userAccountNumber || '');
+    $('#iban').val(dashboardData.personalData.userIban || '');
+    $('#swiftCode').val(dashboardData.personalData.userSwiftCode || '');
+
+    $('#defaultBankName').val(dashboardData.personalData.userBankName || '');
+    $('#defaultAccountName').val(dashboardData.personalData.userAccountName || '');
+    $('#defaultAccountNumber').val(dashboardData.personalData.userAccountNumber || '');
+    $('#defaultIban').val(dashboardData.personalData.userIban || '');
+    $('#defaultSwiftCode').val(dashboardData.personalData.userSwiftCode || '');
 
     const nameValInit = dashboardData.personalData.fullName || '';
     $('#fullNameHeader, #nameincompte').text(nameValInit);
@@ -482,6 +501,14 @@ function initializeUI() {
                 showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
                 saveDashboardData();
             }
+            if (this.id === 'bankWithdrawForm' && $('#saveBankInfo').is(':checked')) {
+                dashboardData.personalData.userBankName = $('#bankName').val();
+                dashboardData.personalData.userAccountName = $('#accountHolder').val();
+                dashboardData.personalData.userAccountNumber = $('#accountNumber').val();
+                dashboardData.personalData.userIban = $('#iban').val();
+                dashboardData.personalData.userSwiftCode = $('#swiftCode').val();
+                saveDashboardData();
+            }
         } else if (['bankDepositForm', 'cardDepositForm', 'cryptoDepositForm'].includes(this.id)) {
             const amountField = {
                 bankDepositForm: '#bankDepositAmount',
@@ -508,6 +535,14 @@ function initializeUI() {
                 showBootstrapAlert('depositAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
                 saveDashboardData();
             }
+        }
+        if (this.id === 'bankAccountForm') {
+            dashboardData.personalData.userBankName = $('#defaultBankName').val();
+            dashboardData.personalData.userAccountName = $('#defaultAccountName').val();
+            dashboardData.personalData.userAccountNumber = $('#defaultAccountNumber').val();
+            dashboardData.personalData.userIban = $('#defaultIban').val();
+            dashboardData.personalData.userSwiftCode = $('#defaultSwiftCode').val();
+            saveDashboardData();
         }
     });
 
