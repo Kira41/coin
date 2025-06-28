@@ -1,4 +1,4 @@
-INSERT INTO personal_data VALUES (1, '3,500 $', '1200 $', '800 $', '10', 'Ahmed Kouraychi', 'Vérifié', '1', 'Niveau 2', '6ce0330487c92a564b80836c30f81d5b33da46b4e0acaafa94c2211e38f1e01a', 'Fort', '90%', '0', '0', '0', '1', '0', '41kira41@gmail.com', 'Sousse, Tunisie', '+21690000000', '2025-06-11', 'ca', '', '0xABC123...', 'TRc123456...');
+INSERT INTO personal_data VALUES (1, '3,500 $', '1200 $', '800 $', '10', 'Ahmed Kouraychi', 'Vérifié', '1', 'Niveau 2', '6ce0330487c92a564b80836c30f81d5b33da46b4e0acaafa94c2211e38f1e01a', 'Fort', '90%', '0', '0', '0', '1', '0', '41kira41@gmail.com', 'Sousse, Tunisie', '+21690000000', '2025-06-11', 'ca', '', '0xABC123...', 'TRc123456...', 'Bank of Earth', 'Ahmed Kouraychi', 'ACC123456', 'IBAN123456', 'SWIFT123');
 
 INSERT INTO wallets VALUES (
     1751038645430, 1, 'btc', 'Bitcoin',
@@ -32,3 +32,4 @@ INSERT INTO loginHistory (user_id, date, ip, device) VALUES (1, '2025/06/08 18:2
 INSERT INTO loginHistory (user_id, date, ip, device) VALUES (1, '2025/06/07 09:10', '192.168.0.3', 'Safari - iOS');
 INSERT INTO loginHistory (user_id, date, ip, device) VALUES (1, '2025/06/06 23:45', '192.168.0.4', 'Edge - Windows');
 INSERT INTO loginHistory (user_id, date, ip, device) VALUES (1, '2025/06/05 08:30', '192.168.0.5', 'Chrome - macOS');
+INSERT INTO bank_withdrawl_info VALUES ('My Bank', 'Company Ltd', '987654321', 'IBAN987654', 'SWIFT987');
