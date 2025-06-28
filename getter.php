@@ -13,6 +13,8 @@ function fetchAll($pdo, $sql, $params = []) {
 
 $personal = fetchAll($pdo, 'SELECT * FROM personal_data WHERE user_id = ?', [$userId]);
 $personal = $personal ? $personal[0] : [];
+$wallets = fetchAll($pdo, 'SELECT * FROM wallets WHERE user_id = ?', [$userId]);
+$personal['wallets'] = $wallets;
 $bankWithdraw = fetchAll($pdo, 'SELECT * FROM bank_withdrawl_info WHERE user_id = ? LIMIT 1', [$userId]);
 $bankWithdraw = $bankWithdraw ? $bankWithdraw[0] : [];
 
