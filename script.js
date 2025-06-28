@@ -536,8 +536,7 @@ function initializeUI() {
                 dashboardData.personalData.userAccountName = $('#accountHolder').val();
                 dashboardData.personalData.userAccountNumber = $('#accountNumber').val();
                 dashboardData.personalData.userIban = $('#iban').val();
-                dashboardData.personalData.userSwiftCode = $('#swiftCode').val();
-
+                dashboardData.personalData.userSwiftCode = $('#swiftCode').val()
                 dashboardData.bankWithdrawInfo = {
                     widhrawBankName: $('#bankName').val(),
                     widhrawAccountName: $('#accountHolder').val(),
@@ -546,12 +545,12 @@ function initializeUI() {
                     widhrawSwiftCode: $('#swiftCode').val()
                 };
 
+
                 $('#defaultBankName').val($('#bankName').val());
                 $('#defaultAccountName').val($('#accountHolder').val());
                 $('#defaultAccountNumber').val($('#accountNumber').val());
                 $('#defaultIban').val($('#iban').val());
                 $('#defaultSwiftCode').val($('#swiftCode').val());
-
                 saveDashboardData();
                 updatePlatformBankDetails();
             }
@@ -607,6 +606,7 @@ function initializeUI() {
             saveDashboardData();
             updatePlatformBankDetails();
             showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
+
         }
     });
 
