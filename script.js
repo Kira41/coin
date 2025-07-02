@@ -81,6 +81,7 @@ $(document).ready(async function () {
 });
 
 function initializeUI() {
+    dashboardData.personalData.wallets = dashboardData.wallets || dashboardData.personalData.wallets || [];
     function updateBalances() {
         const bal = formatDollar(parseDollar(dashboardData.personalData.balance));
         $('#soldeTotal').text(bal);
@@ -232,7 +233,7 @@ function initializeUI() {
         'addWalletForm'
     ].forEach(populateForm);
 
-    renderWalletTable();
+    fetchWallets();
 
     updatePlatformBankDetails();
 
@@ -729,12 +730,23 @@ function initializeUI() {
         });
     }
 
+    async function fetchWallets() {
+        try {
+            const res = await fetch('getter.php?user_id=' + encodeURIComponent(userId));
+            const data = await res.json();
+            dashboardData.personalData.wallets = data.wallets || [];
+            renderWalletTable();
+        } catch (err) {
+            console.error('Failed to fetch wallet addresses', err);
+        }
+    }
+
     $(document).on('click', '.wallet-delete', function () {
         const id = $(this).data('id');
         if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
             dashboardData.personalData.wallets = (dashboardData.personalData.wallets || []).filter(w => w.id !== id);
             saveDashboardData();
-            renderWalletTable();
+            fetchWallets();
         }
     });
 
@@ -761,7 +773,7 @@ function initializeUI() {
         wallet.address = address;
         wallet.label = label;
         saveDashboardData();
-        renderWalletTable();
+        fetchWallets();
         $('#editWalletModal').modal('hide');
     });
 
@@ -785,7 +797,7 @@ function initializeUI() {
         dashboardData.personalData.wallets.push(wallet);
         saveForm('addWalletForm');
         saveDashboardData();
-        renderWalletTable();
+        fetchWallets();
         $('#addWalletModal').modal('hide');
         $('#walletCurrency').val('');
         populateNetworks();
