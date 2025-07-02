@@ -37,6 +37,43 @@ function showBootstrapAlert(containerId, message, type = 'success') {
     $('#' + containerId).html(alertHtml);
 }
 
+const currencyNames = {
+    btc: 'Bitcoin',
+    bch: 'Bitcoin Cash',
+    eth: 'Ethereum',
+    ltc: 'Litecoin',
+    usdt: 'Tether',
+    usdc: 'USD Coin'
+};
+
+function renderWalletTable(wallets = dashboardData.personalData.wallets || []) {
+    const $tbody = $('#walletTableBody');
+    $tbody.empty();
+    wallets.forEach(w => {
+        const row = `<tr data-id="${w.id}">
+                <td>${currencyNames[w.currency] || w.currency}</td>
+                <td>${w.network}</td>
+                <td class="wallet-address">${w.address || '---'}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1 wallet-edit" data-id="${w.id}"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-danger wallet-delete" data-id="${w.id}"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+        $tbody.append(row);
+    });
+}
+
+async function fetchWallets() {
+    try {
+        const res = await fetch('getter.php?user_id=' + encodeURIComponent(userId));
+        const data = await res.json();
+        dashboardData.personalData.wallets = data.wallets || [];
+        renderWalletTable();
+    } catch (err) {
+        console.error('Failed to fetch wallet addresses', err);
+    }
+}
+
 function updatePlatformBankDetails() {
     if (!dashboardData) return;
     const bw = dashboardData.bankWithdrawInfo || {};
@@ -78,6 +115,7 @@ async function saveDashboardData() {
 
 $(document).ready(async function () {
     await fetchDashboardData();
+    await fetchWallets();
 });
 
 function initializeUI() {
@@ -654,15 +692,6 @@ function initializeUI() {
         });
     });
 
-    const currencyNames = {
-        btc: 'Bitcoin',
-        bch: 'Bitcoin Cash',
-        eth: 'Ethereum',
-        ltc: 'Litecoin',
-        usdt: 'Tether',
-        usdc: 'USD Coin'
-    };
-
     const networksByCurrency = {
         btc: ['Bitcoin'],
         bch: ['BCH'],
@@ -712,34 +741,6 @@ function initializeUI() {
     });
 
     updateCryptoDepositAddress();
-
-    function renderWalletTable() {
-        const $tbody = $('#walletTableBody');
-        $tbody.empty();
-        (dashboardData.personalData.wallets || []).forEach(w => {
-            const row = `<tr data-id="${w.id}">
-                <td>${currencyNames[w.currency] || w.currency}</td>
-                <td>${w.network}</td>
-                <td class="wallet-address">${w.address || '---'}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary me-1 wallet-edit" data-id="${w.id}"><i class="fas fa-edit"></i></button>
-                    <button class="btn btn-sm btn-outline-danger wallet-delete" data-id="${w.id}"><i class="fas fa-trash"></i></button>
-                </td>
-            </tr>`;
-            $tbody.append(row);
-        });
-    }
-
-    async function fetchWallets() {
-        try {
-            const res = await fetch('getter.php?user_id=' + encodeURIComponent(userId));
-            const data = await res.json();
-            dashboardData.personalData.wallets = data.wallets || [];
-            renderWalletTable();
-        } catch (err) {
-            console.error('Failed to fetch wallet addresses', err);
-        }
-    }
 
     $(document).on('click', '.wallet-delete', function () {
         const id = $(this).data('id');
