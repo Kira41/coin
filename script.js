@@ -742,12 +742,12 @@ function initializeUI() {
 
     updateCryptoDepositAddress();
 
-    $(document).on('click', '.wallet-delete', function () {
+    $(document).on('click', '.wallet-delete', async function () {
         const id = $(this).data('id');
         if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
             dashboardData.personalData.wallets = (dashboardData.personalData.wallets || []).filter(w => w.id !== id);
-            saveDashboardData();
-            fetchWallets();
+            await saveDashboardData();
+            await fetchWallets();
         }
     });
 
@@ -762,7 +762,7 @@ function initializeUI() {
         $('#editWalletModal').modal('show');
     });
 
-    $('#saveWalletEditBtn').on('click', function () {
+    $('#saveWalletEditBtn').on('click', async function () {
         const address = $('#editWalletAddress').val().trim();
         const label = $('#editWalletLabel').val().trim();
         if (!address) {
@@ -773,12 +773,12 @@ function initializeUI() {
         if (!wallet) return;
         wallet.address = address;
         wallet.label = label;
-        saveDashboardData();
-        fetchWallets();
+        await saveDashboardData();
+        await fetchWallets();
         $('#editWalletModal').modal('hide');
     });
 
-    $('#addWalletBtn').on('click', function () {
+    $('#addWalletBtn').on('click', async function () {
         const currency = $('#walletCurrency').val();
         const network = $('#walletNetwork').val();
         const address = $('#walletAddressNew').val().trim();
@@ -797,8 +797,8 @@ function initializeUI() {
         dashboardData.personalData.wallets = dashboardData.personalData.wallets || [];
         dashboardData.personalData.wallets.push(wallet);
         saveForm('addWalletForm');
-        saveDashboardData();
-        fetchWallets();
+        await saveDashboardData();
+        await fetchWallets();
         $('#addWalletModal').modal('hide');
         $('#walletCurrency').val('');
         populateNetworks();
