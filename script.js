@@ -65,7 +65,7 @@ function renderWalletTable(wallets = dashboardData.personalData.wallets || []) {
 
 async function fetchWallets() {
     try {
-        const res = await fetch('getter.php?user_id=' + encodeURIComponent(userId));
+        const res = await fetch('get_wallets.php?user_id=' + encodeURIComponent(userId));
         const data = await res.json();
         dashboardData.personalData.wallets = data.wallets || [];
         renderWalletTable();
