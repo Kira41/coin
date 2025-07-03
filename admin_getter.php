@@ -19,7 +19,9 @@ if (!$admin) {
     exit;
 }
 
-$result = [];
+$result = [
+    'is_admin' => (int)$admin['is_admin'],
+];
 
 if ((int)$admin['is_admin'] === 1) {
     $stmt = $pdo->prepare('SELECT id,email,is_admin,created_by FROM admins_agents WHERE created_by = ?');
