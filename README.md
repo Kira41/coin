@@ -24,3 +24,11 @@ information shown on the deposit screen. Each record is tied to a specific user
 via a `user_id` column so multiple users can manage their own withdrawal
 details.
 
+## Wallet management
+
+Each wallet row includes edit and delete icons. Clicking the **edit** icon opens
+a modal where you can update the address or its label. The **trash** icon
+removes the wallet entirely. Edits and deletions are sent to
+`get_wallets.php`, and the wallet list refreshes immediately to show the latest
+data.
+
