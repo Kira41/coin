@@ -23,10 +23,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($action === 'edit') {
-        $stmt = $pdo->prepare('UPDATE wallets SET address = ?, label = ? WHERE id = ? AND user_id = ?');
+        $stmt = $pdo->prepare('UPDATE wallets SET address = ?, label = ?, network = ? WHERE id = ? AND user_id = ?');
         $stmt->execute([
             $data['address'] ?? '',
             $data['label'] ?? '',
+            $data['network'] ?? '',
             $id,
             $userId
         ]);
