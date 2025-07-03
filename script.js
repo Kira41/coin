@@ -745,8 +745,11 @@ function initializeUI() {
     $(document).on('click', '.wallet-delete', async function () {
         const id = $(this).data('id');
         if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
-            dashboardData.personalData.wallets = (dashboardData.personalData.wallets || []).filter(w => w.id !== id);
-            await saveDashboardData();
+            await fetch('get_wallets.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'delete', id, user_id: userId })
+            });
             await fetchWallets();
         }
     });
@@ -769,11 +772,11 @@ function initializeUI() {
             alert('Veuillez saisir une adresse.');
             return;
         }
-        const wallet = (dashboardData.personalData.wallets || []).find(w => w.id === currentEditWalletId);
-        if (!wallet) return;
-        wallet.address = address;
-        wallet.label = label;
-        await saveDashboardData();
+        await fetch('get_wallets.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'edit', id: currentEditWalletId, address, label, user_id: userId })
+        });
         await fetchWallets();
         $('#editWalletModal').modal('hide');
     });
