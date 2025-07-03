@@ -806,7 +806,16 @@ function initializeUI() {
             if (!res.ok || result.status !== 'ok') {
                 throw new Error(result.message || 'Erreur lors de la mise \u00e0 jour');
             }
-            await fetchWallets();
+            const wallets = dashboardData.personalData.wallets || [];
+            const wallet = wallets.find(w => w.id === currentEditWalletId);
+            if (wallet) {
+                wallet.network = network;
+                wallet.address = address;
+                wallet.label = label;
+            }
+            const $row = $('#walletTableBody').find(`tr[data-id="${currentEditWalletId}"]`);
+            $row.children().eq(1).text(network);
+            $row.find('.wallet-address').text(address);
             $('#editWalletModal').modal('hide');
         } catch (err) {
             alert(err.message || 'Erreur lors de la mise \u00e0 jour');
