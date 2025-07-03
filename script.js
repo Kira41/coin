@@ -776,22 +776,32 @@ function initializeUI() {
 
     $('#editWalletModal').on('hidden.bs.modal', function () {
         currentEditWalletId = null;
+        $('#editWalletAlert').empty();
     });
 
     $('#saveWalletEditBtn').on('click', async function () {
         const address = $('#editWalletAddress').val().trim();
         const label = $('#editWalletLabel').val().trim();
         if (!address) {
-            alert('Veuillez saisir une adresse.');
+            showBootstrapAlert('editWalletAlert', 'Veuillez saisir une adresse.', 'danger');
             return;
         }
-        await fetch('get_wallets.php', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ action: 'edit', id: currentEditWalletId, address, label, user_id: userId })
-        });
-        await fetchWallets();
-        $('#editWalletModal').modal('hide');
+        try {
+            const res = await fetch('get_wallets.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'edit', id: currentEditWalletId, address, label, user_id: userId })
+            });
+            const result = await res.json();
+            if (!res.ok || result.status !== 'ok') {
+                throw new Error(result.message || 'Erreur lors de la mise \u00e0 jour');
+            }
+            await fetchWallets();
+            showBootstrapAlert('editWalletAlert', 'Adresse mise \u00e0 jour avec succ\u00e8s.', 'success');
+            setTimeout(() => $('#editWalletModal').modal('hide'), 1000);
+        } catch (err) {
+            showBootstrapAlert('editWalletAlert', err.message || 'Erreur lors de la mise \u00e0 jour', 'danger');
+        }
     });
 
     $('#addWalletBtn').on('click', async function () {
