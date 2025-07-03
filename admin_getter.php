@@ -3,12 +3,7 @@ $dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
 $pdo = new PDO($dsn, 'root', '');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$adminId = isset($_GET['admin_id']) ? (int)$_GET['admin_id'] : 0;
-if (!$adminId) {
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Missing admin_id']);
-    exit;
-}
+$adminId = isset($_GET['admin_id']) ? (int)$_GET['admin_id'] : 1; // default admin
 
 $stmt = $pdo->prepare('SELECT is_admin FROM admins_agents WHERE id = ?');
 $stmt->execute([$adminId]);

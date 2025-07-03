@@ -39,3 +39,11 @@ removes the wallet entirely. Edits and deletions are sent to
 `get_wallets.php`, and the wallet list refreshes immediately to show the latest
 data.
 
+## Admin dashboard
+
+`insertdata.sql` seeds a default administrator account (`admin@example.com`) with
+ID `1`. Opening `dashboard_admin.html` will automatically display this admin's
+data. `admin_getter.php` now defaults to ID `1` when no `admin_id` parameter is
+supplied, so you can browse the admin interface without logging in. Use the
+"Créer Agent" form to add new agents under the default admin.
+
