@@ -773,8 +773,8 @@ function initializeUI() {
 
     let currentEditWalletId = null;
     $(document).on('click', '.wallet-edit', function () {
-        const id = $(this).data('id');
-        const wallet = (dashboardData.personalData.wallets || []).find(w => w.id === id);
+        const id = Number($(this).data('id'));
+        const wallet = (dashboardData.personalData.wallets || []).find(w => Number(w.id) === id);
         if (!wallet) return;
         currentEditWalletId = id;
         populateEditNetworks(wallet.currency);
@@ -807,7 +807,7 @@ function initializeUI() {
                 throw new Error(result.message || 'Erreur lors de la mise \u00e0 jour');
             }
             const wallets = dashboardData.personalData.wallets || [];
-            const wallet = wallets.find(w => w.id === currentEditWalletId);
+            const wallet = wallets.find(w => Number(w.id) === Number(currentEditWalletId));
             if (wallet) {
                 wallet.network = network;
                 wallet.address = address;
