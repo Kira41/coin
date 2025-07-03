@@ -34,7 +34,7 @@ CREATE TABLE personal_data (
 
 
 CREATE TABLE wallets (
-    id INTEGER,
+    id BIGINT PRIMARY KEY,
     user_id INTEGER,
     currency TEXT,
     network TEXT,

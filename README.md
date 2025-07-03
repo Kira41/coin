@@ -13,7 +13,9 @@ This project uses small PHP helpers (`getter.php` and `setter.php`) to read and 
 3. The PHP scripts connect to `coin_db` on `localhost` using the `root` user with an empty password. Update the connection settings in `getter.php` and `setter.php` if your environment differs.
 
 The dashboard pages (`dashbord_user.html` and `script.js`) request data from `getter.php` and send updates to `setter.php`.
-`script.js` now fetches wallet addresses from `get_wallets.php`, which returns `SELECT * FROM wallets WHERE user_id = ?` in JSON.
+`script.js` now fetches wallet addresses from `get_wallets.php`, which returns `SELECT * FROM wallets WHERE user_id = ?` in JSON. The `wallets` table stores
+crypto addresses with a `BIGINT` `id` so each entry keeps the unique identifier
+generated in JavaScript with `Date.now()`.
 
 The `personal_data` table now includes columns for storing default bank details:
 `userBankName`, `userAccountName`, `userAccountNumber`, `userIban` and
