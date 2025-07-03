@@ -268,65 +268,8 @@
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>#001</td>
-                                                <td>Marie Dupont</td>
-                                                <td>marie.dupont@email.com</td>
-                                                <td><span class="badge bg-primary">Utilisateur</span></td>
-                                                <td><span class="badge bg-success">Actif</span></td>
-                                                <td>15/01/2025</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary me-1">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-warning me-1">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-danger">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>#002</td>
-                                                <td>Jean Martin</td>
-                                                <td>jean.martin@email.com</td>
-                                                <td><span class="badge bg-danger">Admin</span></td>
-                                                <td><span class="badge bg-success">Actif</span></td>
-                                                <td>12/01/2025</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary me-1">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-warning me-1">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-danger">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>#003</td>
-                                                <td>Sophie Bernard</td>
-                                                <td>sophie.bernard@email.com</td>
-                                                <td><span class="badge bg-primary">Utilisateur</span></td>
-                                                <td><span class="badge bg-warning">Suspendu</span></td>
-                                                <td>10/01/2025</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary me-1">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-warning me-1">
-                                                        <i class="bi bi-pencil"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-danger">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
+                                        <tbody id="usersTableBody">
+</tbody>
                                     </table>
                                 </div>
                             </div>
@@ -683,37 +626,106 @@
                     document.getElementById(targetSection + '-section').classList.add('active');
                 });
             });
+            loadAdminData();
         });
         
+        const ADMIN_ID = 1;
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/'/g, '&#39;')
+                .replace(/"/g, '&quot;');
+        }
+
+        async function loadAdminData() {
+            try {
+                const res = await fetch('admin_getter.php?admin_id=' + ADMIN_ID);
+                const data = await res.json();
+                const tbody = document.getElementById('usersTableBody');
+                tbody.innerHTML = '';
+                const users = data.users || [];
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Aucune donnée disponible</td></tr>';
+                    return;
+                }
+                users.forEach(u => {
+                    const row = `<tr>
+                        <td>${escapeHtml(u.user_id)}</td>
+                        <td>${escapeHtml(u.fullName || '')}</td>
+                        <td>${escapeHtml(u.emailaddress || '')}</td>
+                        <td><span class="badge bg-primary">Utilisateur</span></td>
+                        <td><span class="badge bg-success">Actif</span></td>
+                        <td></td>
+                        <td></td>
+                    </tr>`;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            } catch (err) {
+                console.error('Failed to load admin data', err);
+            }
+        }
+
         // Create user functionality
-        function createUser() {
+        async function createUser() {
             const form = document.getElementById('createUserForm');
-            const formData = new FormData(form);
-            
-            // Basic validation
+
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-            
             if (password !== confirmPassword) {
                 alert('Les mots de passe ne correspondent pas!');
                 return;
             }
-            
-            // Simulate user creation
-            alert('Utilisateur créé avec succès!');
-            
-            // Reset form and close modal
-            form.reset();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('createUserModal'));
-            modal.hide();
-            
-            // You would typically send this data to your backend here
-            console.log('Création d\'utilisateur:', {
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                email: document.getElementById('email').value,
-                role: document.getElementById('role').value
-            });
+
+            const role = document.getElementById('role').value;
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            let payload;
+            if (role === 'user') {
+                payload = {
+                    action: 'create_user',
+                    user: {
+                        user_id: Date.now(),
+                        fullName: firstName + ' ' + lastName,
+                        emailaddress: email,
+                        password: password,
+                        linked_to_id: ADMIN_ID
+                    }
+                };
+            } else {
+                payload = {
+                    action: 'create_admin',
+                    email: email,
+                    password: password,
+                    is_admin: 1,
+                    created_by: ADMIN_ID
+                };
+            }
+
+            try {
+                const res = await fetch('admin_setter.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await res.json();
+                if (result.status === 'ok') {
+                    alert('Utilisateur créé avec succès!');
+                    form.reset();
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('createUserModal'));
+                    modal.hide();
+                    loadAdminData();
+                } else {
+                    alert('Erreur lors de la création');
+                }
+            } catch (err) {
+                console.error('Creation failed', err);
+                alert('Erreur lors de la création');
+            }
         }
         
         // Add some interactive features
