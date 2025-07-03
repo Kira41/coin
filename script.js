@@ -774,6 +774,10 @@ function initializeUI() {
         $('#editWalletModal').modal('show');
     });
 
+    $('#editWalletModal').on('hidden.bs.modal', function () {
+        currentEditWalletId = null;
+    });
+
     $('#saveWalletEditBtn').on('click', async function () {
         const address = $('#editWalletAddress').val().trim();
         const label = $('#editWalletLabel').val().trim();
