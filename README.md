@@ -28,7 +28,8 @@ An additional table `admins_agents` stores admin and agent accounts. Each row
 contains an email, hashed password and an `is_admin` flag, plus a `created_by`
 field referencing the admin who created the record. The `personal_data` table
 now includes a `linked_to_id` column storing the `admins_agents.id` of the
-creator.
+creator. When inserting or updating these records via `admin_setter.php`, make
+sure the password you send is already hashed using PHP's `password_hash()`.
 
 ## Wallet management
 
