@@ -29,7 +29,8 @@ CREATE TABLE personal_data (
     userAccountName TEXT,
     userAccountNumber TEXT,
     userIban TEXT,
-    userSwiftCode TEXT
+    userSwiftCode TEXT,
+    linked_to_id INTEGER
 );
 
 
@@ -55,4 +56,12 @@ CREATE TABLE bank_withdrawl_info (
     widhrawAccountNumber TEXT,
     widhrawIban TEXT,
     widhrawSwiftCode TEXT
+);
+
+CREATE TABLE admins_agents (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    email TEXT NOT NULL,
+    password TEXT NOT NULL,
+    is_admin TINYINT(1) NOT NULL,
+    created_by INTEGER NULL
 );

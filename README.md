@@ -24,6 +24,12 @@ information shown on the deposit screen. Each record is tied to a specific user
 via a `user_id` column so multiple users can manage their own withdrawal
 details.
 
+An additional table `admins_agents` stores admin and agent accounts. Each row
+contains an email, hashed password and an `is_admin` flag, plus a `created_by`
+field referencing the admin who created the record. The `personal_data` table
+now includes a `linked_to_id` column storing the `admins_agents.id` of the
+creator.
+
 ## Wallet management
 
 Each wallet row includes edit and delete icons. Clicking the **edit** icon opens
