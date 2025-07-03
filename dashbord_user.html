@@ -1217,11 +1217,16 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
       </div>
       <div class="modal-body">
-        <div id="editWalletAlert"></div>
         <form id="editWalletForm">
           <div class="mb-3">
             <label class="form-label" for="editWalletAddress">Adresse du portefeuille</label>
             <input type="text" class="form-control" id="editWalletAddress" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="editWalletNetwork">Réseau</label>
+            <select class="form-select" id="editWalletNetwork" required>
+              <option value="">-- Choisissez le réseau --</option>
+            </select>
           </div>
           <div class="mb-3">
             <label class="form-label" for="editWalletLabel">Nom du portefeuille (optionnel)</label>

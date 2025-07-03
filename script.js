@@ -719,6 +719,14 @@ function initializeUI() {
         });
     }
 
+    function populateEditNetworks(currency) {
+        const $net = $('#editWalletNetwork');
+        $net.empty().append('<option value="">-- Choisissez le réseau --</option>');
+        (networksByCurrency[currency] || []).forEach(n => {
+            $net.append(`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`);
+        });
+    }
+
     $('#walletCurrency').on('change', populateNetworks);
 
     function populateCryptoNetwork() {
@@ -769,6 +777,8 @@ function initializeUI() {
         const wallet = (dashboardData.personalData.wallets || []).find(w => w.id === id);
         if (!wallet) return;
         currentEditWalletId = id;
+        populateEditNetworks(wallet.currency);
+        $('#editWalletNetwork').val(wallet.network || '');
         $('#editWalletAddress').val(wallet.address || '');
         $('#editWalletLabel').val(wallet.label || '');
         $('#editWalletModal').modal('show');
@@ -776,31 +786,30 @@ function initializeUI() {
 
     $('#editWalletModal').on('hidden.bs.modal', function () {
         currentEditWalletId = null;
-        $('#editWalletAlert').empty();
     });
 
     $('#saveWalletEditBtn').on('click', async function () {
         const address = $('#editWalletAddress').val().trim();
+        const network = $('#editWalletNetwork').val();
         const label = $('#editWalletLabel').val().trim();
-        if (!address) {
-            showBootstrapAlert('editWalletAlert', 'Veuillez saisir une adresse.', 'danger');
+        if (!address || !network) {
+            alert('Veuillez remplir tous les champs requis.');
             return;
         }
         try {
             const res = await fetch('get_wallets.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'edit', id: currentEditWalletId, address, label, user_id: userId })
+                body: JSON.stringify({ action: 'edit', id: currentEditWalletId, address, label, network, user_id: userId })
             });
             const result = await res.json();
             if (!res.ok || result.status !== 'ok') {
                 throw new Error(result.message || 'Erreur lors de la mise \u00e0 jour');
             }
             await fetchWallets();
-            showBootstrapAlert('editWalletAlert', 'Adresse mise \u00e0 jour avec succ\u00e8s.', 'success');
-            setTimeout(() => $('#editWalletModal').modal('hide'), 1000);
+            $('#editWalletModal').modal('hide');
         } catch (err) {
-            showBootstrapAlert('editWalletAlert', err.message || 'Erreur lors de la mise \u00e0 jour', 'danger');
+            alert(err.message || 'Erreur lors de la mise \u00e0 jour');
         }
     });
 
