@@ -9,4 +9,4 @@ $stmt->execute([$userId]);
 $wallets = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 header('Content-Type: application/json');
-echo json_encode($wallets);
+echo json_encode(['wallets' => $wallets]);
