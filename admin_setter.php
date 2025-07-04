@@ -66,8 +66,23 @@ try {
         if (!$userId) {
             throw new Exception('Missing user_id');
         }
-        $pdo->prepare('DELETE FROM personal_data WHERE user_id = ?')->execute([$userId]);
-        echo json_encode(['status' => 'ok']);
+
+        $pdo->beginTransaction();
+        try {
+            $tables = [
+                'wallets', 'transactions', 'notifications', 'deposits',
+                'retraits', 'tradingHistory', 'loginHistory',
+                'bank_withdrawl_info', 'personal_data'
+            ];
+            foreach ($tables as $table) {
+                $pdo->prepare("DELETE FROM $table WHERE user_id = ?")->execute([$userId]);
+            }
+            $pdo->commit();
+            echo json_encode(['status' => 'ok']);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
     } else {
         throw new Exception('Invalid action');
     }
