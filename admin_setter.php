@@ -11,6 +11,16 @@ if (!is_array($data)) {
     exit;
 }
 
+$allowedUserCols = [
+    'user_id','balance','totalDepots','totalRetraits','nbTransactions',
+    'fullName','compteverifie','compteverifie01','niveauavance','passwordHash',
+    'passwordStrength','passwordStrengthBar','emailNotifications','smsNotifications',
+    'loginAlerts','transactionAlerts','twoFactorAuth','emailaddress','address',
+    'phone','dob','nationality','created_at','btcAddress','ethAddress','usdtAddress',
+    'userBankName','userAccountName','userAccountNumber','userIban','userSwiftCode',
+    'linked_to_id'
+];
+
 $action = $data['action'] ?? '';
 
 try {
@@ -37,6 +47,8 @@ try {
         if (!isset($user['created_at']) || $user['created_at'] === '') {
             $user['created_at'] = date('Y-m-d');
         }
+
+        $user = array_intersect_key($user, array_flip($allowedUserCols));
         $cols = array_keys($user);
         $place = implode(',', array_fill(0, count($cols), '?'));
         $sql = 'INSERT INTO personal_data (' . implode(',', $cols) . ') VALUES (' . $place . ')';
@@ -50,6 +62,7 @@ try {
         }
         $userId = (int)$user['user_id'];
         unset($user['user_id']);
+        $user = array_intersect_key($user, array_flip($allowedUserCols));
         $cols = array_keys($user);
         if (!$cols) {
             throw new Exception('No fields to update');
