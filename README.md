@@ -30,6 +30,8 @@ field referencing the admin who created the record. The `personal_data` table
 now includes a `linked_to_id` column storing the `admins_agents.id` of the
 creator. When inserting or updating these records via `admin_setter.php`, make
 sure the password you send is already hashed using PHP's `password_hash()`.
+Each `email` in `admins_agents` must be unique, enforced by a `UNIQUE(email)`
+constraint in the schema.
 
 ## Wallet management
 
