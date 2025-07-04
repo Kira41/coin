@@ -64,5 +64,6 @@ CREATE TABLE admins_agents (
     email TEXT NOT NULL,
     password TEXT NOT NULL,
     is_admin TINYINT(1) NOT NULL,
-    created_by INTEGER NULL
+    created_by INTEGER NULL,
+    UNIQUE(email)
 );
