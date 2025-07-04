@@ -44,8 +44,10 @@ data.
 ## Admin dashboard
 
 `insertdata.sql` seeds a default administrator account (`admin@example.com`) with
-ID `1`. Opening `dashboard_admin.html` will automatically display this admin's
-data. `admin_getter.php` now defaults to ID `1` when no `admin_id` parameter is
-supplied, so you can browse the admin interface without logging in. Use the
-"Créer Agent" form to add new agents under the default admin.
+ID `1`. To load data for this account you now must be authenticated. The
+`admin_getter.php` endpoint looks for a session variable named `admin_id` or an
+`Authorization: Bearer <id>` header identifying the admin. If neither is
+present, the request is rejected with `401 Unauthorized`. Once authenticated,
+`dashboard_admin.html` will display the admin's agents and associated users.
+Use the "Créer Agent" form to add new agents under the logged‑in admin.
 

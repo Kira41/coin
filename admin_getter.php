@@ -3,7 +3,21 @@ $dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
 $pdo = new PDO($dsn, 'root', '');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-$adminId = isset($_GET['admin_id']) ? (int)$_GET['admin_id'] : 1; // default admin
+$adminId = null;
+
+session_start();
+if (isset($_SESSION['admin_id'])) {
+    $adminId = (int)$_SESSION['admin_id'];
+} elseif (!empty($_SERVER['HTTP_AUTHORIZATION']) &&
+          preg_match('/Bearer\s+(\d+)/i', $_SERVER['HTTP_AUTHORIZATION'], $m)) {
+    $adminId = (int)$m[1];
+}
+
+if (!$adminId) {
+    http_response_code(401);
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+    exit;
+}
 
 $stmt = $pdo->prepare('SELECT is_admin FROM admins_agents WHERE id = ?');
 $stmt->execute([$adminId]);
