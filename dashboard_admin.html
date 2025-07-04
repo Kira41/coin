@@ -610,6 +610,13 @@
                                 <input type="password" class="form-control" id="agentConfirm" required>
                             </div>
                         </div>
+                        <div class="mb-3" id="agentRoleContainer" style="display: none;">
+                            <label for="agentRole" class="form-label">Type de Compte</label>
+                            <select class="form-select" id="agentRole">
+                                <option value="0">Agent</option>
+                                <option value="1">Administrateur</option>
+                            </select>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -726,6 +733,8 @@
                 document.getElementById('agentsNavItem').style.display = IS_ADMIN ? 'block' : 'none';
                 const quickBtn = document.getElementById('createAgentQuickBtn');
                 if (quickBtn) quickBtn.style.display = IS_ADMIN ? 'block' : 'none';
+                const roleContainer = document.getElementById('agentRoleContainer');
+                if (roleContainer) roleContainer.style.display = IS_ADMIN ? 'block' : 'none';
 
                 const tbody = document.getElementById('usersTableBody');
                 tbody.innerHTML = '';
@@ -837,11 +846,13 @@
                 alert('Les mots de passe ne correspondent pas!');
                 return;
             }
+            const roleSelect = document.getElementById('agentRole');
+            const isAdminVal = roleSelect ? parseInt(roleSelect.value || '0') : 0;
             const payload = {
                 action: 'create_admin',
                 email: email,
                 password: pass,
-                is_admin: 0,
+                is_admin: isAdminVal,
                 created_by: ADMIN_ID
             };
             try {
