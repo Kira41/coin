@@ -61,6 +61,41 @@ try {
         $values[] = $userId;
         $stmt->execute($values);
         echo json_encode(['status' => 'ok']);
+    } elseif ($action === 'update_admin') {
+        $id = isset($data['id']) ? (int)$data['id'] : 0;
+        if (!$id) {
+            throw new Exception('Missing id');
+        }
+        $fields = [];
+        $values = [];
+        if (isset($data['email'])) {
+            $fields[] = 'email = ?';
+            $values[] = $data['email'];
+        }
+        if (isset($data['password']) && $data['password'] !== '') {
+            $fields[] = 'password = ?';
+            $values[] = password_hash($data['password'], PASSWORD_DEFAULT);
+        }
+        if (isset($data['is_admin'])) {
+            $fields[] = 'is_admin = ?';
+            $values[] = (int)$data['is_admin'];
+        }
+        if (!$fields) {
+            throw new Exception('No fields to update');
+        }
+        $values[] = $id;
+        $sql = 'UPDATE admins_agents SET ' . implode(',', $fields) . ' WHERE id = ?';
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($values);
+        echo json_encode(['status' => 'ok']);
+    } elseif ($action === 'delete_admin') {
+        $id = isset($data['id']) ? (int)$data['id'] : 0;
+        if (!$id) {
+            throw new Exception('Missing id');
+        }
+        $stmt = $pdo->prepare('DELETE FROM admins_agents WHERE id = ?');
+        $stmt->execute([$id]);
+        echo json_encode(['status' => 'ok']);
     } elseif ($action === 'delete_user') {
         $userId = isset($data['user_id']) ? (int)$data['user_id'] : 0;
         if (!$userId) {

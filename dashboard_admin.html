@@ -330,6 +330,7 @@
                                                 <th>ID</th>
                                                 <th>Email</th>
                                                 <th>Rôle</th>
+                                                <th>Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody id="agentsTableBody"></tbody>
@@ -627,6 +628,38 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Agent Modal -->
+    <div class="modal fade" id="editAgentModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier Agent</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editAgentForm">
+                        <input type="hidden" id="editAgentId">
+                        <div class="mb-3">
+                            <label for="editAgentEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editAgentEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAgentRole" class="form-label">Type de Compte</label>
+                            <select class="form-select" id="editAgentRole">
+                                <option value="0">Agent</option>
+                                <option value="1">Administrateur</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="saveEditAgent">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <!-- View User Modal -->
     <div class="modal fade" id="viewUserModal" tabindex="-1">
@@ -830,14 +863,22 @@
                 if (agentsBody) {
                     agentsBody.innerHTML = '';
                     const agents = data.agents || [];
+                    window.AGENTS = agents;
                     if (agents.length === 0) {
-                        agentsBody.innerHTML = '<tr><td colspan="3" class="text-center">Aucune donnée disponible</td></tr>';
+                        agentsBody.innerHTML = '<tr><td colspan="4" class="text-center">Aucune donnée disponible</td></tr>';
                     } else {
                         agents.forEach(a => {
-                            const row = `<tr>
+                            const roleBadge = parseInt(a.is_admin) === 1 ?
+                                '<span class="badge bg-primary">Admin</span>' :
+                                '<span class="badge bg-secondary">Agent</span>';
+                            const row = `<tr data-id="${escapeHtml(a.id)}">
                                 <td>${escapeHtml(a.id)}</td>
                                 <td>${escapeHtml(a.email)}</td>
-                                <td><span class="badge bg-secondary">Agent</span></td>
+                                <td>${roleBadge}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary me-1 agent-edit" data-id="${escapeHtml(a.id)}"><i class="fas fa-edit"></i></button>
+                                    <button class="btn btn-sm btn-outline-danger agent-delete" data-id="${escapeHtml(a.id)}"><i class="fas fa-trash"></i></button>
+                                </td>
                             </tr>`;
                             agentsBody.insertAdjacentHTML('beforeend', row);
                         });
@@ -1029,6 +1070,53 @@
             const result = await res.json();
             if (result.status === 'ok') {
                 bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
+                loadAdminData();
+            } else {
+                alert('Erreur lors de la mise à jour');
+            }
+        });
+
+        // Agent table actions
+        const agentsTable = document.getElementById('agentsTableBody');
+        if (agentsTable) {
+            agentsTable.addEventListener('click', async function(e) {
+                const editBtn = e.target.closest('.agent-edit');
+                const delBtn = e.target.closest('.agent-delete');
+                if (editBtn) {
+                    const id = editBtn.getAttribute('data-id');
+                    const agent = (window.AGENTS || []).find(a => String(a.id) === String(id));
+                    if (!agent) return;
+                    document.getElementById('editAgentId').value = agent.id;
+                    document.getElementById('editAgentEmail').value = agent.email || '';
+                    document.getElementById('editAgentRole').value = agent.is_admin || '0';
+                    new bootstrap.Modal(document.getElementById('editAgentModal')).show();
+                } else if (delBtn) {
+                    const id = delBtn.getAttribute('data-id');
+                    if (confirm('Supprimer cet agent ?')) {
+                        await fetch('admin_setter.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'delete_admin', id: id })
+                        });
+                        loadAdminData();
+                    }
+                }
+            });
+        }
+
+        document.getElementById('saveEditAgent').addEventListener('click', async function() {
+            const id = document.getElementById('editAgentId').value;
+            const email = document.getElementById('editAgentEmail').value.trim();
+            const role = document.getElementById('editAgentRole').value;
+            const payload = { action: 'update_admin', id: id, email: email, is_admin: parseInt(role) };
+            const res = await fetch('admin_setter.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.status === 'ok') {
+                bootstrap.Modal.getInstance(document.getElementById('editAgentModal')).hide();
                 loadAdminData();
             } else {
                 alert('Erreur lors de la mise à jour');
