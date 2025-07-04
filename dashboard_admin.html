@@ -142,7 +142,7 @@
                                 <div class="card stats-card">
                                     <div class="card-body text-center">
                                         <i class="bi bi-people fs-1 mb-2"></i>
-                                        <h3 class="mb-1">1,247</h3>
+                                        <h3 id="statTotalUsers" class="mb-1"></h3>
                                         <p class="mb-0">Utilisateurs Total</p>
                                     </div>
                                 </div>
@@ -151,8 +151,8 @@
                                 <div class="card stats-card">
                                     <div class="card-body text-center">
                                         <i class="bi bi-credit-card fs-1 mb-2"></i>
-                                        <h3 class="mb-1">€45,892</h3>
-                                        <p class="mb-0">Transactions Aujourd'hui</p>
+                                        <h3 id="statTotalDeposits" class="mb-1"></h3>
+                                        <p class="mb-0">Total Dépôts</p>
                                     </div>
                                 </div>
                             </div>
@@ -169,7 +169,7 @@
                                 <div class="card stats-card">
                                     <div class="card-body text-center">
                                         <i class="bi bi-check-circle fs-1 mb-2"></i>
-                                        <h3 class="mb-1">98.5%</h3>
+                                        <h3 id="statSuccessRate" class="mb-1"></h3>
                                         <p class="mb-0">Taux de Réussite</p>
                                     </div>
                                 </div>
@@ -828,6 +828,14 @@
                 const res = await fetch('admin_getter.php?admin_id=' + ADMIN_ID);
                 const data = await res.json();
                 IS_ADMIN = parseInt(data.is_admin || 0);
+
+                if (data.stats) {
+                    document.getElementById('statTotalUsers').textContent = data.stats.total_users;
+                    document.getElementById('statTotalDeposits').textContent =
+                        Number(data.stats.total_deposits).toLocaleString('en-US', {minimumFractionDigits: 2}) + ' $';
+                    document.getElementById('statSuccessRate').textContent =
+                        (data.stats.success_rate || 0) + '%';
+                }
 
                 document.getElementById('agentsNavItem').style.display = IS_ADMIN ? 'block' : 'none';
                 const quickBtn = document.getElementById('createAgentQuickBtn');
