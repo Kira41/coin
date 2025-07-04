@@ -749,8 +749,11 @@
                             <td>${escapeHtml(u.emailaddress || '')}</td>
                             <td><span class="badge bg-primary">Utilisateur</span></td>
                             <td><span class="badge bg-success">Actif</span></td>
-                            <td></td>
-                            <td></td>
+                            <td>${escapeHtml(u.created_at || '')}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-primary me-1 user-edit" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-edit"></i></button>
+                                <button class="btn btn-sm btn-outline-danger user-delete" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-trash"></i></button>
+                            </td>
                         </tr>`;
                         tbody.insertAdjacentHTML('beforeend', row);
                     });
