@@ -42,5 +42,29 @@ $stmt = $pdo->prepare('SELECT * FROM personal_data WHERE linked_to_id = ?');
 $stmt->execute([$adminId]);
 $result['users'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Compute statistics for the admin's users
+$userIds = array_column($result['users'], 'user_id');
+$totalUsers = count($userIds);
+$sumDeposits = 0;
+$successUsers = [];
+if ($userIds) {
+    $placeholders = implode(',', array_fill(0, count($userIds), '?'));
+    $sql = "SELECT user_id, amount FROM deposits WHERE status='complet' AND user_id IN ($placeholders)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($userIds);
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+        $amount = preg_replace('/[^0-9.,-]/', '', $row['amount']);
+        $amount = str_replace(',', '', $amount);
+        $sumDeposits += (float)$amount;
+        $successUsers[$row['user_id']] = true;
+    }
+}
+$successRate = $totalUsers ? round(count($successUsers) / $totalUsers * 100, 2) : 0;
+$result['stats'] = [
+    'total_users' => $totalUsers,
+    'total_deposits' => $sumDeposits,
+    'success_rate' => $successRate,
+];
+
 header('Content-Type: application/json');
 echo json_encode($result);
