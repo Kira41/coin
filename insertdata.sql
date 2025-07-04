@@ -1,7 +1,18 @@
 INSERT INTO admins_agents (email, password, is_admin, created_by)
 VALUES ('admin@example.com', '$2b$12$DujgN6sRcXHjyuXJkcTmgedBXpP9jwonqolpXmLOn2Z39RQS59EJa', 1, NULL);
 
-INSERT INTO personal_data VALUES (1, '3,500 $', '1200 $', '800 $', '10', 'Ahmed Kouraychi', 'Vérifié', '1', 'Niveau 2', 'c1de8b176818ec85532879c60030aedd', 'Fort', '90%', '0', '0', '0', '1', '0', '41kira41@gmail.com', 'Sousse, Tunisie', '+21690000000', '2025-06-11', 'ca', '2025-01-01', '0xABC123...', 'TRc123456...', 'Bank of Earth', 'Ahmed Kouraychi', 'ACC123456', 'IBAN123456', 'SWIFT123', 1);
+INSERT INTO personal_data VALUES (
+1, '3,500 $', '1200 $', '800 $', '10', 
+'Ahmed Kouraychi', 'Vérifié', '1', 'Niveau 2', 
+'c1de8b176818ec85532879c60030aedd', 'Fort', '90%', 
+'0', '0', '0', '1', '0', 
+'41kira41@gmail.com', 'Sousse, Tunisie', '+21690000000', 
+'2025-06-11', 'ca', '2025-01-01', 
+'0xABC123...', 'TRc123456...', 'USDT123...', 
+'Bank of Earth', 'Ahmed Kouraychi', 
+'ACC123456', 'IBAN123456', 'SWIFT123', 1
+);
+
 
 INSERT INTO wallets VALUES (
     1751038645430, 1, 'btc', 'Bitcoin',
