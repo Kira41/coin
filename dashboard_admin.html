@@ -642,6 +642,7 @@
                     <div class="progress mb-3">
                         <div class="progress-bar" id="viewKycBar" role="progressbar" style="width:0%">0%</div>
                     </div>
+                    <p><strong>KYC Status:</strong> <span id="viewKycLabel">pending</span></p>
                     <h6 class="mt-3">Dépôts récents</h6>
                     <table class="table table-sm">
                         <thead>
@@ -958,18 +959,15 @@
                 document.getElementById('viewFullName').textContent = pd.fullName || '';
                 document.getElementById('viewEmail').textContent = pd.emailaddress || '';
                 document.getElementById('viewCreated').textContent = pd.created_at || '';
-                const kyc = data.defaultKYCStatus || {};
-                let completed = 0, inProg = false;
-                Object.keys(kyc).forEach(k => {
-                    const v = typeof kyc[k] === 'object' ? String(kyc[k].status) : String(kyc[k]);
-                    if (v === '1') completed++; else if (v === '2') inProg = true;
-                });
-                const pct = Math.round((completed / Object.keys(kyc).length) * 100);
+                const steps = Object.values(data.defaultKYCStatus || {});
+                const completed = steps.filter(s => String(s.status) === '1').length;
+                const pct = Math.round((completed / steps.length) * 100);
                 const bar = document.getElementById('viewKycBar');
                 bar.style.width = pct + '%';
                 bar.textContent = pct + '%';
-                bar.classList.remove('bg-success','bg-warning','bg-danger');
-                bar.classList.add(pct===100?'bg-success':inProg?'bg-warning':'bg-danger');
+                bar.classList.remove('bg-success','bg-warning');
+                bar.classList.add(pct === 100 ? 'bg-success' : 'bg-warning');
+                document.getElementById('viewKycLabel').textContent = pct === 100 ? 'completed' : 'pending';
                 const depBody = document.getElementById('viewDeposits');
                 depBody.innerHTML = '';
                 (data.deposits || []).slice(0,10).forEach(d => {

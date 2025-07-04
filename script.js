@@ -98,6 +98,18 @@ async function fetchDashboardData() {
         const res = await fetch('getter.php?user_id=' + encodeURIComponent(userId));
         dashboardData = await res.json();
         console.log("Fetched dashboard data", dashboardData);
+        const steps = Object.values(dashboardData.defaultKYCStatus || {});
+        const completed = steps.filter(s => String(s.status) === '1').length;
+        const progress = Math.round((completed / steps.length) * 100);
+        dashboardData.kycProgress = progress;
+        const $bar = $('#kycProgressBar');
+        const $label = $('#kycStatusLabel');
+        if ($bar.length) {
+            $bar.css('width', progress + '%').text(progress + '%');
+        }
+        if ($label.length) {
+            $label.text(progress === 100 ? 'completed' : 'pending');
+        }
         updatePlatformBankDetails();
         initializeUI();
     } catch (err) {
@@ -140,31 +152,31 @@ function initializeUI() {
     }
 
     function updateKYCProgress() {
-        let completedSteps = 0;
-        let hasInProgress = false;
-        const keys = Object.keys(dashboardData.defaultKYCStatus);
-        keys.forEach(k => {
-            const valObj = dashboardData.defaultKYCStatus[k];
+        const steps = Object.values(dashboardData.defaultKYCStatus);
+        const completed = steps.filter(s => String(s.status) === '1').length;
+        let hasInProgress = steps.some(s => String(s.status) === '2');
+        steps.forEach((valObj, idx) => {
+            const key = Object.keys(dashboardData.defaultKYCStatus)[idx];
             const val = typeof valObj === 'object' ? String(valObj.status) : String(valObj);
-            const $badge = $('#' + k);
-            const $icon = $('#' + k.replace('stat', 'icon'));
+            const $badge = $('#' + key);
+            const $icon = $('#' + key.replace('stat', 'icon'));
             if (val === "1") {
                 $badge.text('complet').removeClass('bg-danger bg-warning bg-secondary').addClass('bg-success');
                 $icon.removeClass('fa-times-circle text-danger fa-clock text-warning').addClass('fa-check-circle text-success');
-                completedSteps++;
             } else if (val === "2") {
                 $badge.text('En cours').removeClass('bg-success bg-danger bg-secondary').addClass('bg-warning');
                 $icon.removeClass('fa-times-circle text-danger fa-check-circle text-success').addClass('fa-clock text-warning');
-                hasInProgress = true;
             } else {
                 $badge.text('Incomplet').removeClass('bg-success bg-warning bg-secondary').addClass('bg-danger');
                 $icon.removeClass('fa-check-circle text-success fa-clock text-warning').addClass('fa-times-circle text-danger');
             }
         });
-        const progress = (completedSteps / keys.length) * 100;
+        const progress = Math.round((completed / steps.length) * 100);
         const $bar = $('#kycProgressBar');
+        const $label = $('#kycStatusLabel');
         $bar.css('width', progress + '%').text(progress + '%').attr('aria-valuenow', progress);
         $bar.removeClass('bg-success bg-warning bg-danger');
+        if ($label.length) $label.text(progress === 100 ? 'completed' : 'pending');
         const $statusAlert = $('#alertWarning2');
         const $statusIcon = $('#alertWarning2 i');
         const $statusTitle = $('#alertWarning2 .alert-heading');
