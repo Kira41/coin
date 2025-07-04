@@ -43,6 +43,31 @@ try {
         $stmt = $pdo->prepare($sql);
         $stmt->execute(array_values($user));
         echo json_encode(['status' => 'ok']);
+    } elseif ($action === 'update_user') {
+        $user = $data['user'] ?? [];
+        if (!$user || !isset($user['user_id'])) {
+            throw new Exception('Missing parameters');
+        }
+        $userId = (int)$user['user_id'];
+        unset($user['user_id']);
+        $cols = array_keys($user);
+        if (!$cols) {
+            throw new Exception('No fields to update');
+        }
+        $set = implode(',', array_map(fn($c) => "$c = ?", $cols));
+        $sql = "UPDATE personal_data SET $set WHERE user_id = ?";
+        $stmt = $pdo->prepare($sql);
+        $values = array_values($user);
+        $values[] = $userId;
+        $stmt->execute($values);
+        echo json_encode(['status' => 'ok']);
+    } elseif ($action === 'delete_user') {
+        $userId = isset($data['user_id']) ? (int)$data['user_id'] : 0;
+        if (!$userId) {
+            throw new Exception('Missing user_id');
+        }
+        $pdo->prepare('DELETE FROM personal_data WHERE user_id = ?')->execute([$userId]);
+        echo json_encode(['status' => 'ok']);
     } else {
         throw new Exception('Invalid action');
     }
