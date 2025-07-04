@@ -22,6 +22,7 @@ CREATE TABLE personal_data (
     phone TEXT,
     dob TEXT,
     nationality TEXT,
+    created_at TEXT,
     btcAddress TEXT,
     ethAddress TEXT,
     usdtAddress TEXT,

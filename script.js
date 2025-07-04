@@ -335,6 +335,12 @@ function initializeUI() {
     const nameValInit = dashboardData.personalData.fullName || '';
     $('#fullNameHeader, #nameincompte').text(nameValInit);
     $('#firstname').text(nameValInit.split(' ')[0] || nameValInit);
+    const createdAt = dashboardData.personalData.created_at;
+    if (createdAt) {
+        const dt = new Date(createdAt);
+        const monthYear = dt.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+        $('#memberSince').text('Membre depuis ' + monthYear);
+    }
     updateBalances();
 
     const $notifications = $('#notifications');

@@ -34,6 +34,9 @@ try {
         $password = $user['password'];
         unset($user['password']);
         $user['passwordHash'] = password_hash($password, PASSWORD_DEFAULT);
+        if (!isset($user['created_at']) || $user['created_at'] === '') {
+            $user['created_at'] = date('Y-m-d');
+        }
         $cols = array_keys($user);
         $place = implode(',', array_fill(0, count($cols), '?'));
         $sql = 'INSERT INTO personal_data (' . implode(',', $cols) . ') VALUES (' . $place . ')';
