@@ -1,5 +1,5 @@
 INSERT INTO admins_agents (email, password, is_admin, created_by)
-VALUES ('admin@example.com', '$2b$12$DujgN6sRcXHjyuXJkcTmgedBXpP9jwonqolpXmLOn2Z39RQS59EJa', 1, NULL);
+VALUES ('admin@example.com', '0192023a7bbd73250516f069df18b500', 1, NULL);
 
 INSERT INTO personal_data VALUES (
 1, '3,500 $', '1200 $', '800 $', '10', 
