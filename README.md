@@ -51,3 +51,4 @@ present, the request is rejected with `401 Unauthorized`. Once authenticated,
 `dashboard_admin.html` will display the admin's agents and associated users.
 Use the "Créer Agent" form to add new agents under the logged‑in admin.
 
+Use `admin_login.php` to sign in. POST `email` and `password`; a successful login starts a session and stores `admin_id` for subsequent requests.
