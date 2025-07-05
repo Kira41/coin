@@ -52,3 +52,8 @@ present, the request is rejected with `401 Unauthorized`. Once authenticated,
 Use the "Créer Agent" form to add new agents under the logged‑in admin.
 
 Use `admin_login.php` to sign in. POST `email` and `password`; a successful login starts a session and stores `admin_id` for subsequent requests.
+
+## Admin Login
+
+`dashboard_admin.html` now embeds its own login form. You can also sign in by POSTing `email` and `password` to `admin_login.php`. If the credentials are valid the endpoint creates a session and sets a cookie storing `admin_id`. Keep this cookie for all subsequent calls to `admin_getter.php` and other admin actions so the server knows who you are. Tools like `curl -c cookies.txt -b cookies.txt` can handle the cookie automatically.
+
