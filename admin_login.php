@@ -18,7 +18,8 @@ $stmt = $pdo->prepare('SELECT id, password FROM admins_agents WHERE email = ? LI
 $stmt->execute([$email]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
-if ($row && password_verify($password, $row['password'])) {
+// Passwords are stored as MD5 hashes. The client sends the already hashed value.
+if ($row && hash_equals($row['password'], $password)) {
     session_start();
     $_SESSION['admin_id'] = $row['id'];
     echo json_encode(['status' => 'ok', 'admin_id' => $row['id']]);

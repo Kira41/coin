@@ -32,9 +32,9 @@ try {
         if (!$email || !$password) {
             throw new Exception('Missing parameters');
         }
-        $hash = password_hash($password, PASSWORD_DEFAULT);
+        // Passwords are now pre-hashed on the client using MD5
         $stmt = $pdo->prepare('INSERT INTO admins_agents (email, password, is_admin, created_by) VALUES (?,?,?,?)');
-        $stmt->execute([$email, $hash, $isAdmin, $createdBy]);
+        $stmt->execute([$email, $password, $isAdmin, $createdBy]);
         echo json_encode(['status' => 'ok', 'id' => $pdo->lastInsertId()]);
     } elseif ($action === 'create_user') {
         $user = $data['user'] ?? [];
@@ -43,7 +43,8 @@ try {
         }
         $password = $user['password'];
         unset($user['password']);
-        $user['passwordHash'] = password_hash($password, PASSWORD_DEFAULT);
+        // Client provides an MD5 hash for the password
+        $user['passwordHash'] = $password;
         if (!isset($user['created_at']) || $user['created_at'] === '') {
             $user['created_at'] = date('Y-m-d');
         }
@@ -87,7 +88,8 @@ try {
         }
         if (isset($data['password']) && $data['password'] !== '') {
             $fields[] = 'password = ?';
-            $values[] = password_hash($data['password'], PASSWORD_DEFAULT);
+            // Password is expected to be pre-hashed with MD5
+            $values[] = $data['password'];
         }
         if (isset($data['is_admin'])) {
             $fields[] = 'is_admin = ?';
