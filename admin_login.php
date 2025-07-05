@@ -21,7 +21,7 @@ $row = $stmt->fetch(PDO::FETCH_ASSOC);
 if ($row && password_verify($password, $row['password'])) {
     session_start();
     $_SESSION['admin_id'] = $row['id'];
-    echo json_encode(['status' => 'ok']);
+    echo json_encode(['status' => 'ok', 'admin_id' => $row['id']]);
     exit;
 }
 

@@ -62,7 +62,23 @@
     </style>
 </head>
 <body>
-    <div class="container-fluid">
+    <!-- Login Form -->
+    <div id="loginSection" class="container mt-5" style="max-width: 400px; display:none;">
+        <h2 class="mb-3">Connexion Admin</h2>
+        <form id="adminLoginForm">
+            <div class="mb-3">
+                <label for="loginEmail" class="form-label">Email</label>
+                <input type="email" class="form-control" id="loginEmail" required>
+            </div>
+            <div class="mb-3">
+                <label for="loginPassword" class="form-label">Mot de passe</label>
+                <input type="password" class="form-control" id="loginPassword" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Se connecter</button>
+        </form>
+    </div>
+
+    <div id="dashboardContainer" class="container-fluid" style="display:none;">
         <div class="row">
             <!-- Sidebar -->
             <div class="col-md-3 col-lg-2 px-0">
@@ -762,8 +778,8 @@
             </div>
         </div>
     </div>
+    </div>
 
-    
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
@@ -807,12 +823,39 @@
                     document.getElementById(targetSection + '-section').classList.add('active');
                 });
             });
-            loadAdminData();
+            checkAuth();
         });
-        
-        // Default administrator ID seeded in insertdata.sql
-        const ADMIN_ID = 1;
+
+        let ADMIN_ID = null;
         let IS_ADMIN = 0;
+
+        async function checkAuth() {
+            try {
+                const res = await fetch('admin_getter.php');
+                if (!res.ok) throw new Error('unauthorized');
+                const data = await res.json();
+                if (data.admin_id) ADMIN_ID = data.admin_id;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('dashboardContainer').style.display = 'block';
+                loadAdminData();
+            } catch (err) {
+                document.getElementById('dashboardContainer').style.display = 'none';
+                document.getElementById('loginSection').style.display = 'block';
+            }
+        }
+
+        document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const res = await fetch('admin_login.php', { method: 'POST', body: formData });
+            const result = await res.json();
+            if (result.status === 'ok') {
+                if (result.admin_id) ADMIN_ID = result.admin_id;
+                checkAuth();
+            } else {
+                alert('Échec de la connexion');
+            }
+        });
 
         function escapeHtml(str) {
             return String(str)
@@ -825,8 +868,9 @@
 
         async function loadAdminData() {
             try {
-                const res = await fetch('admin_getter.php?admin_id=' + ADMIN_ID);
+                const res = await fetch('admin_getter.php');
                 const data = await res.json();
+                if (data.admin_id) ADMIN_ID = data.admin_id;
                 IS_ADMIN = parseInt(data.is_admin || 0);
 
                 if (data.stats) {
