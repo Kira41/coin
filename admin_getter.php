@@ -30,6 +30,7 @@ if (!$admin) {
 
 $result = [
     'is_admin' => (int)$admin['is_admin'],
+    'admin_id' => $adminId,
 ];
 
 if ((int)$admin['is_admin'] === 1) {
