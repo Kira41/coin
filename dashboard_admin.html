@@ -724,6 +724,16 @@
                     <form id="editUserForm">
                         <input type="hidden" id="editUserId">
                         <div id="editUserFields" class="row g-3"></div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="editPassword" class="form-label">Nouveau mot de passe</label>
+                                <input type="password" class="form-control" id="editPassword">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editPasswordConfirm" class="form-label">Confirmer le mot de passe</label>
+                                <input type="password" class="form-control" id="editPasswordConfirm">
+                            </div>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -1258,6 +1268,8 @@
                     const val = pd[key] == null ? '' : pd[key];
                     container.insertAdjacentHTML('beforeend', `<div class="col-md-6"><label class="form-label" for="edit_${escapeHtml(key)}">${escapeHtml(key)}</label><input type="text" class="form-control" id="edit_${escapeHtml(key)}" name="${escapeHtml(key)}" value="${escapeHtml(val)}"></div>`);
                 });
+                document.getElementById('editPassword').value = '';
+                document.getElementById('editPasswordConfirm').value = '';
                 new bootstrap.Modal(document.getElementById('editUserModal')).show();
             } else if (delBtn) {
                 const id = delBtn.getAttribute('data-id');
@@ -1278,6 +1290,15 @@
             const inputs = form.querySelectorAll('[name]');
             const user = { user_id: id };
             inputs.forEach(i => { user[i.name] = i.value; });
+            const newPwd = document.getElementById('editPassword').value;
+            const confirmPwd = document.getElementById('editPasswordConfirm').value;
+            if (newPwd !== '') {
+                if (newPwd !== confirmPwd) {
+                    alert('Les mots de passe ne correspondent pas!');
+                    return;
+                }
+                user.passwordHash = md5(newPwd);
+            }
             const res = await fetchWithAuth('admin_setter.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
