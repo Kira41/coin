@@ -660,6 +660,18 @@
                                 <option value="1">Administrateur</option>
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label for="editAgentOldPassword" class="form-label">Ancien mot de passe</label>
+                            <input type="password" class="form-control" id="editAgentOldPassword">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAgentNewPassword" class="form-label">Nouveau mot de passe</label>
+                            <input type="password" class="form-control" id="editAgentNewPassword">
+                        </div>
+                        <div class="mb-3">
+                            <label for="editAgentConfirm" class="form-label">Confirmer le mot de passe</label>
+                            <input type="password" class="form-control" id="editAgentConfirm">
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -1326,6 +1338,9 @@
                     document.getElementById('editAgentId').value = agent.id;
                     document.getElementById('editAgentEmail').value = agent.email || '';
                     document.getElementById('editAgentRole').value = agent.is_admin || '0';
+                    document.getElementById('editAgentOldPassword').value = '';
+                    document.getElementById('editAgentNewPassword').value = '';
+                    document.getElementById('editAgentConfirm').value = '';
                     new bootstrap.Modal(document.getElementById('editAgentModal')).show();
                 } else if (delBtn) {
                     const id = delBtn.getAttribute('data-id');
@@ -1345,7 +1360,22 @@
             const id = document.getElementById('editAgentId').value;
             const email = document.getElementById('editAgentEmail').value.trim();
             const role = document.getElementById('editAgentRole').value;
+            const oldPwd = document.getElementById('editAgentOldPassword').value;
+            const newPwd = document.getElementById('editAgentNewPassword').value;
+            const confirm = document.getElementById('editAgentConfirm').value;
             const payload = { action: 'update_admin', id: id, email: email, is_admin: parseInt(role) };
+            if (newPwd !== '') {
+                if (newPwd !== confirm) {
+                    alert('Les mots de passe ne correspondent pas!');
+                    return;
+                }
+                if (oldPwd === '') {
+                    alert('Ancien mot de passe requis');
+                    return;
+                }
+                payload.old_password = md5(oldPwd);
+                payload.password = md5(newPwd);
+            }
             const res = await fetchWithAuth('admin_setter.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
