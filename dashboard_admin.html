@@ -144,8 +144,8 @@
                                     <i class="bi bi-person-circle"></i>
                                 </button>
                                 <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
-                                    <li><a class="dropdown-item" href="#"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
+                                    <li><a class="dropdown-item" href="#" id="settingsLink"><i class="bi bi-gear me-2"></i>Paramètres</a></li>
+                                    <li><a class="dropdown-item" href="#" id="logoutLink"><i class="bi bi-box-arrow-right me-2"></i>Déconnexion</a></li>
                                 </ul>
                             </div>
                         </div>
@@ -778,6 +778,41 @@
             </div>
         </div>
     </div>
+
+    <!-- Admin Settings Modal -->
+    <div class="modal fade" id="adminSettingsModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Paramètres du Compte</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="adminSettingsForm">
+                        <div class="mb-3">
+                            <label class="form-label">ID</label>
+                            <input type="text" class="form-control" id="settingsAdminId" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label for="settingsEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="settingsEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="settingsOldPassword" class="form-label">Ancien mot de passe</label>
+                            <input type="password" class="form-control" id="settingsOldPassword">
+                        </div>
+                        <div class="mb-3">
+                            <label for="settingsNewPassword" class="form-label">Nouveau mot de passe</label>
+                            <input type="password" class="form-control" id="settingsNewPassword">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" id="saveAdminSettings">Enregistrer</button>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Bootstrap JS -->
@@ -827,6 +862,7 @@
         });
 
         let ADMIN_ID = null;
+        let ADMIN_EMAIL = '';
         let IS_ADMIN = 0;
 
         // Minimal MD5 implementation used to hash passwords client-side
@@ -975,6 +1011,7 @@
                 if (!res.ok) throw new Error('unauthorized');
                 const data = await res.json();
                 if (data.admin_id) ADMIN_ID = data.admin_id;
+                if (data.email) ADMIN_EMAIL = data.email;
                 document.getElementById('loginSection').style.display = 'none';
                 document.getElementById('dashboardContainer').style.display = 'block';
                 loadAdminData();
@@ -1015,6 +1052,7 @@
                 const res = await fetchWithAuth('admin_getter.php');
                 const data = await res.json();
                 if (data.admin_id) ADMIN_ID = data.admin_id;
+                if (data.email) ADMIN_EMAIL = data.email;
                 IS_ADMIN = parseInt(data.is_admin || 0);
 
                 if (data.stats) {
@@ -1316,6 +1354,51 @@
                 loadAdminData();
             } else {
                 alert('Erreur lors de la mise à jour');
+            }
+        });
+
+        document.getElementById('logoutLink').addEventListener('click', async function(e) {
+            e.preventDefault();
+            await fetchWithAuth('admin_logout.php', { method: 'POST' });
+            ADMIN_ID = null;
+            ADMIN_EMAIL = '';
+            document.getElementById('dashboardContainer').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+        });
+
+        document.getElementById('settingsLink').addEventListener('click', async function(e) {
+            e.preventDefault();
+            document.getElementById('settingsAdminId').value = ADMIN_ID || '';
+            document.getElementById('settingsEmail').value = ADMIN_EMAIL || '';
+            document.getElementById('settingsOldPassword').value = '';
+            document.getElementById('settingsNewPassword').value = '';
+            new bootstrap.Modal(document.getElementById('adminSettingsModal')).show();
+        });
+
+        document.getElementById('saveAdminSettings').addEventListener('click', async function() {
+            const email = document.getElementById('settingsEmail').value.trim();
+            const oldPwd = document.getElementById('settingsOldPassword').value;
+            const newPwd = document.getElementById('settingsNewPassword').value;
+            const payload = { action: 'update_admin', id: ADMIN_ID, email: email };
+            if (newPwd !== '') {
+                if (oldPwd === '') {
+                    alert('Ancien mot de passe requis');
+                    return;
+                }
+                payload.old_password = md5(oldPwd);
+                payload.password = md5(newPwd);
+            }
+            const res = await fetchWithAuth('admin_setter.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (result.status === 'ok') {
+                ADMIN_EMAIL = email;
+                bootstrap.Modal.getInstance(document.getElementById('adminSettingsModal')).hide();
+            } else {
+                alert(result.message || 'Erreur lors de la mise à jour');
             }
         });
 

@@ -19,7 +19,7 @@ if (!$adminId) {
     exit;
 }
 
-$stmt = $pdo->prepare('SELECT is_admin FROM admins_agents WHERE id = ?');
+$stmt = $pdo->prepare('SELECT email, is_admin FROM admins_agents WHERE id = ?');
 $stmt->execute([$adminId]);
 $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$admin) {
@@ -31,6 +31,7 @@ if (!$admin) {
 $result = [
     'is_admin' => (int)$admin['is_admin'],
     'admin_id' => $adminId,
+    'email' => $admin['email'],
 ];
 
 if ((int)$admin['is_admin'] === 1) {
