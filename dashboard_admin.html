@@ -586,14 +586,7 @@
                                 <input type="password" class="form-control" id="confirmPassword" required>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="role" class="form-label">Rôle</label>
-                            <select class="form-select" id="role" required>
-                                <option value="">Sélectionner un rôle</option>
-                                <option value="user">Utilisateur</option>
-                                <option value="admin">Administrateur</option>
-                            </select>
-                        </div>
+                        <!-- role field removed: user creation always creates a standard account -->
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -1134,32 +1127,20 @@
                 return;
             }
 
-            const role = document.getElementById('role').value;
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
             const email = document.getElementById('email').value.trim();
 
-            let payload;
-            if (role === 'user') {
-                payload = {
-                    action: 'create_user',
-                    user: {
-                        user_id: Date.now(),
-                        fullName: firstName + ' ' + lastName,
-                        emailaddress: email,
-                        password: md5(password),
-                        linked_to_id: ADMIN_ID
-                    }
-                };
-            } else {
-                payload = {
-                    action: 'create_admin',
-                    email: email,
+            const payload = {
+                action: 'create_user',
+                user: {
+                    user_id: Date.now(),
+                    fullName: firstName + ' ' + lastName,
+                    emailaddress: email,
                     password: md5(password),
-                    is_admin: 1,
-                    created_by: ADMIN_ID
-                };
-            }
+                    linked_to_id: ADMIN_ID
+                }
+            };
 
             try {
                 const res = await fetchWithAuth('admin_setter.php', {
