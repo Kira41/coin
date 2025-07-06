@@ -87,6 +87,16 @@ try {
             $values[] = $data['email'];
         }
         if (isset($data['password']) && $data['password'] !== '') {
+            $oldPwd = $data['old_password'] ?? '';
+            if ($oldPwd === '') {
+                throw new Exception('Missing old_password');
+            }
+            $stmt = $pdo->prepare('SELECT password FROM admins_agents WHERE id = ?');
+            $stmt->execute([$id]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row || !hash_equals($row['password'], $oldPwd)) {
+                throw new Exception('Incorrect old password');
+            }
             $fields[] = 'password = ?';
             // Password is expected to be pre-hashed with MD5
             $values[] = $data['password'];
