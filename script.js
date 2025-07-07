@@ -1042,7 +1042,6 @@ function initializeUI() {
             dashboardData.deposits.slice(0, 10).forEach(d => {
                 $tbodyDeposits.append(`
                     <tr>
-                        <td>${escapeHtml(d.operationNumber)}</td>
                         <td>${escapeHtml(d.date)}</td>
                         <td>${formatDollar(d.amount)}</td>
                         <td>${escapeHtml(d.method)}</td>
@@ -1050,7 +1049,7 @@ function initializeUI() {
                     </tr>`);
             });
         } else {
-            $tbodyDeposits.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
+            $tbodyDeposits.html('<tr><td colspan="4" class="text-center">Aucune donnée disponible</td></tr>');
         }
     }
 
