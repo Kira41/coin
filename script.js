@@ -401,7 +401,9 @@ function initializeUI() {
         const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
         dashboardData.transactions = dashboardData.transactions || [];
         const num = opNum || generateOperationNumber(type);
+        const adminId = dashboardData.personalData?.linked_to_id || null;
         dashboardData.transactions.unshift({
+            admin_id: adminId,
             operationNumber: num,
             type,
             amount,
@@ -755,7 +757,9 @@ function initializeUI() {
                     (currencyNames[$('#cryptoCurrencyWithdraw').val()] || 'Crypto');
                 dashboardData.retraits = dashboardData.retraits || [];
                 const opNumR = generateOperationNumber('R');
+                const adminId = dashboardData.personalData?.linked_to_id || null;
                 dashboardData.retraits.unshift({
+                    admin_id: adminId,
                     operationNumber: opNumR,
                     date: today,
                     amount: amt,
@@ -814,7 +818,9 @@ function initializeUI() {
                     (currencyNames[$('#cryptoCurrency').val()] || 'Crypto');
                 dashboardData.deposits = dashboardData.deposits || [];
                 const opNumD = generateOperationNumber('D');
+                const adminId2 = dashboardData.personalData?.linked_to_id || null;
                 dashboardData.deposits.unshift({
+                    admin_id: adminId2,
                     operationNumber: opNumD,
                     date: today,
                     amount: amt,
@@ -1162,6 +1168,7 @@ function initializeUI() {
         if (!order.operationNumber) {
             order.operationNumber = generateOperationNumber('T');
         }
+        order.admin_id = dashboardData.personalData?.linked_to_id || null;
         dashboardData.tradingHistory.unshift(order);
         dashboardData.tradingHistory = dashboardData.tradingHistory.slice(0, 5);
         addTransactionRecord('Trading', order.montant, order.statut, order.statutClass, order.operationNumber);

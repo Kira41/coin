@@ -21,22 +21,19 @@ if (!$adminId) {
 $sql = "(
         SELECT t.operationNumber, t.user_id, t.type, t.amount, t.status, t.date, t.statusClass
         FROM transactions t
-        JOIN personal_data p ON t.user_id = p.user_id
-        WHERE p.linked_to_id = ?
+        WHERE t.admin_id = ?
     )
     UNION ALL
     (
         SELECT d.operationNumber, d.user_id, 'Dépôt' AS type, d.amount, d.status, d.date, d.statusClass
         FROM deposits d
-        JOIN personal_data p ON d.user_id = p.user_id
-        WHERE p.linked_to_id = ?
+        WHERE d.admin_id = ?
     )
     UNION ALL
     (
         SELECT r.operationNumber, r.user_id, 'Retrait' AS type, r.amount, r.status, r.date, r.statusClass
         FROM retraits r
-        JOIN personal_data p ON r.user_id = p.user_id
-        WHERE p.linked_to_id = ?
+        WHERE r.admin_id = ?
     )
     ORDER BY STR_TO_DATE(date, '%Y/%m/%d') DESC";
 $stmt = $pdo->prepare($sql);
