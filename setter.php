@@ -1,19 +1,24 @@
 <?php
-$dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
-$pdo = new PDO($dsn, 'root', '');
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-$input = file_get_contents('php://input');
-$data = json_decode($input, true);
-if (!is_array($data)) {
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON']);
-    exit;
-}
-
-$userId = $data['personalData']['user_id'] ?? $data['user_id'] ?? ($_POST['user_id'] ?? 1);
+header('Content-Type: application/json');
+set_error_handler(function ($severity, $message, $file, $line) {
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
 
 try {
+    $dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
+    $pdo = new PDO($dsn, 'root', '');
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+    if (!is_array($data)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Invalid JSON']);
+        exit;
+    }
+
+    $userId = $data['personalData']['user_id'] ?? $data['user_id'] ?? ($_POST['user_id'] ?? 1);
+
     $pdo->beginTransaction();
 
     if (isset($data['personalData'])) {
@@ -95,10 +100,10 @@ try {
     }
 
     $pdo->commit();
-    header('Content-Type: application/json');
     echo json_encode(['status' => 'ok']);
-} catch (Exception $e) {
+} catch (Throwable $e) {
     $pdo->rollBack();
+    error_log(__FILE__ . ' - ' . $e->getMessage());
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
