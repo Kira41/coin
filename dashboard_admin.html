@@ -175,9 +175,9 @@
                             <div class="col-md-3 mb-3">
                                 <div class="card stats-card">
                                     <div class="card-body text-center">
-                                        <i class="bi bi-clock-history fs-1 mb-2"></i>
-                                        <h3 class="mb-1">23</h3>
-                                        <p class="mb-0">KYC en Attente</p>
+                                        <i class="bi bi-stack fs-1 mb-2"></i>
+                                        <h3 id="statDepositCount" class="mb-1"></h3>
+                                        <p class="mb-0">Nombre de dépôts</p>
                                     </div>
                                 </div>
                             </div>
@@ -1054,6 +1054,7 @@
                     document.getElementById('statTotalUsers').textContent = data.stats.total_users;
                     document.getElementById('statTotalDeposits').textContent =
                         Number(data.stats.total_deposits).toLocaleString('en-US', {minimumFractionDigits: 2}) + ' $';
+                    document.getElementById('statDepositCount').textContent = data.stats.deposit_count || 0;
                     document.getElementById('statSuccessRate').textContent =
                         (data.stats.success_rate || 0) + '%';
                 }
