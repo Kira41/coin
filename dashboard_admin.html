@@ -401,7 +401,6 @@
                                             <option value="all">Tous les statuts</option>
                                             <option value="complet">complet</option>
                                             <option value="En cours">En cours</option>
-                                            <option value="accept">accept</option>
                                             <option value="reject">reject</option>
                                         </select>
                                     </div>
@@ -1450,7 +1449,7 @@
 
             txs.forEach(t => {
                 const normalizedStatus = String(t.status).toLowerCase();
-                const hideAccept = normalizedStatus === 'accept' || normalizedStatus === 'complet';
+                const hideAccept = normalizedStatus === 'complet';
                 const row = `<tr data-id="${escapeHtml(t.id)}">`
                     + `<td>${escapeHtml(t.id)}</td>`
                     + `<td>${escapeHtml(t.user_id)}</td>`
@@ -1459,7 +1458,7 @@
                     + `<td><span class="badge ${escapeHtml(t.statusClass || 'bg-secondary')}">${escapeHtml(t.status || '')}</span></td>`
                     + `<td>${escapeHtml(t.date || '')}</td>`
                     + `<td>`
-                    + `<button class="btn btn-sm btn-outline-success me-1 tx-accept" ${hideAccept ? 'style=\\"display:none;\\"' : ''}>accept</button>`
+                    + `<button class="btn btn-sm btn-outline-success me-1 tx-accept" ${hideAccept ? 'style=\\"display:none;\\"' : ''}>complet</button>`
                     + `<button class="btn btn-sm btn-outline-danger me-1 tx-reject">reject</button>`
                     + `<button class="btn btn-sm btn-outline-secondary tx-remove">remove</button>`
                     + `</td>`
@@ -1500,7 +1499,7 @@
                 const id = e.target.closest('tr')?.getAttribute('data-id');
                 if (!id) return;
                 if (e.target.closest('.tx-accept')) {
-                    updateTransaction(id, 'accept', 'bg-success');
+                    updateTransaction(id, 'complet', 'bg-success');
                 } else if (e.target.closest('.tx-reject')) {
                     updateTransaction(id, 'reject', 'bg-danger');
                 } else if (e.target.closest('.tx-remove')) {
