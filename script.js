@@ -369,15 +369,19 @@ function initializeUI() {
         $notifications.html('<p>Aucune notification disponible.</p>');
     }
 
-    function generateOperationNumber() {
-        return '#' + Date.now();
+    function generateOperationNumber(type) {
+        let prefix = 'T';
+        if (type && type.toLowerCase().startsWith('d')) prefix = 'D';
+        else if (type && type.toLowerCase().startsWith('r')) prefix = 'R';
+        return prefix + Date.now();
     }
 
-    function addTransactionRecord(type, amount, status = 'En cours', statusClass = 'bg-warning') {
+    function addTransactionRecord(type, amount, status = 'En cours', statusClass = 'bg-warning', opNum = null) {
         const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
         dashboardData.transactions = dashboardData.transactions || [];
+        const num = opNum || generateOperationNumber(type);
         dashboardData.transactions.unshift({
-            operationNumber: generateOperationNumber(),
+            operationNumber: num,
             type,
             amount,
             date: today,
@@ -725,7 +729,9 @@ function initializeUI() {
                     this.id === 'paypalWithdrawForm' ? 'Paypal' :
                     (currencyNames[$('#cryptoCurrencyWithdraw').val()] || 'Crypto');
                 dashboardData.retraits = dashboardData.retraits || [];
+                const opNumR = generateOperationNumber('R');
                 dashboardData.retraits.unshift({
+                    operationNumber: opNumR,
                     date: today,
                     amount: formatDollar(amt),
                     method,
@@ -733,7 +739,7 @@ function initializeUI() {
                     statusClass: 'bg-warning'
                 });
                 dashboardData.retraits = dashboardData.retraits.slice(0, 10);
-                addTransactionRecord('Retrait', formatDollar(amt));
+                addTransactionRecord('Retrait', formatDollar(amt), 'En cours', 'bg-warning', opNumR);
                 updateBalances();
                 renderWithdrawHistory();
                 renderRecentTransactions();
@@ -777,7 +783,9 @@ function initializeUI() {
                     this.id === 'cardDepositForm' ? 'Carte' :
                     (currencyNames[$('#cryptoCurrency').val()] || 'Crypto');
                 dashboardData.deposits = dashboardData.deposits || [];
+                const opNumD = generateOperationNumber('D');
                 dashboardData.deposits.unshift({
+                    operationNumber: opNumD,
                     date: today,
                     amount: formatDollar(amt),
                     method,
@@ -787,7 +795,7 @@ function initializeUI() {
                 dashboardData.deposits = dashboardData.deposits.slice(0, 10);
                 renderDepositHistory();
                 updateBalances();
-                addTransactionRecord('Dépôt', formatDollar(amt));
+                addTransactionRecord('Dépôt', formatDollar(amt), 'En cours', 'bg-warning', opNumD);
                 renderRecentTransactions();
                 showBootstrapAlert('depositAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
                 saveDashboardData();
@@ -1021,6 +1029,7 @@ function initializeUI() {
             dashboardData.deposits.slice(0, 10).forEach(d => {
                 $tbodyDeposits.append(`
                     <tr>
+                        <td>${escapeHtml(d.operationNumber)}</td>
                         <td>${escapeHtml(d.date)}</td>
                         <td>${escapeHtml(d.amount)}</td>
                         <td>${escapeHtml(d.method)}</td>
@@ -1028,7 +1037,7 @@ function initializeUI() {
                     </tr>`);
             });
         } else {
-            $tbodyDeposits.html('<tr><td colspan="4" class="text-center">Aucune donnée disponible</td></tr>');
+            $tbodyDeposits.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
         }
     }
 
@@ -1040,6 +1049,7 @@ function initializeUI() {
             dashboardData.retraits.slice(0, 10).forEach(r => {
                 $tbodyRetraits.append(`
                     <tr>
+                        <td>${escapeHtml(r.operationNumber)}</td>
                         <td>${escapeHtml(r.date)}</td>
                         <td>${escapeHtml(r.amount)}</td>
                         <td>${escapeHtml(r.method)}</td>
@@ -1047,7 +1057,7 @@ function initializeUI() {
                     </tr>`);
             });
         } else {
-            $tbodyRetraits.html('<tr><td colspan="4" class="text-center">Aucune donnée disponible</td></tr>');
+            $tbodyRetraits.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
         }
     }
 
@@ -1075,6 +1085,7 @@ function initializeUI() {
             dashboardData.tradingHistory.slice(0, 5).forEach(trade => {
                 $tbodyTrading.append(`
                     <tr>
+                        <td>${escapeHtml(trade.operationNumber)}</td>
                         <td>${escapeHtml(trade.temps)}</td>
                         <td>${escapeHtml(trade.paireDevises)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutTypeClass)}">${escapeHtml(trade.type)}</span></td>
@@ -1085,7 +1096,7 @@ function initializeUI() {
                     </tr>`);
             });
         } else {
-            $tbodyTrading.html('<tr><td colspan="7" class="text-center">Aucune donnée disponible</td></tr>');
+            $tbodyTrading.html('<tr><td colspan="8" class="text-center">Aucune donnée disponible</td></tr>');
         }
     }
 
@@ -1119,9 +1130,12 @@ function initializeUI() {
 
     function addTrade(order) {
         dashboardData.tradingHistory = dashboardData.tradingHistory || [];
+        if (!order.operationNumber) {
+            order.operationNumber = generateOperationNumber('T');
+        }
         dashboardData.tradingHistory.unshift(order);
         dashboardData.tradingHistory = dashboardData.tradingHistory.slice(0, 5);
-        addTransactionRecord('Trading', order.montant, order.statut, order.statutClass);
+        addTransactionRecord('Trading', order.montant, order.statut, order.statutClass, order.operationNumber);
         saveDashboardData();
         renderTradingHistory();
         renderRecentTransactions();
@@ -1140,7 +1154,7 @@ function initializeUI() {
         order.profitClass = profit >= 0 ? 'text-success' : 'text-danger';
         order.statut = 'complet';
         order.statutClass = 'bg-success';
-        const tx = (dashboardData.transactions || []).find(t => t.amount === order.montant && t.type === 'Trading' && t.status === 'En cours');
+        const tx = (dashboardData.transactions || []).find(t => t.operationNumber === order.operationNumber);
         if (tx) {
             tx.status = 'complet';
             tx.statusClass = 'bg-success';

@@ -49,9 +49,9 @@ try {
     $tables = [
         'transactions' => ['operationNumber','type','amount','date','status','statusClass'],
         'notifications' => ['type','title','message','time','alertClass'],
-        'deposits' => ['date','amount','method','status','statusClass'],
-        'retraits' => ['date','amount','method','status','statusClass'],
-        'tradingHistory' => ['temps','paireDevises','type','statutTypeClass','montant','prix','statut','statutClass','profitPerte','profitClass'],
+        'deposits' => ['operationNumber','date','amount','method','status','statusClass'],
+        'retraits' => ['operationNumber','date','amount','method','status','statusClass'],
+        'tradingHistory' => ['operationNumber','temps','paireDevises','type','statutTypeClass','montant','prix','statut','statutClass','profitPerte','profitClass'],
         'loginHistory' => ['date','ip','device'],
     ];
 
