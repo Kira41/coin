@@ -18,13 +18,29 @@ if (!$adminId) {
     exit;
 }
 
-$sql = 'SELECT t.id, t.user_id, t.type, t.amount, t.status, t.date
+$sql = "(
+        SELECT t.id, t.user_id, t.type, t.amount, t.status, t.date, t.statusClass
         FROM transactions t
         JOIN personal_data p ON t.user_id = p.user_id
         WHERE p.linked_to_id = ?
-        ORDER BY STR_TO_DATE(t.date, "%Y/%m/%d") DESC, t.id DESC';
+    )
+    UNION ALL
+    (
+        SELECT d.id + 1000000 AS id, d.user_id, 'Dépôt' AS type, d.amount, d.status, d.date, d.statusClass
+        FROM deposits d
+        JOIN personal_data p ON d.user_id = p.user_id
+        WHERE p.linked_to_id = ?
+    )
+    UNION ALL
+    (
+        SELECT r.id + 2000000 AS id, r.user_id, 'Retrait' AS type, r.amount, r.status, r.date, r.statusClass
+        FROM retraits r
+        JOIN personal_data p ON r.user_id = p.user_id
+        WHERE p.linked_to_id = ?
+    )
+    ORDER BY STR_TO_DATE(date, '%Y/%m/%d') DESC, id DESC";
 $stmt = $pdo->prepare($sql);
-$stmt->execute([$adminId]);
+$stmt->execute([$adminId, $adminId, $adminId]);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 header('Content-Type: application/json');
