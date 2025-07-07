@@ -3,6 +3,20 @@ $dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
 $pdo = new PDO($dsn, 'root', '');
 $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+$adminId = null;
+session_start();
+if (isset($_SESSION['admin_id'])) {
+    $adminId = (int)$_SESSION['admin_id'];
+} elseif (!empty($_SERVER['HTTP_AUTHORIZATION']) &&
+          preg_match('/Bearer\s+(\d+)/i', $_SERVER['HTTP_AUTHORIZATION'], $m)) {
+    $adminId = (int)$m[1];
+}
+if (!$adminId) {
+    http_response_code(401);
+    echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+    exit;
+}
+
 $input = file_get_contents('php://input');
 $data = json_decode($input, true);
 if (!is_array($data)) {
@@ -142,6 +156,25 @@ try {
         } catch (Exception $e) {
             $pdo->rollBack();
             throw $e;
+        }
+    } elseif ($action === 'update_transaction') {
+        $id = isset($data['id']) ? (int)$data['id'] : 0;
+        if (!$id) {
+            throw new Exception('Missing id');
+        }
+        if (!empty($data['delete'])) {
+            $stmt = $pdo->prepare('DELETE FROM transactions WHERE id = ?');
+            $stmt->execute([$id]);
+            echo json_encode(['status' => 'ok']);
+        } else {
+            $status = $data['status'] ?? null;
+            $class = $data['statusClass'] ?? null;
+            if ($status === null || $class === null) {
+                throw new Exception('Missing status');
+            }
+            $stmt = $pdo->prepare('UPDATE transactions SET status = ?, statusClass = ? WHERE id = ?');
+            $stmt->execute([$status, $class, $id]);
+            echo json_encode(['status' => 'ok']);
         }
     } else {
         throw new Exception('Invalid action');
