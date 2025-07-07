@@ -162,8 +162,18 @@ try {
         if (!$id) {
             throw new Exception('Missing id');
         }
+
+        $table = 'transactions';
+        if ($id >= 2000000) {
+            $id -= 2000000;
+            $table = 'retraits';
+        } elseif ($id >= 1000000) {
+            $id -= 1000000;
+            $table = 'deposits';
+        }
+
         if (!empty($data['delete'])) {
-            $stmt = $pdo->prepare('DELETE FROM transactions WHERE id = ?');
+            $stmt = $pdo->prepare("DELETE FROM $table WHERE id = ?");
             $stmt->execute([$id]);
             echo json_encode(['status' => 'ok']);
         } else {
@@ -172,7 +182,7 @@ try {
             if ($status === null || $class === null) {
                 throw new Exception('Missing status');
             }
-            $stmt = $pdo->prepare('UPDATE transactions SET status = ?, statusClass = ? WHERE id = ?');
+            $stmt = $pdo->prepare("UPDATE $table SET status = ?, statusClass = ? WHERE id = ?");
             $stmt->execute([$status, $class, $id]);
             echo json_encode(['status' => 'ok']);
         }
