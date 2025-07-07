@@ -101,6 +101,7 @@ async function fetchDashboardData() {
             dashboardData.personalData.balance = parseDollar(dashboardData.personalData.balance);
             dashboardData.personalData.totalDepots = parseDollar(dashboardData.personalData.totalDepots);
             dashboardData.personalData.totalRetraits = parseDollar(dashboardData.personalData.totalRetraits);
+            dashboardData.personalData.nbTransactions = parseInt(dashboardData.personalData.nbTransactions) || 0;
         }
         ['transactions','deposits','retraits'].forEach(t => {
             (dashboardData[t] || []).forEach(r => { r.amount = parseDollar(r.amount); });
@@ -162,6 +163,12 @@ function initializeUI() {
         $('#soldedisponible2').text(bal);
         $('#soldedisponible3').text(bal);
         $('#accountBalance').text(bal);
+    }
+
+    function updateCounters() {
+        $('#totalDepots').text(formatDollar(dashboardData.personalData.totalDepots));
+        $('#totalRetraits').text(formatDollar(dashboardData.personalData.totalRetraits));
+        $('#nbTransactions').text(dashboardData.personalData.nbTransactions);
     }
 
     function updateKYCProgress() {
@@ -367,6 +374,7 @@ function initializeUI() {
         $('#memberSince').text('Membre depuis ' + monthYear);
     }
     updateBalances();
+    updateCounters();
 
     const $notifications = $('#notifications');
     if (dashboardData.notifications?.length > 0) {
@@ -738,6 +746,10 @@ function initializeUI() {
             if (!isNaN(amt) && amt > 0) {
                 const cur = parseDollar(dashboardData.personalData.balance);
                 dashboardData.personalData.balance = cur - amt;
+                dashboardData.personalData.totalRetraits =
+                    parseDollar(dashboardData.personalData.totalRetraits) + amt;
+                dashboardData.personalData.nbTransactions =
+                    (parseInt(dashboardData.personalData.nbTransactions) || 0) + 1;
                 const method = this.id === 'bankWithdrawForm' ? 'Banque' :
                     this.id === 'paypalWithdrawForm' ? 'Paypal' :
                     (currencyNames[$('#cryptoCurrencyWithdraw').val()] || 'Crypto');
@@ -754,6 +766,7 @@ function initializeUI() {
                 dashboardData.retraits = dashboardData.retraits.slice(0, 10);
                 addTransactionRecord('Retrait', amt, 'En cours', 'bg-warning', opNumR);
                 updateBalances();
+                updateCounters();
                 renderWithdrawHistory();
                 renderRecentTransactions();
                 showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
@@ -792,6 +805,10 @@ function initializeUI() {
             if (!isNaN(amt) && amt > 0) {
                 const cur = parseDollar(dashboardData.personalData.balance);
                 dashboardData.personalData.balance = cur + amt;
+                dashboardData.personalData.totalDepots =
+                    parseDollar(dashboardData.personalData.totalDepots) + amt;
+                dashboardData.personalData.nbTransactions =
+                    (parseInt(dashboardData.personalData.nbTransactions) || 0) + 1;
                 const method = this.id === 'bankDepositForm' ? 'Banque' :
                     this.id === 'cardDepositForm' ? 'Carte' :
                     (currencyNames[$('#cryptoCurrency').val()] || 'Crypto');
@@ -808,6 +825,7 @@ function initializeUI() {
                 dashboardData.deposits = dashboardData.deposits.slice(0, 10);
                 renderDepositHistory();
                 updateBalances();
+                updateCounters();
                 addTransactionRecord('Dépôt', amt, 'En cours', 'bg-warning', opNumD);
                 renderRecentTransactions();
                 showBootstrapAlert('depositAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
