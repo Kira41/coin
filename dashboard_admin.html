@@ -1425,6 +1425,12 @@
             if (!tbody) return;
             tbody.innerHTML = '';
 
+            const typeClasses = {
+                'Retrait': 'bg-warning',
+                'Dépôt': 'bg-info',
+                'Trading': 'bg-primary'
+            };
+
             const typeSel = document.getElementById('txFilterType');
             const statusSel = document.getElementById('txFilterStatus');
             const searchInput = document.getElementById('txSearchInput');
@@ -1448,7 +1454,7 @@
                 const row = `<tr data-id="${escapeHtml(t.id)}">`
                     + `<td>${escapeHtml(t.id)}</td>`
                     + `<td>${escapeHtml(t.user_id)}</td>`
-                    + `<td>${escapeHtml(t.type || '')}</td>`
+                    + `<td><span class="badge ${escapeHtml(typeClasses[t.type] || 'bg-secondary')}">${escapeHtml(t.type || '')}</span></td>`
                     + `<td>${escapeHtml(t.amount || '')}</td>`
                     + `<td><span class="badge ${escapeHtml(t.statusClass || 'bg-secondary')}">${escapeHtml(t.status || '')}</span></td>`
                     + `<td>${escapeHtml(t.date || '')}</td>`
