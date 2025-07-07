@@ -44,7 +44,7 @@ data.
 
 ## Admin dashboard
 
-`insertdata.sql` seeds a default administrator account (`admin@example.com`) with
+`insertdata.sql` seeds a default administrator account (`admin@scampia.io`) with
 ID `1`. To load data for this account you now must be authenticated. The
 `admin_getter.php` endpoint looks for a session variable named `admin_id` or an
 `Authorization: Bearer <id>` header identifying the admin. If neither is
