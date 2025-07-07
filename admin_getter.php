@@ -55,9 +55,7 @@ if ($userIds) {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($userIds);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
-        $amount = preg_replace('/[^0-9.,-]/', '', $row['amount']);
-        $amount = str_replace(',', '', $amount);
-        $sumDeposits += (float)$amount;
+        $sumDeposits += (float)$row['amount'];
         $successUsers[$row['user_id']] = true;
     }
 }
