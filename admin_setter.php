@@ -164,26 +164,111 @@ try {
         }
 
         $prefix = strtoupper(substr($op, 0, 1));
-        $table = 'transactions';
+        $historyTable = null;
         if ($prefix === 'D') {
-            $table = 'deposits';
+            $historyTable = 'deposits';
         } elseif ($prefix === 'R') {
-            $table = 'retraits';
+            $historyTable = 'retraits';
         }
 
-        if (!empty($data['delete'])) {
-            $stmt = $pdo->prepare("DELETE FROM $table WHERE operationNumber = ?");
+        $pdo->beginTransaction();
+        try {
+            $stmt = ($historyTable
+                ? $pdo->prepare("SELECT user_id, amount, status FROM $historyTable WHERE operationNumber = ? FOR UPDATE")
+                : $pdo->prepare("SELECT user_id, amount, status FROM transactions WHERE operationNumber = ? FOR UPDATE"));
             $stmt->execute([$op]);
-            echo json_encode(['status' => 'ok']);
-        } else {
-            $status = $data['status'] ?? null;
-            $class = $data['statusClass'] ?? null;
-            if ($status === null || $class === null) {
-                throw new Exception('Missing status');
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                throw new Exception('Transaction not found');
             }
-            $stmt = $pdo->prepare("UPDATE $table SET status = ?, statusClass = ? WHERE operationNumber = ?");
-            $stmt->execute([$status, $class, $op]);
+            $userId = (int)$row['user_id'];
+            $amount = (float)$row['amount'];
+            $oldStatus = $row['status'];
+
+            if (!empty($data['delete'])) {
+                if ($historyTable) {
+                    $pdo->prepare("DELETE FROM $historyTable WHERE operationNumber = ?")
+                        ->execute([$op]);
+                }
+                $pdo->prepare("DELETE FROM transactions WHERE operationNumber = ?")
+                    ->execute([$op]);
+
+                if ($oldStatus === 'complet') {
+                    if ($prefix === 'D') {
+                        $pdo->prepare(
+                            'UPDATE personal_data SET '\
+                            . 'balance = COALESCE(balance,0)-?, '\
+                            . 'totalDepots = COALESCE(totalDepots,0)-?, '\
+                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '\
+                            . 'WHERE user_id = ?')
+                            ->execute([$amount, $amount, $userId]);
+                    } elseif ($prefix === 'R') {
+                        $pdo->prepare(
+                            'UPDATE personal_data SET '\
+                            . 'balance = COALESCE(balance,0)+?, '\
+                            . 'totalRetraits = COALESCE(totalRetraits,0)-?, '\
+                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '\
+                            . 'WHERE user_id = ?')
+                            ->execute([$amount, $amount, $userId]);
+                    }
+                }
+            } else {
+                $status = $data['status'] ?? null;
+                $class = $data['statusClass'] ?? null;
+                if ($status === null || $class === null) {
+                    throw new Exception('Missing status');
+                }
+                if ($historyTable) {
+                    $pdo->prepare("UPDATE $historyTable SET status = ?, statusClass = ? WHERE operationNumber = ?")
+                        ->execute([$status, $class, $op]);
+                }
+                $pdo->prepare("UPDATE transactions SET status = ?, statusClass = ? WHERE operationNumber = ?")
+                    ->execute([$status, $class, $op]);
+
+                if ($prefix === 'D') {
+                    if ($oldStatus !== 'complet' && $status === 'complet') {
+                        $pdo->prepare(
+                            'UPDATE personal_data SET '\
+                            . 'balance = COALESCE(balance,0)+?, '\
+                            . 'totalDepots = COALESCE(totalDepots,0)+?, '\
+                            . 'nbTransactions = COALESCE(nbTransactions,0)+1 '\
+                            . 'WHERE user_id = ?')
+                            ->execute([$amount, $amount, $userId]);
+                    } elseif ($oldStatus === 'complet' && $status !== 'complet') {
+                        $pdo->prepare(
+                            'UPDATE personal_data SET '\
+                            . 'balance = COALESCE(balance,0)-?, '\
+                            . 'totalDepots = COALESCE(totalDepots,0)-?, '\
+                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '\
+                            . 'WHERE user_id = ?')
+                            ->execute([$amount, $amount, $userId]);
+                    }
+                } elseif ($prefix === 'R') {
+                    if ($oldStatus !== 'complet' && $status === 'complet') {
+                        $pdo->prepare(
+                            'UPDATE personal_data SET '\
+                            . 'balance = COALESCE(balance,0)-?, '\
+                            . 'totalRetraits = COALESCE(totalRetraits,0)+?, '\
+                            . 'nbTransactions = COALESCE(nbTransactions,0)+1 '\
+                            . 'WHERE user_id = ?')
+                            ->execute([$amount, $amount, $userId]);
+                    } elseif ($oldStatus === 'complet' && $status !== 'complet') {
+                        $pdo->prepare(
+                            'UPDATE personal_data SET '\
+                            . 'balance = COALESCE(balance,0)+?, '\
+                            . 'totalRetraits = COALESCE(totalRetraits,0)-?, '\
+                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '\
+                            . 'WHERE user_id = ?')
+                            ->execute([$amount, $amount, $userId]);
+                    }
+                }
+            }
+
+            $pdo->commit();
             echo json_encode(['status' => 'ok']);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw $e;
         }
     } else {
         throw new Exception('Invalid action');
