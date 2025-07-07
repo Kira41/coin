@@ -1,10 +1,16 @@
 <?php
-$dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
-$pdo = new PDO($dsn, 'root', '');
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+header('Content-Type: application/json');
+set_error_handler(function ($severity, $message, $file, $line) {
+    throw new ErrorException($message, 0, $severity, $file, $line);
+});
 
-$adminId = null;
-session_start();
+try {
+    $dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
+    $pdo = new PDO($dsn, 'root', '');
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    $adminId = null;
+    session_start();
 if (isset($_SESSION['admin_id'])) {
     $adminId = (int)$_SESSION['admin_id'];
 } elseif (!empty($_SERVER['HTTP_AUTHORIZATION']) &&
@@ -273,7 +279,8 @@ try {
     } else {
         throw new Exception('Invalid action');
     }
-} catch (Exception $e) {
-    http_response_code(400);
+} catch (Throwable $e) {
+    error_log(__FILE__ . ' - ' . $e->getMessage());
+    http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
 }
