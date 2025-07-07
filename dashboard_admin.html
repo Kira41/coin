@@ -387,6 +387,25 @@
                                         </div>
                                     </div>
                                 </div>
+                                <div class="row mt-2">
+                                    <div class="col-md-6 mb-2">
+                                        <select id="txFilterType" class="form-select">
+                                            <option value="all">Tous les types</option>
+                                            <option value="Dépôt">Dépôt</option>
+                                            <option value="Retrait">Retrait</option>
+                                            <option value="Trading">Trading</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6 mb-2">
+                                        <select id="txFilterStatus" class="form-select">
+                                            <option value="all">Tous les statuts</option>
+                                            <option value="complet">complet</option>
+                                            <option value="En cours">En cours</option>
+                                            <option value="accept">accept</option>
+                                            <option value="reject">reject</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             <div class="card-body p-0">
                                 <div class="table-responsive">
@@ -1398,40 +1417,57 @@
             }
         });
 
+
+        let ALL_TXS = [];
+
+        function renderTransactions() {
+            const tbody = document.getElementById('transactionsTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            const typeSel = document.getElementById('txFilterType');
+            const statusSel = document.getElementById('txFilterStatus');
+            const typeVal = typeSel ? typeSel.value : 'all';
+            const statusVal = statusSel ? statusSel.value : 'all';
+
+            let txs = ALL_TXS.slice();
+            if (typeVal !== 'all') txs = txs.filter(t => String(t.type).toLowerCase() === typeVal.toLowerCase());
+            if (statusVal !== 'all') txs = txs.filter(t => String(t.status).toLowerCase() === statusVal.toLowerCase());
+
+            if (txs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Aucune donnée disponible</td></tr>';
+                return;
+            }
+
+            txs.forEach(t => {
+                const hideAccept = String(t.status).toLowerCase() === 'accept' || String(t.status).toLowerCase() === 'complet';
+                const row = `<tr data-id="${escapeHtml(t.id)}">`
+                    + `<td>${escapeHtml(t.id)}</td>`
+                    + `<td>${escapeHtml(t.user_id)}</td>`
+                    + `<td>${escapeHtml(t.type || '')}</td>`
+                    + `<td>${escapeHtml(t.amount || '')}</td>`
+                    + `<td><span class="badge ${escapeHtml(t.statusClass || 'bg-secondary')}">${escapeHtml(t.status || '')}</span></td>`
+                    + `<td>${escapeHtml(t.date || '')}</td>`
+                    + `<td>`
+                    + `<button class="btn btn-sm btn-outline-success me-1 tx-accept" ${hideAccept ? 'style=\\"display:none;\\"' : ''}>accept</button>`
+                    + `<button class="btn btn-sm btn-outline-danger me-1 tx-reject">reject</button>`
+                    + `<button class="btn btn-sm btn-outline-secondary tx-remove">remove</button>`
+                    + `</td>`
+                    + `</tr>`;
+                tbody.insertAdjacentHTML('beforeend', row);
+            });
+        }
+
         async function loadTransactions() {
             try {
                 const res = await fetchWithAuth('admin_transactions_getter.php');
                 const data = await res.json();
-                const tbody = document.getElementById('transactionsTableBody');
-                if (!tbody) return;
-                tbody.innerHTML = '';
-                const txs = data.transactions || [];
-                if (txs.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Aucune donnée disponible</td></tr>';
-                } else {
-                    txs.forEach(t => {
-                        const hideAccept = String(t.status).toLowerCase() === 'accept' || String(t.status).toLowerCase() === 'complet';
-                        const row = `<tr data-id="${escapeHtml(t.id)}">
-                            <td>${escapeHtml(t.id)}</td>
-                            <td>${escapeHtml(t.user_id)}</td>
-                            <td>${escapeHtml(t.type || '')}</td>
-                            <td>${escapeHtml(t.amount || '')}</td>
-                            <td>${escapeHtml(t.status || '')}</td>
-                            <td>${escapeHtml(t.date || '')}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-success me-1 tx-accept" ${hideAccept ? 'style="display:none;"' : ''}>accept</button>
-                                <button class="btn btn-sm btn-outline-danger me-1 tx-reject">reject</button>
-                                <button class="btn btn-sm btn-outline-secondary tx-remove">remove</button>
-                            </td>
-                        </tr>`;
-                        tbody.insertAdjacentHTML('beforeend', row);
-                    });
-                }
+                ALL_TXS = data.transactions || [];
+                renderTransactions();
             } catch (err) {
                 console.error('Failed to load transactions', err);
             }
         }
-
         async function updateTransaction(id, status, statusClass, remove = false) {
             const payload = { action: 'update_transaction', id: id };
             if (remove) {
@@ -1464,6 +1500,10 @@
                 }
             });
         }
+        const typeSel = document.getElementById('txFilterType');
+        const statusSel = document.getElementById('txFilterStatus');
+        if (typeSel) typeSel.addEventListener('change', renderTransactions);
+        if (statusSel) statusSel.addEventListener('change', renderTransactions);
 
         // Add some interactive features
         document.addEventListener('DOMContentLoaded', function() {
