@@ -34,6 +34,11 @@ algorithm.
 Each `email` in `admins_agents` must be unique, enforced by a `UNIQUE(email)`
 constraint in the schema.
 
+Foreign keys from tables such as `transactions`, `deposits`, `retraits` and
+`tradingHistory` now include `ON DELETE CASCADE`. Removing a row from
+`personal_data` will automatically clean up any related records, preventing
+foreign key errors.
+
 ## Wallet management
 
 Each wallet row includes edit and delete icons. Clicking the **edit** icon opens

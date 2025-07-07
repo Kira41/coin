@@ -62,8 +62,10 @@ CREATE TABLE transactions (
     status TEXT,
     statusClass TEXT,
     UNIQUE(operationNumber),
-    FOREIGN KEY (user_id) REFERENCES personal_data(user_id),
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (admin_id) REFERENCES admins_agents(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE notifications (
@@ -87,8 +89,10 @@ CREATE TABLE deposits (
     status TEXT,
     statusClass TEXT,
     UNIQUE(operationNumber),
-    FOREIGN KEY (user_id) REFERENCES personal_data(user_id),
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (admin_id) REFERENCES admins_agents(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE retraits (
@@ -102,8 +106,10 @@ CREATE TABLE retraits (
     status TEXT,
     statusClass TEXT,
     UNIQUE(operationNumber),
-    FOREIGN KEY (user_id) REFERENCES personal_data(user_id),
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (admin_id) REFERENCES admins_agents(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE tradingHistory (
@@ -122,8 +128,10 @@ CREATE TABLE tradingHistory (
     profitPerte DECIMAL(18,2),
     profitClass TEXT,
     UNIQUE(operationNumber),
-    FOREIGN KEY (user_id) REFERENCES personal_data(user_id),
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
+        ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (admin_id) REFERENCES admins_agents(id)
+        ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE loginHistory (
