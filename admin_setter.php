@@ -158,23 +158,22 @@ try {
             throw $e;
         }
     } elseif ($action === 'update_transaction') {
-        $id = isset($data['id']) ? (int)$data['id'] : 0;
-        if (!$id) {
+        $op = isset($data['id']) ? trim($data['id']) : '';
+        if ($op === '') {
             throw new Exception('Missing id');
         }
 
+        $prefix = strtoupper(substr($op, 0, 1));
         $table = 'transactions';
-        if ($id >= 2000000) {
-            $id -= 2000000;
-            $table = 'retraits';
-        } elseif ($id >= 1000000) {
-            $id -= 1000000;
+        if ($prefix === 'D') {
             $table = 'deposits';
+        } elseif ($prefix === 'R') {
+            $table = 'retraits';
         }
 
         if (!empty($data['delete'])) {
-            $stmt = $pdo->prepare("DELETE FROM $table WHERE id = ?");
-            $stmt->execute([$id]);
+            $stmt = $pdo->prepare("DELETE FROM $table WHERE operationNumber = ?");
+            $stmt->execute([$op]);
             echo json_encode(['status' => 'ok']);
         } else {
             $status = $data['status'] ?? null;
@@ -182,8 +181,8 @@ try {
             if ($status === null || $class === null) {
                 throw new Exception('Missing status');
             }
-            $stmt = $pdo->prepare("UPDATE $table SET status = ?, statusClass = ? WHERE id = ?");
-            $stmt->execute([$status, $class, $id]);
+            $stmt = $pdo->prepare("UPDATE $table SET status = ?, statusClass = ? WHERE operationNumber = ?");
+            $stmt->execute([$status, $class, $op]);
             echo json_encode(['status' => 'ok']);
         }
     } else {

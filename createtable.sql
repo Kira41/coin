@@ -46,9 +46,9 @@ CREATE TABLE wallets (
 
 CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, operationNumber TEXT, type TEXT, amount TEXT, date TEXT, status TEXT, statusClass TEXT);
 CREATE TABLE notifications (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, type TEXT, title TEXT, message TEXT, time TEXT, alertClass TEXT);
-CREATE TABLE deposits (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, date TEXT, amount TEXT, method TEXT, status TEXT, statusClass TEXT);
-CREATE TABLE retraits (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, date TEXT, amount TEXT, method TEXT, status TEXT, statusClass TEXT);
-CREATE TABLE tradingHistory (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, temps TEXT, paireDevises TEXT, type TEXT, statutTypeClass TEXT, montant TEXT, prix TEXT, statut TEXT, statutClass TEXT, profitPerte TEXT, profitClass TEXT);
+CREATE TABLE deposits (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, operationNumber TEXT, date TEXT, amount TEXT, method TEXT, status TEXT, statusClass TEXT);
+CREATE TABLE retraits (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, operationNumber TEXT, date TEXT, amount TEXT, method TEXT, status TEXT, statusClass TEXT);
+CREATE TABLE tradingHistory (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, operationNumber TEXT, temps TEXT, paireDevises TEXT, type TEXT, statutTypeClass TEXT, montant TEXT, prix TEXT, statut TEXT, statutClass TEXT, profitPerte TEXT, profitClass TEXT);
 CREATE TABLE loginHistory (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, date TEXT, ip TEXT, device TEXT);
 CREATE TABLE bank_withdrawl_info (
     user_id INTEGER PRIMARY KEY,

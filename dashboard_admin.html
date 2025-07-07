@@ -411,7 +411,7 @@
                                     <table class="table table-hover mb-0">
                                         <thead>
                                             <tr>
-                                                <th>ID Transaction</th>
+                                                <th>Opération</th>
                                                 <th>Utilisateur</th>
                                                 <th>Type</th>
                                                 <th>Montant</th>
@@ -1440,7 +1440,7 @@
             let txs = ALL_TXS.slice();
             if (typeVal !== 'all') txs = txs.filter(t => String(t.type).toLowerCase() === typeVal.toLowerCase());
             if (statusVal !== 'all') txs = txs.filter(t => String(t.status).toLowerCase() === statusVal.toLowerCase());
-            if (searchVal) txs = txs.filter(t => String(t.id).toLowerCase().includes(searchVal));
+            if (searchVal) txs = txs.filter(t => String(t.operationNumber).toLowerCase().includes(searchVal));
 
             if (txs.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center">Aucune donnée disponible</td></tr>';
@@ -1450,8 +1450,8 @@
             txs.forEach(t => {
                 const normalizedStatus = String(t.status).toLowerCase();
                 const hideAccept = normalizedStatus === 'complet';
-                const row = `<tr data-id="${escapeHtml(t.id)}">`
-                    + `<td>${escapeHtml(t.id)}</td>`
+                const row = `<tr data-id="${escapeHtml(t.operationNumber)}">`
+                    + `<td>${escapeHtml(t.operationNumber)}</td>`
                     + `<td>${escapeHtml(t.user_id)}</td>`
                     + `<td><span class="badge ${escapeHtml(typeClasses[t.type] || 'bg-secondary')}">${escapeHtml(t.type || '')}</span></td>`
                     + `<td>${escapeHtml(t.amount || '')}</td>`
