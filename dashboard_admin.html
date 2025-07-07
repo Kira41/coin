@@ -380,7 +380,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Rechercher une transaction...">
+                                            <input type="text" class="form-control" placeholder="Rechercher une transaction..." id="txSearchInput">
                                             <button class="btn btn-outline-secondary" type="button">
                                                 <i class="bi bi-search"></i>
                                             </button>
@@ -1427,12 +1427,15 @@
 
             const typeSel = document.getElementById('txFilterType');
             const statusSel = document.getElementById('txFilterStatus');
+            const searchInput = document.getElementById('txSearchInput');
             const typeVal = typeSel ? typeSel.value : 'all';
             const statusVal = statusSel ? statusSel.value : 'all';
+            const searchVal = searchInput ? searchInput.value.trim().toLowerCase() : '';
 
             let txs = ALL_TXS.slice();
             if (typeVal !== 'all') txs = txs.filter(t => String(t.type).toLowerCase() === typeVal.toLowerCase());
             if (statusVal !== 'all') txs = txs.filter(t => String(t.status).toLowerCase() === statusVal.toLowerCase());
+            if (searchVal) txs = txs.filter(t => String(t.id).toLowerCase().includes(searchVal));
 
             if (txs.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center">Aucune donnée disponible</td></tr>';
@@ -1500,10 +1503,12 @@
                 }
             });
         }
-        const typeSel = document.getElementById('txFilterType');
-        const statusSel = document.getElementById('txFilterStatus');
-        if (typeSel) typeSel.addEventListener('change', renderTransactions);
-        if (statusSel) statusSel.addEventListener('change', renderTransactions);
+       const typeSel = document.getElementById('txFilterType');
+       const statusSel = document.getElementById('txFilterStatus');
+        const searchInput = document.getElementById('txSearchInput');
+       if (typeSel) typeSel.addEventListener('change', renderTransactions);
+       if (statusSel) statusSel.addEventListener('change', renderTransactions);
+        if (searchInput) searchInput.addEventListener('input', renderTransactions);
 
         // Add some interactive features
         document.addEventListener('DOMContentLoaded', function() {
