@@ -1061,7 +1061,6 @@ function initializeUI() {
             dashboardData.retraits.slice(0, 10).forEach(r => {
                 $tbodyRetraits.append(`
                     <tr>
-                        <td>${escapeHtml(r.operationNumber)}</td>
                         <td>${escapeHtml(r.date)}</td>
                         <td>${formatDollar(r.amount)}</td>
                         <td>${escapeHtml(r.method)}</td>
@@ -1069,7 +1068,7 @@ function initializeUI() {
                     </tr>`);
             });
         } else {
-            $tbodyRetraits.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
+            $tbodyRetraits.html('<tr><td colspan="4" class="text-center">Aucune donnée disponible</td></tr>');
         }
     }
 
