@@ -48,6 +48,7 @@ $result['users'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 $userIds = array_column($result['users'], 'user_id');
 $totalUsers = count($userIds);
 $sumDeposits = 0;
+$depositCount = 0;
 $successUsers = [];
 if ($userIds) {
     $placeholders = implode(',', array_fill(0, count($userIds), '?'));
@@ -56,6 +57,7 @@ if ($userIds) {
     $stmt->execute($userIds);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $sumDeposits += (float)$row['amount'];
+        $depositCount++;
         $successUsers[$row['user_id']] = true;
     }
 }
@@ -63,6 +65,7 @@ $successRate = $totalUsers ? round(count($successUsers) / $totalUsers * 100, 2) 
 $result['stats'] = [
     'total_users' => $totalUsers,
     'total_deposits' => $sumDeposits,
+    'deposit_count' => $depositCount,
     'success_rate' => $successRate,
 ];
 
