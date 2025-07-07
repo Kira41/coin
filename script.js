@@ -46,6 +46,22 @@ function showBootstrapAlert(containerId, message, type = 'success') {
     $('#' + containerId).html(alertHtml);
 }
 
+async function apiFetch(url, options = {}) {
+    const res = await fetch(url, options);
+    let data;
+    try {
+        data = await res.json();
+    } catch (err) {
+        console.error('Invalid JSON from', url, err);
+        throw err;
+    }
+    if (!res.ok || data.status === 'error') {
+        console.error(`API error from ${url}:`, data.message || res.statusText);
+        throw new Error(data.message || 'API error');
+    }
+    return data;
+}
+
 const currencyNames = {
     btc: 'Bitcoin',
     bch: 'Bitcoin Cash',
@@ -74,12 +90,11 @@ function renderWalletTable(wallets = dashboardData.personalData.wallets || []) {
 
 async function fetchWallets() {
     try {
-        const res = await fetch('get_wallets.php?user_id=' + encodeURIComponent(userId));
-        const data = await res.json();
+        const data = await apiFetch('get_wallets.php?user_id=' + encodeURIComponent(userId));
         dashboardData.personalData.wallets = data.wallets || [];
         renderWalletTable();
     } catch (err) {
-        console.error('Failed to fetch wallet addresses', err);
+        console.error('Failed to fetch wallet addresses', err.message || err);
     }
 }
 
@@ -95,8 +110,7 @@ function updatePlatformBankDetails() {
 
 async function fetchDashboardData() {
     try {
-        const res = await fetch('getter.php?user_id=' + encodeURIComponent(userId));
-        dashboardData = await res.json();
+        dashboardData = await apiFetch('getter.php?user_id=' + encodeURIComponent(userId));
         if (dashboardData.personalData) {
             dashboardData.personalData.balance = parseDollar(dashboardData.personalData.balance);
             dashboardData.personalData.totalDepots = parseDollar(dashboardData.personalData.totalDepots);
@@ -127,23 +141,21 @@ async function fetchDashboardData() {
         updatePlatformBankDetails();
         initializeUI();
     } catch (err) {
-        console.error("Failed to load dashboard data", err);
+        console.error("Failed to load dashboard data", err.message || err);
         alert("Erreur : Impossible de charger les données utilisateur.");
     }
 }
 
 async function saveDashboardData() {
     try {
-        const res = await fetch('setter.php', {
+        const result = await apiFetch('setter.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...dashboardData, user_id: userId })
         });
-        if (!res.ok) throw new Error("Failed to save data");
-        const result = await res.json();
         console.log("Saved dashboard data", result);
     } catch (err) {
-        console.error("Failed to save dashboard data", err);
+        console.error("Failed to save dashboard data", err.message || err);
         alert("Erreur : Impossible d'enregistrer les données utilisateur.");
     }
 }
@@ -968,12 +980,16 @@ function initializeUI() {
     $(document).on('click', '.wallet-delete', async function () {
         const id = $(this).data('id');
         if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
-            await fetch('get_wallets.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'delete', id, user_id: userId })
-            });
-            await fetchWallets();
+            try {
+                await apiFetch('get_wallets.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete', id, user_id: userId })
+                });
+                await fetchWallets();
+            } catch (err) {
+                console.error('Failed to delete wallet', err.message || err);
+            }
         }
     });
 
@@ -1005,15 +1021,11 @@ function initializeUI() {
             return;
         }
         try {
-            const res = await fetch('get_wallets.php', {
+            await apiFetch('get_wallets.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'edit', id: currentEditWalletId, address, label, network, user_id: userId })
             });
-            const result = await res.json();
-            if (!res.ok || result.status !== 'ok') {
-                throw new Error(result.message || 'Erreur lors de la mise \u00e0 jour');
-            }
             const wallets = dashboardData.personalData.wallets || [];
             const wallet = wallets.find(w => w.id === currentEditWalletId);
             if (wallet) {
@@ -1026,6 +1038,7 @@ function initializeUI() {
             $row.find('.wallet-address').text(address);
             $('#editWalletModal').modal('hide');
         } catch (err) {
+            console.error('Failed to update wallet', err.message || err);
             alert(err.message || 'Erreur lors de la mise \u00e0 jour');
         }
     });
