@@ -1,9 +1,9 @@
 
 CREATE TABLE personal_data (
     user_id INTEGER PRIMARY KEY,
-    balance TEXT,
-    totalDepots TEXT,
-    totalRetraits TEXT,
+    balance DECIMAL(18,2),
+    totalDepots DECIMAL(18,2),
+    totalRetraits DECIMAL(18,2),
     nbTransactions TEXT,
     fullName TEXT,
     compteverifie TEXT,
@@ -44,11 +44,11 @@ CREATE TABLE wallets (
     label TEXT
 );
 
-CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, operationNumber TEXT, type TEXT, amount TEXT, date TEXT, status TEXT, statusClass TEXT);
+CREATE TABLE transactions (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, operationNumber TEXT, type TEXT, amount DECIMAL(18,2), date TEXT, status TEXT, statusClass TEXT);
 CREATE TABLE notifications (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, type TEXT, title TEXT, message TEXT, time TEXT, alertClass TEXT);
-CREATE TABLE deposits (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, date TEXT, amount TEXT, method TEXT, status TEXT, statusClass TEXT);
-CREATE TABLE retraits (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, date TEXT, amount TEXT, method TEXT, status TEXT, statusClass TEXT);
-CREATE TABLE tradingHistory (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, temps TEXT, paireDevises TEXT, type TEXT, statutTypeClass TEXT, montant TEXT, prix TEXT, statut TEXT, statutClass TEXT, profitPerte TEXT, profitClass TEXT);
+CREATE TABLE deposits (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, date TEXT, amount DECIMAL(18,2), method TEXT, status TEXT, statusClass TEXT);
+CREATE TABLE retraits (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, date TEXT, amount DECIMAL(18,2), method TEXT, status TEXT, statusClass TEXT);
+CREATE TABLE tradingHistory (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, temps TEXT, paireDevises TEXT, type TEXT, statutTypeClass TEXT, montant DECIMAL(18,2), prix DECIMAL(18,2), statut TEXT, statutClass TEXT, profitPerte DECIMAL(18,2), profitClass TEXT);
 CREATE TABLE loginHistory (id INTEGER PRIMARY KEY AUTO_INCREMENT, user_id INTEGER, date TEXT, ip TEXT, device TEXT);
 CREATE TABLE bank_withdrawl_info (
     user_id INTEGER PRIMARY KEY,

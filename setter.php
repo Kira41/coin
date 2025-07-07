@@ -22,6 +22,11 @@ try {
         $wallets = $personal['wallets'] ?? ($data['wallets'] ?? []);
         unset($personal['wallets']);
 
+        foreach ($numericFields['personal_data'] as $nf) {
+            if (isset($personal[$nf])) {
+                $personal[$nf] = (float)$personal[$nf];
+            }
+        }
         $cols = array_keys($personal);
         $place = implode(',', array_fill(0, count($cols), '?'));
         $sql = 'REPLACE INTO personal_data (' . implode(',', $cols) . ') VALUES (' . $place . ')';
@@ -54,6 +59,13 @@ try {
         'tradingHistory' => ['temps','paireDevises','type','statutTypeClass','montant','prix','statut','statutClass','profitPerte','profitClass'],
         'loginHistory' => ['date','ip','device'],
     ];
+    $numericFields = [
+        'personal_data' => ['balance','totalDepots','totalRetraits'],
+        'transactions' => ['amount'],
+        'deposits' => ['amount'],
+        'retraits' => ['amount'],
+        'tradingHistory' => ['montant','prix','profitPerte'],
+    ];
 
     foreach ($tables as $table => $cols) {
         $pdo->prepare("DELETE FROM $table WHERE user_id = ?")->execute([$userId]);
@@ -64,7 +76,11 @@ try {
             foreach ($data[$table] as $row) {
                 $values = [$userId];
                 foreach ($cols as $c) {
-                    $values[] = $row[$c] ?? null;
+                    $v = $row[$c] ?? null;
+                    if (in_array($c, $numericFields[$table] ?? [])) {
+                        $v = $v !== null ? (float)$v : null;
+                    }
+                    $values[] = $v;
                 }
                 $stmt->execute($values);
             }

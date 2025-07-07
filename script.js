@@ -142,7 +142,7 @@ $(document).ready(async function () {
 function initializeUI() {
     dashboardData.personalData.wallets = dashboardData.wallets || dashboardData.personalData.wallets || [];
     function updateBalances() {
-        const bal = formatDollar(parseDollar(dashboardData.personalData.balance));
+        const bal = formatDollar(Number(dashboardData.personalData.balance));
         $('#soldeTotal').text(bal);
         $('#soldeintrade').text(bal);
         $('#soldedisponible1').text(bal);
@@ -396,7 +396,7 @@ function initializeUI() {
                     <tr>
                         <td>${escapeHtml(t.operationNumber)}</td>
                         <td>${escapeHtml(t.type)}</td>
-                        <td>${escapeHtml(t.amount)}</td>
+                        <td>${formatDollar(t.amount)}</td>
                         <td>${escapeHtml(t.date)}</td>
                         <td><span class="badge ${escapeHtml(t.statusClass)}">${escapeHtml(t.status)}</span></td>
                     </tr>`);
@@ -719,21 +719,21 @@ function initializeUI() {
             }[this.id];
             const amt = parseFloat($(amountField).val());
             if (!isNaN(amt) && amt > 0) {
-                const cur = parseDollar(dashboardData.personalData.balance);
-                dashboardData.personalData.balance = formatDollar(cur - amt);
+                const cur = Number(dashboardData.personalData.balance);
+                dashboardData.personalData.balance = cur - amt;
                 const method = this.id === 'bankWithdrawForm' ? 'Banque' :
                     this.id === 'paypalWithdrawForm' ? 'Paypal' :
                     (currencyNames[$('#cryptoCurrencyWithdraw').val()] || 'Crypto');
                 dashboardData.retraits = dashboardData.retraits || [];
                 dashboardData.retraits.unshift({
                     date: today,
-                    amount: formatDollar(amt),
+                    amount: amt,
                     method,
                     status: 'En cours',
                     statusClass: 'bg-warning'
                 });
                 dashboardData.retraits = dashboardData.retraits.slice(0, 10);
-                addTransactionRecord('Retrait', formatDollar(amt));
+                addTransactionRecord('Retrait', amt);
                 updateBalances();
                 renderWithdrawHistory();
                 renderRecentTransactions();
@@ -771,15 +771,15 @@ function initializeUI() {
             }[this.id];
             const amt = parseFloat($(amountField).val());
             if (!isNaN(amt) && amt > 0) {
-                const cur = parseDollar(dashboardData.personalData.balance);
-                dashboardData.personalData.balance = formatDollar(cur + amt);
+                const cur = Number(dashboardData.personalData.balance);
+                dashboardData.personalData.balance = cur + amt;
                 const method = this.id === 'bankDepositForm' ? 'Banque' :
                     this.id === 'cardDepositForm' ? 'Carte' :
                     (currencyNames[$('#cryptoCurrency').val()] || 'Crypto');
                 dashboardData.deposits = dashboardData.deposits || [];
                 dashboardData.deposits.unshift({
                     date: today,
-                    amount: formatDollar(amt),
+                    amount: amt,
                     method,
                     status: 'En cours',
                     statusClass: 'bg-warning'
@@ -787,7 +787,7 @@ function initializeUI() {
                 dashboardData.deposits = dashboardData.deposits.slice(0, 10);
                 renderDepositHistory();
                 updateBalances();
-                addTransactionRecord('Dépôt', formatDollar(amt));
+                addTransactionRecord('Dépôt', amt);
                 renderRecentTransactions();
                 showBootstrapAlert('depositAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
                 saveDashboardData();
@@ -1022,7 +1022,7 @@ function initializeUI() {
                 $tbodyDeposits.append(`
                     <tr>
                         <td>${escapeHtml(d.date)}</td>
-                        <td>${escapeHtml(d.amount)}</td>
+                        <td>${formatDollar(d.amount)}</td>
                         <td>${escapeHtml(d.method)}</td>
                         <td><span class="badge ${escapeHtml(d.statusClass)}">${escapeHtml(d.status)}</span></td>
                     </tr>`);
@@ -1041,7 +1041,7 @@ function initializeUI() {
                 $tbodyRetraits.append(`
                     <tr>
                         <td>${escapeHtml(r.date)}</td>
-                        <td>${escapeHtml(r.amount)}</td>
+                        <td>${formatDollar(r.amount)}</td>
                         <td>${escapeHtml(r.method)}</td>
                         <td><span class="badge ${escapeHtml(r.statusClass)}">${escapeHtml(r.status)}</span></td>
                     </tr>`);
@@ -1073,15 +1073,16 @@ function initializeUI() {
         $tbodyTrading.empty();
         if (dashboardData.tradingHistory?.length > 0) {
             dashboardData.tradingHistory.slice(0, 5).forEach(trade => {
+                const profit = trade.profitPerte == null ? '-' : (trade.profitPerte >= 0 ? '+' : '') + formatDollar(Math.abs(trade.profitPerte));
                 $tbodyTrading.append(`
                     <tr>
                         <td>${escapeHtml(trade.temps)}</td>
                         <td>${escapeHtml(trade.paireDevises)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutTypeClass)}">${escapeHtml(trade.type)}</span></td>
-                        <td>${escapeHtml(trade.montant)}</td>
-                        <td>${escapeHtml(trade.prix)}</td>
+                        <td>${formatDollar(trade.montant)}</td>
+                        <td>${formatDollar(trade.prix)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutClass)}">${escapeHtml(trade.statut)}</span></td>
-                        <td class="${escapeHtml(trade.profitClass || '')}">${escapeHtml(trade.profitPerte)}</td>
+                        <td class="${escapeHtml(trade.profitClass || '')}">${profit}</td>
                     </tr>`);
             });
         } else {
@@ -1128,15 +1129,15 @@ function initializeUI() {
     }
 
     function finalizeOrder(order, exitPrice) {
-        const priceValue = parseFloat(order.prix.replace('$', ''));
-        const qty = parseFloat(order.montant.replace('$', ''));
+        const priceValue = Number(order.prix);
+        const qty = Number(order.montant);
         let profit = 0;
         if (order.type === 'Acheter') {
             profit = (exitPrice - priceValue) * qty;
         } else {
             profit = (priceValue - exitPrice) * qty;
         }
-        order.profitPerte = (profit >= 0 ? '+' : '') + profit.toFixed(2) + '$';
+        order.profitPerte = profit;
         order.profitClass = profit >= 0 ? 'text-success' : 'text-danger';
         order.statut = 'complet';
         order.statutClass = 'bg-success';
@@ -1154,9 +1155,9 @@ function initializeUI() {
             });
         }
         const invested = order.invested || priceValue * qty;
-        let balance = parseDollar(dashboardData.personalData.balance);
+        let balance = Number(dashboardData.personalData.balance);
         balance += invested + profit;
-        dashboardData.personalData.balance = formatDollar(balance);
+        dashboardData.personalData.balance = balance;
         saveDashboardData();
         updateBalances();
         renderTradingHistory();
@@ -1176,7 +1177,7 @@ function initializeUI() {
                 return;
             }
             const sl = order.stopLoss;
-            const entryPrice = parseFloat(order.prix.replace('$', ''));
+            const entryPrice = Number(order.prix);
             if (sl.type === 'price') {
                 if ((order.type === 'Acheter' && currentPrice <= sl.price) ||
                     (order.type === 'Vendre' && currentPrice >= sl.price)) {
@@ -1311,12 +1312,12 @@ function initializeUI() {
             }
         }
         const cost = amount * price;
-        if (cost > parseDollar(dashboardData.personalData.balance)) {
+        if (cost > Number(dashboardData.personalData.balance)) {
             alert('Solde insuffisant');
             return;
         }
-        let newBalance = parseDollar(dashboardData.personalData.balance) - cost;
-        dashboardData.personalData.balance = formatDollar(newBalance);
+        let newBalance = Number(dashboardData.personalData.balance) - cost;
+        dashboardData.personalData.balance = newBalance;
         saveDashboardData();
         updateBalances();
 
@@ -1351,11 +1352,11 @@ function initializeUI() {
             paireDevises: pair.replace('USD', '/USD'),
             type: isBuy ? 'Acheter' : 'Vendre',
             statutTypeClass: isBuy ? 'bg-success' : 'bg-danger',
-            montant: '$' + amount,
-            prix: '$' + price,
+            montant: amount,
+            prix: price,
             statut: 'En cours',
             statutClass: 'bg-warning',
-            profitPerte: '-',
+            profitPerte: null,
             profitClass: '',
             stopLoss: stopLoss,
             stopLimit: orderType === 'stoplimit' ? { stopPrice: stopPrice, limitPrice: price } : null,
@@ -1366,7 +1367,7 @@ function initializeUI() {
         };
 
         if (ocoEnabled) {
-            const tpOrder = Object.assign({}, order, { stopLoss: null, takeProfit: takeProfit, prix: '$' + takeProfit });
+            const tpOrder = Object.assign({}, order, { stopLoss: null, takeProfit: takeProfit, prix: takeProfit });
             const slOrder = Object.assign({}, order, { takeProfit: null });
             addTrade(tpOrder);
             addTrade(slOrder);
