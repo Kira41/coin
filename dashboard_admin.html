@@ -402,47 +402,7 @@
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>#TXN001</td>
-                                                <td>Marie Dupont</td>
-                                                <td><span class="badge bg-info">Dépôt</span></td>
-                                                <td>€1,250.00</td>
-                                                <td><span class="badge bg-success">Approuvé</span></td>
-                                                <td>24/06/2025 14:30</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>#TXN002</td>
-                                                <td>Jean Martin</td>
-                                                <td><span class="badge bg-warning">Retrait</span></td>
-                                                <td>€750.00</td>
-                                                <td><span class="badge bg-warning">En Attente</span></td>
-                                                <td>24/06/2025 13:15</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>#TXN003</td>
-                                                <td>Sophie Bernard</td>
-                                                <td><span class="badge bg-secondary">Transfert</span></td>
-                                                <td>€300.00</td>
-                                                <td><span class="badge bg-danger">Rejeté</span></td>
-                                                <td>24/06/2025 11:45</td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        </tbody>
+                                        <tbody id="transactionsTableBody"></tbody>
                                     </table>
                                 </div>
                             </div>
@@ -856,6 +816,7 @@
                     // Show target section
                     const targetSection = this.getAttribute('data-section');
                     document.getElementById(targetSection + '-section').classList.add('active');
+                    if (targetSection === 'transactions') loadTransactions();
                 });
             });
             
@@ -863,14 +824,15 @@
             document.querySelectorAll('[data-section]').forEach(button => {
                 button.addEventListener('click', function() {
                     const targetSection = this.getAttribute('data-section');
-                    
+
                     // Update navigation
                     navLinks.forEach(l => l.classList.remove('active'));
                     document.querySelector(`[data-section="${targetSection}"]`).classList.add('active');
-                    
+
                     // Show target section
                     sections.forEach(section => section.classList.remove('active'));
                     document.getElementById(targetSection + '-section').classList.add('active');
+                    if (targetSection === 'transactions') loadTransactions();
                 });
             });
             checkAuth();
@@ -1133,6 +1095,7 @@
                         });
                     }
                 }
+                loadTransactions();
             } catch (err) {
                 console.error('Failed to load admin data', err);
             }
@@ -1434,6 +1397,73 @@
                 alert(result.message || 'Erreur lors de la mise à jour');
             }
         });
+
+        async function loadTransactions() {
+            try {
+                const res = await fetchWithAuth('admin_transactions_getter.php');
+                const data = await res.json();
+                const tbody = document.getElementById('transactionsTableBody');
+                if (!tbody) return;
+                tbody.innerHTML = '';
+                const txs = data.transactions || [];
+                if (txs.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Aucune donnée disponible</td></tr>';
+                } else {
+                    txs.forEach(t => {
+                        const hideAccept = String(t.status).toLowerCase() === 'accept' || String(t.status).toLowerCase() === 'complet';
+                        const row = `<tr data-id="${escapeHtml(t.id)}">
+                            <td>${escapeHtml(t.id)}</td>
+                            <td>${escapeHtml(t.user_id)}</td>
+                            <td>${escapeHtml(t.type || '')}</td>
+                            <td>${escapeHtml(t.amount || '')}</td>
+                            <td>${escapeHtml(t.status || '')}</td>
+                            <td>${escapeHtml(t.date || '')}</td>
+                            <td>
+                                <button class="btn btn-sm btn-outline-success me-1 tx-accept" ${hideAccept ? 'style="display:none;"' : ''}>accept</button>
+                                <button class="btn btn-sm btn-outline-danger me-1 tx-reject">reject</button>
+                                <button class="btn btn-sm btn-outline-secondary tx-remove">remove</button>
+                            </td>
+                        </tr>`;
+                        tbody.insertAdjacentHTML('beforeend', row);
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load transactions', err);
+            }
+        }
+
+        async function updateTransaction(id, status, statusClass, remove = false) {
+            const payload = { action: 'update_transaction', id: id };
+            if (remove) {
+                payload.delete = 1;
+            } else {
+                payload.status = status;
+                payload.statusClass = statusClass;
+            }
+            await fetchWithAuth('admin_setter.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            loadTransactions();
+        }
+
+        const txBody = document.getElementById('transactionsTableBody');
+        if (txBody) {
+            txBody.addEventListener('click', function(e) {
+                const id = e.target.closest('tr')?.getAttribute('data-id');
+                if (!id) return;
+                if (e.target.closest('.tx-accept')) {
+                    updateTransaction(id, 'accept', 'bg-success');
+                } else if (e.target.closest('.tx-reject')) {
+                    updateTransaction(id, 'reject', 'bg-danger');
+                } else if (e.target.closest('.tx-remove')) {
+                    if (confirm('Supprimer cette transaction ?')) {
+                        updateTransaction(id, '', '', true);
+                    }
+                }
+            });
+        }
 
         // Add some interactive features
         document.addEventListener('DOMContentLoaded', function() {
