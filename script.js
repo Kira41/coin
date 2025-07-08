@@ -758,12 +758,6 @@ function initializeUI() {
             }[this.id];
             const amt = parseFloat($(amountField).val());
             if (!isNaN(amt) && amt > 0) {
-                const cur = parseDollar(dashboardData.personalData.balance);
-                dashboardData.personalData.balance = cur - amt;
-                dashboardData.personalData.totalRetraits =
-                    parseDollar(dashboardData.personalData.totalRetraits) + amt;
-                dashboardData.personalData.nbTransactions =
-                    (parseInt(dashboardData.personalData.nbTransactions) || 0) + 1;
                 const method = this.id === 'bankWithdrawForm' ? 'Banque' :
                     this.id === 'paypalWithdrawForm' ? 'Paypal' :
                     (currencyNames[$('#cryptoCurrencyWithdraw').val()] || 'Crypto');
@@ -781,8 +775,6 @@ function initializeUI() {
                 });
                 dashboardData.retraits = dashboardData.retraits.slice(0, 10);
                 addTransactionRecord('Retrait', amt, 'En cours', 'bg-warning', opNumR);
-                updateBalances();
-                updateCounters();
                 renderWithdrawHistory();
                 renderRecentTransactions();
                 showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
@@ -819,12 +811,6 @@ function initializeUI() {
             }[this.id];
             const amt = parseFloat($(amountField).val());
             if (!isNaN(amt) && amt > 0) {
-                const cur = parseDollar(dashboardData.personalData.balance);
-                dashboardData.personalData.balance = cur + amt;
-                dashboardData.personalData.totalDepots =
-                    parseDollar(dashboardData.personalData.totalDepots) + amt;
-                dashboardData.personalData.nbTransactions =
-                    (parseInt(dashboardData.personalData.nbTransactions) || 0) + 1;
                 const method = this.id === 'bankDepositForm' ? 'Banque' :
                     this.id === 'cardDepositForm' ? 'Carte' :
                     (currencyNames[$('#cryptoCurrency').val()] || 'Crypto');
@@ -842,8 +828,6 @@ function initializeUI() {
                 });
                 dashboardData.deposits = dashboardData.deposits.slice(0, 10);
                 renderDepositHistory();
-                updateBalances();
-                updateCounters();
                 addTransactionRecord('Dépôt', amt, 'En cours', 'bg-warning', opNumD);
                 renderRecentTransactions();
                 showBootstrapAlert('depositAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
