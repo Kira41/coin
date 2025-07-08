@@ -9,6 +9,19 @@ try {
     $pdo = new PDO($dsn, 'root', '');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    function formatTimeAgoFromDate($dateStr) {
+        $ts = strtotime($dateStr);
+        if (!$ts) return '';
+        $diff = time() - $ts;
+        if ($diff < 60) return "À l'instant";
+        $mins = floor($diff / 60);
+        if ($mins < 60) return 'Il y a ' . $mins . ' minute' . ($mins > 1 ? 's' : '');
+        $hours = floor($diff / 3600);
+        if ($hours < 24) return 'Il y a ' . $hours . ' heure' . ($hours > 1 ? 's' : '');
+        $days = floor($diff / 86400);
+        return 'Il y a ' . $days . ' jour' . ($days > 1 ? 's' : '');
+    }
+
     $adminId = null;
     session_start();
     if (isset($_SESSION['admin_id'])) {
@@ -172,8 +185,8 @@ try {
         $pdo->beginTransaction();
         try {
             $stmt = ($historyTable
-                ? $pdo->prepare("SELECT user_id, amount, status FROM $historyTable WHERE operationNumber = ? FOR UPDATE")
-                : $pdo->prepare("SELECT user_id, amount, status FROM transactions WHERE operationNumber = ? FOR UPDATE"));
+                ? $pdo->prepare("SELECT user_id, amount, status, date FROM $historyTable WHERE operationNumber = ? FOR UPDATE")
+                : $pdo->prepare("SELECT user_id, amount, status, date FROM transactions WHERE operationNumber = ? FOR UPDATE"));
             $stmt->execute([$op]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$row) {
@@ -227,6 +240,18 @@ try {
                             . 'nbTransactions = COALESCE(nbTransactions,0)+1 '
                             . 'WHERE user_id = ?'
                         )->execute([$amount, $amount, $userId]);
+
+                        $timeAgo = formatTimeAgoFromDate($row['date']);
+                        $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
+                        $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
+                            ->execute([
+                                $userId,
+                                'success',
+                                'Dépôt réussi',
+                                "Un montant de $msgAmount a été déposé avec succès.",
+                                $timeAgo,
+                                'alert-success'
+                            ]);
                     } elseif ($oldStatus === 'complet' && $status !== 'complet') {
                         $pdo->prepare(
                             'UPDATE personal_data SET '
@@ -245,6 +270,18 @@ try {
                             . 'nbTransactions = COALESCE(nbTransactions,0)+1 '
                             . 'WHERE user_id = ?'
                         )->execute([$amount, $amount, $userId]);
+
+                        $timeAgo = formatTimeAgoFromDate($row['date']);
+                        $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
+                        $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
+                            ->execute([
+                                $userId,
+                                'success',
+                                'Retrait approuvé',
+                                "Votre retrait de $msgAmount a été approuvé.",
+                                $timeAgo,
+                                'alert-success'
+                            ]);
                     } elseif ($oldStatus === 'complet' && $status !== 'complet') {
                         $pdo->prepare(
                             'UPDATE personal_data SET '
