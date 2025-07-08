@@ -1042,6 +1042,15 @@
                 .replace(/"/g, '&quot;');
         }
 
+        function formatDollar(num) {
+            const n = Number(num);
+            const hasDecimals = n % 1 !== 0;
+            return n.toLocaleString('en-US', {
+                minimumFractionDigits: hasDecimals ? 2 : 0,
+                maximumFractionDigits: hasDecimals ? 2 : 0
+            }) + ' $';
+        }
+
         async function loadAdminData() {
             try {
                 const res = await fetchWithAuth('admin_getter.php');
@@ -1299,7 +1308,15 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'update_user', user: user })
             });
-            const result = await res.json();
+            let result;
+            try {
+                result = await res.json();
+            } catch (err) {
+                const txt = await res.text();
+                console.error('Invalid JSON', txt);
+                alert('Erreur serveur');
+                return;
+            }
             if (result.status === 'ok') {
                 bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide();
                 loadAdminData();
