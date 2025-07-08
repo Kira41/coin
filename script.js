@@ -390,7 +390,7 @@ function initializeUI() {
 
     const $notifications = $('#notifications');
     if (dashboardData.notifications?.length > 0) {
-        dashboardData.notifications.forEach(n => {
+        dashboardData.notifications.slice(0, 4).forEach(n => {
             $notifications.append(`
                 <div class="alert ${escapeHtml(n.alertClass)}">
                     <strong>${escapeHtml(n.title)}</strong>
@@ -476,7 +476,7 @@ function initializeUI() {
         }).join('');
     }
 
-    const notifications = dashboardData.notifications || [];
+    const notifications = (dashboardData.notifications || []).slice(0, 4);
     $('#notificationCount').text(notifications.length);
     const $dropdown = $('#notificationsDropdown');
     $dropdown.empty();
