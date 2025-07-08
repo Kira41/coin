@@ -202,18 +202,18 @@ try {
                 if ($oldStatus === 'complet') {
                     if ($prefix === 'D') {
                         $pdo->prepare(
-                            'UPDATE personal_data SET '\
-                            . 'balance = COALESCE(balance,0)-?, '\
-                            . 'totalDepots = COALESCE(totalDepots,0)-?, '\
-                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '\
+                            'UPDATE personal_data SET '
+                            . 'balance = COALESCE(balance,0)-?, '
+                            . 'totalDepots = COALESCE(totalDepots,0)-?, '
+                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '
                             . 'WHERE user_id = ?')
                             ->execute([$amount, $amount, $userId]);
                     } elseif ($prefix === 'R') {
                         $pdo->prepare(
-                            'UPDATE personal_data SET '\
-                            . 'balance = COALESCE(balance,0)+?, '\
-                            . 'totalRetraits = COALESCE(totalRetraits,0)-?, '\
-                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '\
+                            'UPDATE personal_data SET '
+                            . 'balance = COALESCE(balance,0)+?, '
+                            . 'totalRetraits = COALESCE(totalRetraits,0)-?, '
+                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '
                             . 'WHERE user_id = ?')
                             ->execute([$amount, $amount, $userId]);
                     }
@@ -234,36 +234,36 @@ try {
                 if ($prefix === 'D') {
                     if ($oldStatus !== 'complet' && $status === 'complet') {
                         $pdo->prepare(
-                            'UPDATE personal_data SET '\
-                            . 'balance = COALESCE(balance,0)+?, '\
-                            . 'totalDepots = COALESCE(totalDepots,0)+?, '\
-                            . 'nbTransactions = COALESCE(nbTransactions,0)+1 '\
+                            'UPDATE personal_data SET '
+                            . 'balance = COALESCE(balance,0)+?, '
+                            . 'totalDepots = COALESCE(totalDepots,0)+?, '
+                            . 'nbTransactions = COALESCE(nbTransactions,0)+1 '
                             . 'WHERE user_id = ?')
                             ->execute([$amount, $amount, $userId]);
                     } elseif ($oldStatus === 'complet' && $status !== 'complet') {
                         $pdo->prepare(
-                            'UPDATE personal_data SET '\
-                            . 'balance = COALESCE(balance,0)-?, '\
-                            . 'totalDepots = COALESCE(totalDepots,0)-?, '\
-                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '\
+                            'UPDATE personal_data SET '
+                            . 'balance = COALESCE(balance,0)-?, '
+                            . 'totalDepots = COALESCE(totalDepots,0)-?, '
+                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '
                             . 'WHERE user_id = ?')
                             ->execute([$amount, $amount, $userId]);
                     }
                 } elseif ($prefix === 'R') {
                     if ($oldStatus !== 'complet' && $status === 'complet') {
                         $pdo->prepare(
-                            'UPDATE personal_data SET '\
-                            . 'balance = COALESCE(balance,0)-?, '\
-                            . 'totalRetraits = COALESCE(totalRetraits,0)+?, '\
-                            . 'nbTransactions = COALESCE(nbTransactions,0)+1 '\
+                            'UPDATE personal_data SET '
+                            . 'balance = COALESCE(balance,0)-?, '
+                            . 'totalRetraits = COALESCE(totalRetraits,0)+?, '
+                            . 'nbTransactions = COALESCE(nbTransactions,0)+1 '
                             . 'WHERE user_id = ?')
                             ->execute([$amount, $amount, $userId]);
                     } elseif ($oldStatus === 'complet' && $status !== 'complet') {
                         $pdo->prepare(
-                            'UPDATE personal_data SET '\
-                            . 'balance = COALESCE(balance,0)+?, '\
-                            . 'totalRetraits = COALESCE(totalRetraits,0)-?, '\
-                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '\
+                            'UPDATE personal_data SET '
+                            . 'balance = COALESCE(balance,0)+?, '
+                            . 'totalRetraits = COALESCE(totalRetraits,0)-?, '
+                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '
                             . 'WHERE user_id = ?')
                             ->execute([$amount, $amount, $userId]);
                     }
