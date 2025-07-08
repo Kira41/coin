@@ -1309,10 +1309,10 @@
                 body: JSON.stringify({ action: 'update_user', user: user })
             });
             let result;
+            const txt = await res.text();
             try {
-                result = await res.json();
+                result = JSON.parse(txt);
             } catch (err) {
-                const txt = await res.text();
                 console.error('Invalid JSON', txt);
                 alert('Erreur serveur');
                 return;
