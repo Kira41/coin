@@ -11,39 +11,38 @@ try {
 
     $adminId = null;
     session_start();
-if (isset($_SESSION['admin_id'])) {
-    $adminId = (int)$_SESSION['admin_id'];
-} elseif (!empty($_SERVER['HTTP_AUTHORIZATION']) &&
-          preg_match('/Bearer\s+(\d+)/i', $_SERVER['HTTP_AUTHORIZATION'], $m)) {
-    $adminId = (int)$m[1];
-}
-if (!$adminId) {
-    http_response_code(401);
-    echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
-    exit;
-}
+    if (isset($_SESSION['admin_id'])) {
+        $adminId = (int)$_SESSION['admin_id'];
+    } elseif (!empty($_SERVER['HTTP_AUTHORIZATION']) &&
+        preg_match('/Bearer\s+(\d+)/i', $_SERVER['HTTP_AUTHORIZATION'], $m)) {
+        $adminId = (int)$m[1];
+    }
+    if (!$adminId) {
+        http_response_code(401);
+        echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
+        exit;
+    }
 
-$input = file_get_contents('php://input');
-$data = json_decode($input, true);
-if (!is_array($data)) {
-    http_response_code(400);
-    echo json_encode(['status' => 'error', 'message' => 'Invalid JSON']);
-    exit;
-}
+    $input = file_get_contents('php://input');
+    $data = json_decode($input, true);
+    if (!is_array($data)) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Invalid JSON']);
+        exit;
+    }
 
-$allowedUserCols = [
-    'user_id','balance','totalDepots','totalRetraits','nbTransactions',
-    'fullName','compteverifie','compteverifie01','niveauavance','passwordHash',
-    'passwordStrength','passwordStrengthBar','emailNotifications','smsNotifications',
-    'loginAlerts','transactionAlerts','twoFactorAuth','emailaddress','address',
-    'phone','dob','nationality','created_at','btcAddress','ethAddress','usdtAddress',
-    'userBankName','userAccountName','userAccountNumber','userIban','userSwiftCode',
-    'linked_to_id'
-];
+    $allowedUserCols = [
+        'user_id','balance','totalDepots','totalRetraits','nbTransactions',
+        'fullName','compteverifie','compteverifie01','niveauavance','passwordHash',
+        'passwordStrength','passwordStrengthBar','emailNotifications','smsNotifications',
+        'loginAlerts','transactionAlerts','twoFactorAuth','emailaddress','address',
+        'phone','dob','nationality','created_at','btcAddress','ethAddress','usdtAddress',
+        'userBankName','userAccountName','userAccountNumber','userIban','userSwiftCode',
+        'linked_to_id'
+    ];
 
-$action = $data['action'] ?? '';
+    $action = $data['action'] ?? '';
 
-try {
     if ($action === 'create_admin') {
         $email = $data['email'] ?? '';
         $password = $data['password'] ?? '';
@@ -52,7 +51,6 @@ try {
         if (!$email || !$password) {
             throw new Exception('Missing parameters');
         }
-        // Passwords are now pre-hashed on the client using MD5
         $stmt = $pdo->prepare('INSERT INTO admins_agents (email, password, is_admin, created_by) VALUES (?,?,?,?)');
         $stmt->execute([$email, $password, $isAdmin, $createdBy]);
         echo json_encode(['status' => 'ok', 'id' => $pdo->lastInsertId()]);
@@ -63,12 +61,10 @@ try {
         }
         $password = $user['password'];
         unset($user['password']);
-        // Client provides an MD5 hash for the password
         $user['passwordHash'] = $password;
         if (!isset($user['created_at']) || $user['created_at'] === '') {
             $user['created_at'] = date('Y-m-d');
         }
-
         $user = array_intersect_key($user, array_flip($allowedUserCols));
         $cols = array_keys($user);
         $place = implode(',', array_fill(0, count($cols), '?'));
@@ -118,7 +114,6 @@ try {
                 throw new Exception('Incorrect old password');
             }
             $fields[] = 'password = ?';
-            // Password is expected to be pre-hashed with MD5
             $values[] = $data['password'];
         }
         if (isset($data['is_admin'])) {
@@ -146,7 +141,6 @@ try {
         if (!$userId) {
             throw new Exception('Missing user_id');
         }
-
         $pdo->beginTransaction();
         try {
             $tables = [
@@ -168,7 +162,6 @@ try {
         if ($op === '') {
             throw new Exception('Missing id');
         }
-
         $prefix = strtoupper(substr($op, 0, 1));
         $historyTable = null;
         if ($prefix === 'D') {
@@ -176,7 +169,6 @@ try {
         } elseif ($prefix === 'R') {
             $historyTable = 'retraits';
         }
-
         $pdo->beginTransaction();
         try {
             $stmt = ($historyTable
@@ -190,15 +182,11 @@ try {
             $userId = (int)$row['user_id'];
             $amount = (float)$row['amount'];
             $oldStatus = $row['status'];
-
             if (!empty($data['delete'])) {
                 if ($historyTable) {
-                    $pdo->prepare("DELETE FROM $historyTable WHERE operationNumber = ?")
-                        ->execute([$op]);
+                    $pdo->prepare("DELETE FROM $historyTable WHERE operationNumber = ?")->execute([$op]);
                 }
-                $pdo->prepare("DELETE FROM transactions WHERE operationNumber = ?")
-                    ->execute([$op]);
-
+                $pdo->prepare("DELETE FROM transactions WHERE operationNumber = ?")->execute([$op]);
                 if ($oldStatus === 'complet') {
                     if ($prefix === 'D') {
                         $pdo->prepare(
@@ -206,16 +194,16 @@ try {
                             . 'balance = COALESCE(balance,0)-?, '
                             . 'totalDepots = COALESCE(totalDepots,0)-?, '
                             . 'nbTransactions = COALESCE(nbTransactions,0)-1 '
-                            . 'WHERE user_id = ?')
-                            ->execute([$amount, $amount, $userId]);
+                            . 'WHERE user_id = ?'
+                        )->execute([$amount, $amount, $userId]);
                     } elseif ($prefix === 'R') {
                         $pdo->prepare(
                             'UPDATE personal_data SET '
                             . 'balance = COALESCE(balance,0)+?, '
                             . 'totalRetraits = COALESCE(totalRetraits,0)-?, '
                             . 'nbTransactions = COALESCE(nbTransactions,0)-1 '
-                            . 'WHERE user_id = ?')
-                            ->execute([$amount, $amount, $userId]);
+                            . 'WHERE user_id = ?'
+                        )->execute([$amount, $amount, $userId]);
                     }
                 }
             } else {
@@ -230,7 +218,6 @@ try {
                 }
                 $pdo->prepare("UPDATE transactions SET status = ?, statusClass = ? WHERE operationNumber = ?")
                     ->execute([$status, $class, $op]);
-
                 if ($prefix === 'D') {
                     if ($oldStatus !== 'complet' && $status === 'complet') {
                         $pdo->prepare(
@@ -238,16 +225,16 @@ try {
                             . 'balance = COALESCE(balance,0)+?, '
                             . 'totalDepots = COALESCE(totalDepots,0)+?, '
                             . 'nbTransactions = COALESCE(nbTransactions,0)+1 '
-                            . 'WHERE user_id = ?')
-                            ->execute([$amount, $amount, $userId]);
+                            . 'WHERE user_id = ?'
+                        )->execute([$amount, $amount, $userId]);
                     } elseif ($oldStatus === 'complet' && $status !== 'complet') {
                         $pdo->prepare(
                             'UPDATE personal_data SET '
                             . 'balance = COALESCE(balance,0)-?, '
                             . 'totalDepots = COALESCE(totalDepots,0)-?, '
                             . 'nbTransactions = COALESCE(nbTransactions,0)-1 '
-                            . 'WHERE user_id = ?')
-                            ->execute([$amount, $amount, $userId]);
+                            . 'WHERE user_id = ?'
+                        )->execute([$amount, $amount, $userId]);
                     }
                 } elseif ($prefix === 'R') {
                     if ($oldStatus !== 'complet' && $status === 'complet') {
@@ -256,20 +243,19 @@ try {
                             . 'balance = COALESCE(balance,0)-?, '
                             . 'totalRetraits = COALESCE(totalRetraits,0)+?, '
                             . 'nbTransactions = COALESCE(nbTransactions,0)+1 '
-                            . 'WHERE user_id = ?')
-                            ->execute([$amount, $amount, $userId]);
+                            . 'WHERE user_id = ?'
+                        )->execute([$amount, $amount, $userId]);
                     } elseif ($oldStatus === 'complet' && $status !== 'complet') {
                         $pdo->prepare(
                             'UPDATE personal_data SET '
                             . 'balance = COALESCE(balance,0)+?, '
                             . 'totalRetraits = COALESCE(totalRetraits,0)-?, '
                             . 'nbTransactions = COALESCE(nbTransactions,0)-1 '
-                            . 'WHERE user_id = ?')
-                            ->execute([$amount, $amount, $userId]);
+                            . 'WHERE user_id = ?'
+                        )->execute([$amount, $amount, $userId]);
                     }
                 }
             }
-
             $pdo->commit();
             echo json_encode(['status' => 'ok']);
         } catch (Exception $e) {
