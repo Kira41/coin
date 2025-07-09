@@ -779,6 +779,10 @@ function initializeUI() {
         saveForm(this.id);
         const today = new Date().toISOString().split('T')[0].replace(/-/g, '/');
         if (['bankWithdrawForm', 'cryptoWithdrawForm', 'paypalWithdrawForm'].includes(this.id)) {
+            if ((dashboardData.retraits || []).some(r => r.status === 'En cours')) {
+                showBootstrapAlert('withdrawAlert', 'Un retrait est déjà en attente.', 'warning');
+                return;
+            }
             const amountField = {
                 bankWithdrawForm: '#withdrawAmount',
                 cryptoWithdrawForm: '#cryptoWithdrawAmount',
@@ -832,6 +836,10 @@ function initializeUI() {
                 updatePlatformBankDetails();
             }
         } else if (['bankDepositForm', 'cardDepositForm', 'cryptoDepositForm'].includes(this.id)) {
+            if ((dashboardData.deposits || []).some(d => d.status === 'En cours')) {
+                showBootstrapAlert('depositAlert', 'Un dépôt est déjà en attente.', 'warning');
+                return;
+            }
             const amountField = {
                 bankDepositForm: '#bankDepositAmount',
                 cardDepositForm: '#cardDepositAmount',
