@@ -15,7 +15,9 @@ This project uses small PHP helpers (`getter.php` and `setter.php`) to read and 
 The dashboard pages (`dashbord_user.html` and `script.js`) request data from `getter.php` and send updates to `setter.php`.
 `script.js` now fetches wallet addresses from `get_wallets.php`, which returns `SELECT * FROM wallets WHERE user_id = ?` in JSON. The `wallets` table stores
 crypto addresses with a `BIGINT` `id` so each entry keeps the unique identifier
-generated in JavaScript with `Date.now()`.
+generated in JavaScript with `Date.now()`. User accounts use the same approach:
+the `personal_data.user_id` column is also a `BIGINT` so IDs created with
+`Date.now()` are inserted without overflowing.
 
 The `personal_data` table now includes columns for storing default bank details:
 `userBankName`, `userAccountName`, `userAccountNumber`, `userIban` and
