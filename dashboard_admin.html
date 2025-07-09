@@ -1473,16 +1473,16 @@
                     .toLowerCase();
                 const hideAccept = normalizedStatus === 'complet';
                 const row = `<tr data-id="${escapeHtml(t.operationNumber)}">`
-                    + `<td>${escapeHtml(t.operationNumber)}</td>`
+                    + `<td class="text-muted fw-bold">${escapeHtml(t.operationNumber)}</td>`
                     + `<td>${escapeHtml(t.user_id)}</td>`
                     + `<td><span class="badge ${escapeHtml(typeClasses[t.type] || 'bg-secondary')}">${escapeHtml(t.type || '')}</span></td>`
-                    + `<td>${escapeHtml(t.amount || '')}</td>`
+                    + `<td>${formatDollar(t.amount || 0)}</td>`
                     + `<td><span class="badge ${escapeHtml(t.statusClass || 'bg-secondary')}">${escapeHtml(t.status || '')}</span></td>`
                     + `<td>${escapeHtml(t.date || '')}</td>`
-                    + `<td>`
-                    + `<button class="btn btn-sm btn-outline-danger me-1 tx-reject">reject</button>`
-                    + `<button class="btn btn-sm btn-outline-secondary tx-remove">remove</button>`
-                    + ` <button class="btn btn-sm btn-outline-success me-1 tx-accept" ${hideAccept ? 'style=display:none;' : ''}>complet</button>`
+                    + `<td class="text-nowrap">`
+                    + `<button class="btn btn-sm btn-outline-danger me-1 tx-reject" title="Reject"><i class="fas fa-times"></i></button>`
+                    + `<button class="btn btn-sm btn-outline-secondary me-1 tx-remove" title="Remove"><i class="fas fa-trash-alt"></i></button>`
+                    + `<button class="btn btn-sm btn-outline-success tx-accept" ${hideAccept ? 'style=display:none;' : ''} title="Complete"><i class="fas fa-check"></i></button>`
                     + `</td>`
                     + `</tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
