@@ -18,6 +18,8 @@ if (isset($_SESSION['admin_id'])) {
     $adminId = (int)$m[1];
 }
 
+    $targetId = isset($_GET['admin_id']) ? (int)$_GET['admin_id'] : $adminId;
+
 if (!$adminId) {
     http_response_code(401);
     echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
@@ -30,9 +32,9 @@ $pageSize = $pageSize > 0 ? min($pageSize, 100) : 10;
 $offset = ($page - 1) * $pageSize;
 
 $placeholders = [];
-$linkedIds = [$adminId];
+$linkedIds = [$targetId];
 $agentsStmt = $pdo->prepare('SELECT id FROM admins_agents WHERE created_by = ?');
-$agentsStmt->execute([$adminId]);
+$agentsStmt->execute([$targetId]);
 $agentIds = $agentsStmt->fetchAll(PDO::FETCH_COLUMN);
 if ($agentIds) {
     $linkedIds = array_merge($linkedIds, $agentIds);
