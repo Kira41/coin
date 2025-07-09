@@ -252,6 +252,11 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="card-footer">
+                                <nav>
+                                    <ul class="pagination justify-content-center mb-0" id="transactionsPagination"></ul>
+                                </nav>
+                            </div>
                         </div>
                     </div>
                     
@@ -834,7 +839,7 @@
                     // Show target section
                     const targetSection = this.getAttribute('data-section');
                     document.getElementById(targetSection + '-section').classList.add('active');
-                    if (targetSection === 'transactions') loadTransactions();
+                    if (targetSection === 'transactions') { TX_PAGE = 1; loadTransactions(); }
                 });
             });
             
@@ -850,7 +855,7 @@
                     // Show target section
                     sections.forEach(section => section.classList.remove('active'));
                     document.getElementById(targetSection + '-section').classList.add('active');
-                    if (targetSection === 'transactions') loadTransactions();
+                    if (targetSection === 'transactions') { TX_PAGE = 1; loadTransactions(); }
                 });
             });
             checkAuth();
@@ -1123,6 +1128,7 @@
                         });
                     }
                 }
+                TX_PAGE = 1;
                 loadTransactions();
             } catch (err) {
                 console.error('Failed to load admin data', err);
@@ -1437,6 +1443,8 @@
 
 
         let ALL_TXS = [];
+        let TX_PAGE = 1;
+        const TX_PAGE_SIZE = 10;
 
         function renderTransactions() {
             const tbody = document.getElementById('transactionsTableBody');
@@ -1461,21 +1469,24 @@
             if (statusVal !== 'all') txs = txs.filter(t => String(t.status).toLowerCase() === statusVal.toLowerCase());
             if (searchVal) txs = txs.filter(t => String(t.operationNumber).toLowerCase().includes(searchVal));
 
-            if (txs.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Aucune donnée disponible</td></tr>';
-                return;
-            }
+            const totalPages = Math.ceil(txs.length / TX_PAGE_SIZE) || 1;
+            if (TX_PAGE > totalPages) TX_PAGE = totalPages;
+            const start = (TX_PAGE - 1) * TX_PAGE_SIZE;
+            const pageTxs = txs.slice(start, start + TX_PAGE_SIZE);
 
-            txs.forEach(t => {
-                const normalizedStatus = String(t.status)
-                    .trim()
-                    .replace(/[\s.]+$/, '')
-                    .toLowerCase();
-                const hideAccept = normalizedStatus === 'complet';
-                const acceptBtn = hideAccept ? ''
-                    : `<button class="btn btn-sm btn-outline-success tx-accept" title="Complete"><i class="fas fa-check"></i></button>`;
-                const row = `<tr data-id="${escapeHtml(t.operationNumber)}">`
-                    + `<td class="text-muted fw-bold">${escapeHtml(t.operationNumber)}</td>`
+            if (pageTxs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center">Aucune donnée disponible</td></tr>';
+            } else {
+                pageTxs.forEach(t => {
+                    const normalizedStatus = String(t.status)
+                        .trim()
+                        .replace(/[\s.]+$/, '')
+                        .toLowerCase();
+                    const hideAccept = normalizedStatus === 'complet';
+                    const acceptBtn = hideAccept ? ''
+                        : `<button class="btn btn-sm btn-outline-success tx-accept" title="Complete"><i class="fas fa-check"></i></button>`;
+                    const row = `<tr data-id="${escapeHtml(t.operationNumber)}">`
+                        + `<td class="text-muted fw-bold">${escapeHtml(t.operationNumber)}</td>`
                     + `<td>${escapeHtml(t.user_id)}</td>`
                     + `<td><span class="badge ${escapeHtml(typeClasses[t.type] || 'bg-secondary')}">${escapeHtml(t.type || '')}</span></td>`
                     + `<td>${formatDollar(t.amount || 0)}</td>`
@@ -1487,8 +1498,22 @@
                     + acceptBtn
                     + `</td>`
                     + `</tr>`;
-                tbody.insertAdjacentHTML('beforeend', row);
-            });
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            }
+
+            const pagination = document.getElementById('transactionsPagination');
+            if (pagination) {
+                pagination.innerHTML = '';
+                const prevClass = TX_PAGE === 1 ? 'disabled' : '';
+                pagination.insertAdjacentHTML('beforeend', `<li class="page-item ${prevClass}"><a class="page-link" href="#" data-page="${TX_PAGE - 1}">Précédent</a></li>`);
+                for (let i = 1; i <= totalPages; i++) {
+                    const active = i === TX_PAGE ? 'active' : '';
+                    pagination.insertAdjacentHTML('beforeend', `<li class="page-item ${active}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`);
+                }
+                const nextClass = TX_PAGE === totalPages ? 'disabled' : '';
+                pagination.insertAdjacentHTML('beforeend', `<li class="page-item ${nextClass}"><a class="page-link" href="#" data-page="${TX_PAGE + 1}">Suivant</a></li>`);
+            }
         }
 
         async function loadTransactions() {
@@ -1514,6 +1539,7 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
+            TX_PAGE = 1;
             loadTransactions();
         }
 
@@ -1536,9 +1562,19 @@
        const typeSel = document.getElementById('txFilterType');
        const statusSel = document.getElementById('txFilterStatus');
         const searchInput = document.getElementById('txSearchInput');
-       if (typeSel) typeSel.addEventListener('change', renderTransactions);
-       if (statusSel) statusSel.addEventListener('change', renderTransactions);
-        if (searchInput) searchInput.addEventListener('input', renderTransactions);
+       if (typeSel) typeSel.addEventListener('change', () => { TX_PAGE = 1; renderTransactions(); });
+       if (statusSel) statusSel.addEventListener('change', () => { TX_PAGE = 1; renderTransactions(); });
+        if (searchInput) searchInput.addEventListener('input', () => { TX_PAGE = 1; renderTransactions(); });
+
+        const txPag = document.getElementById('transactionsPagination');
+        if (txPag) txPag.addEventListener('click', function(e) {
+            e.preventDefault();
+            const page = parseInt(e.target.getAttribute('data-page'));
+            if (!isNaN(page)) {
+                TX_PAGE = page;
+                renderTransactions();
+            }
+        });
 
         // Add some interactive features
         document.addEventListener('DOMContentLoaded', function() {
