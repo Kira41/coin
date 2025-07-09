@@ -1467,7 +1467,10 @@
             }
 
             txs.forEach(t => {
-                const normalizedStatus = String(t.status).toLowerCase();
+                const normalizedStatus = String(t.status)
+                    .trim()
+                    .replace(/[\s.]+$/, '')
+                    .toLowerCase();
                 const hideAccept = normalizedStatus === 'complet';
                 const row = `<tr data-id="${escapeHtml(t.operationNumber)}">`
                     + `<td>${escapeHtml(t.operationNumber)}</td>`
