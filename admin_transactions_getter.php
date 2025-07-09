@@ -29,12 +29,22 @@ $pageSize = isset($_GET['page_size']) ? (int)$_GET['page_size'] : 10;
 $pageSize = $pageSize > 0 ? min($pageSize, 100) : 10;
 $offset = ($page - 1) * $pageSize;
 
+$placeholders = [];
+$linkedIds = [$adminId];
+$agentsStmt = $pdo->prepare('SELECT id FROM admins_agents WHERE created_by = ?');
+$agentsStmt->execute([$adminId]);
+$agentIds = $agentsStmt->fetchAll(PDO::FETCH_COLUMN);
+if ($agentIds) {
+    $linkedIds = array_merge($linkedIds, $agentIds);
+}
+$placeholders = implode(',', array_fill(0, count($linkedIds), '?'));
+
 $baseSql = "FROM transactions AS t
         JOIN personal_data AS p ON p.user_id = t.user_id
-        WHERE p.linked_to_id = ?";
+        WHERE p.linked_to_id IN ($placeholders)";
 
 $countStmt = $pdo->prepare("SELECT COUNT(*) $baseSql");
-$countStmt->execute([$adminId]);
+$countStmt->execute($linkedIds);
 $total = (int)$countStmt->fetchColumn();
 
 $sql = "SELECT t.operationNumber, t.user_id, t.type, t.amount, t.status, t.date, t.statusClass
@@ -42,7 +52,7 @@ $sql = "SELECT t.operationNumber, t.user_id, t.type, t.amount, t.status, t.date,
         ORDER BY STR_TO_DATE(t.date, '%Y/%m/%d') DESC
         LIMIT ? OFFSET ?";
 $stmt = $pdo->prepare($sql);
-$stmt->execute([$adminId, $pageSize, $offset]);
+$stmt->execute(array_merge($linkedIds, [$pageSize, $offset]));
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 echo json_encode(['transactions' => $rows, 'total' => $total, 'page' => $page, 'page_size' => $pageSize]);
