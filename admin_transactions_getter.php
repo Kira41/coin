@@ -30,6 +30,7 @@ $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $pageSize = isset($_GET['page_size']) ? (int)$_GET['page_size'] : 10;
 $pageSize = $pageSize > 0 ? min($pageSize, 100) : 10;
 $offset = ($page - 1) * $pageSize;
+$search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
 $placeholders = [];
 $linkedIds = [$targetId];
@@ -41,12 +42,19 @@ if ($agentIds) {
 }
 $placeholders = implode(',', array_fill(0, count($linkedIds), '?'));
 
+
 $baseSql = "FROM transactions AS t
         JOIN personal_data AS p ON p.user_id = t.user_id
         WHERE p.linked_to_id IN ($placeholders)";
 
+$params = $linkedIds;
+if ($search !== '') {
+    $baseSql .= " AND t.operationNumber LIKE ?";
+    $params[] = '%' . $search . '%';
+}
+
 $countStmt = $pdo->prepare("SELECT COUNT(*) $baseSql");
-$countStmt->execute($linkedIds);
+$countStmt->execute($params);
 $total = (int)$countStmt->fetchColumn();
 
     // MySQL doesn't allow binding parameters for LIMIT/OFFSET reliably when
@@ -57,7 +65,7 @@ $total = (int)$countStmt->fetchColumn();
         ORDER BY STR_TO_DATE(t.date, '%Y/%m/%d') DESC
         LIMIT $pageSize OFFSET $offset";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($linkedIds);
+    $stmt->execute($params);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 echo json_encode(['transactions' => $rows, 'total' => $total, 'page' => $page, 'page_size' => $pageSize]);

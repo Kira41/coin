@@ -1516,7 +1516,14 @@
 
         async function loadTransactions() {
             try {
-                const res = await fetchWithAuth(`admin_transactions_getter.php?page=${TX_PAGE}&page_size=${TX_PAGE_SIZE}`);
+                const searchInput = document.getElementById('txSearchInput');
+                const search = searchInput ? searchInput.value.trim() : '';
+                const params = new URLSearchParams({
+                    page: TX_PAGE,
+                    page_size: TX_PAGE_SIZE
+                });
+                if (search) params.append('search', search);
+                const res = await fetchWithAuth(`admin_transactions_getter.php?${params.toString()}`);
                 const data = await res.json();
                 ALL_TXS = data.transactions || [];
                 TX_TOTAL_PAGES = Math.ceil((data.total || 0) / TX_PAGE_SIZE) || 1;
@@ -1563,7 +1570,10 @@
         const searchInput = document.getElementById('txSearchInput');
        if (typeSel) typeSel.addEventListener('change', () => { TX_PAGE = 1; renderTransactions(); });
        if (statusSel) statusSel.addEventListener('change', () => { TX_PAGE = 1; renderTransactions(); });
-        if (searchInput) searchInput.addEventListener('input', () => { TX_PAGE = 1; renderTransactions(); });
+        if (searchInput) searchInput.addEventListener('input', () => {
+            TX_PAGE = 1;
+            loadTransactions();
+        });
 
         const txPag = document.getElementById('transactionsPagination');
         if (txPag) txPag.addEventListener('click', function(e) {
