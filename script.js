@@ -423,7 +423,7 @@ function initializeUI() {
             status,
             statusClass
         });
-        dashboardData.transactions = dashboardData.transactions.slice(0, 10);
+        // keep full history for persistence; UI will limit display to 10
     }
 
     function renderRecentTransactions() {
@@ -773,7 +773,7 @@ function initializeUI() {
                     status: 'En cours',
                     statusClass: 'bg-warning'
                 });
-                dashboardData.retraits = dashboardData.retraits.slice(0, 10);
+                // retain full withdrawal history; display will cap items
                 addTransactionRecord('Retrait', amt, 'En cours', 'bg-warning', opNumR);
                 renderWithdrawHistory();
                 renderRecentTransactions();
@@ -826,7 +826,7 @@ function initializeUI() {
                     status: 'En cours',
                     statusClass: 'bg-warning'
                 });
-                dashboardData.deposits = dashboardData.deposits.slice(0, 10);
+                // keep full deposit history; interface truncates to latest
                 renderDepositHistory();
                 addTransactionRecord('Dépôt', amt, 'En cours', 'bg-warning', opNumD);
                 renderRecentTransactions();
