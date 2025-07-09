@@ -252,11 +252,6 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="card-footer">
-                                <nav>
-                                    <ul class="pagination justify-content-center mb-0" id="transactionsPagination"></ul>
-                                </nav>
-                            </div>
                         </div>
                     </div>
                     
@@ -425,12 +420,17 @@
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody id="transactionsTableBody"></tbody>
-                                    </table>
-                                </div>
+                                    <tbody id="transactionsTableBody"></tbody>
+                                </table>
                             </div>
                         </div>
+                        <div class="card-footer">
+                            <nav>
+                                <ul class="pagination justify-content-center mb-0" id="transactionsPagination"></ul>
+                            </nav>
+                        </div>
                     </div>
+                </div>
                     
                     <!-- KYC Section -->
                     <div id="kyc-section" class="content-section">
@@ -1444,7 +1444,7 @@
 
         let ALL_TXS = [];
         let TX_PAGE = 1;
-        const TX_PAGE_SIZE = 100; // nombre d'entrées par page
+        const TX_PAGE_SIZE = 10; // nombre d'entrées par page
         let TX_TOTAL_PAGES = 1;
 
         function renderTransactions() {
