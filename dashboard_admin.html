@@ -1472,6 +1472,8 @@
                     .replace(/[\s.]+$/, '')
                     .toLowerCase();
                 const hideAccept = normalizedStatus === 'complet';
+                const acceptBtn = hideAccept ? ''
+                    : `<button class="btn btn-sm btn-outline-success tx-accept" title="Complete"><i class="fas fa-check"></i></button>`;
                 const row = `<tr data-id="${escapeHtml(t.operationNumber)}">`
                     + `<td class="text-muted fw-bold">${escapeHtml(t.operationNumber)}</td>`
                     + `<td>${escapeHtml(t.user_id)}</td>`
@@ -1482,7 +1484,7 @@
                     + `<td class="text-nowrap">`
                     + `<button class="btn btn-sm btn-outline-danger me-1 tx-reject" title="Reject"><i class="fas fa-times"></i></button>`
                     + `<button class="btn btn-sm btn-outline-secondary me-1 tx-remove" title="Remove"><i class="fas fa-trash-alt"></i></button>`
-                    + `<button class="btn btn-sm btn-outline-success tx-accept" ${hideAccept ? 'style=display:none;' : ''} title="Complete"><i class="fas fa-check"></i></button>`
+                    + acceptBtn
                     + `</td>`
                     + `</tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
