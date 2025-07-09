@@ -381,7 +381,7 @@
                             <div class="card-header">
                                 <div class="row align-items-center">
                                     <div class="col-md-6">
-                                        <h5 class="mb-0">Transactions Récentes</h5>
+                                        <h5 class="mb-0">Transactions Récentes (10 par page)</h5>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="input-group">
@@ -1444,7 +1444,7 @@
 
         let ALL_TXS = [];
         let TX_PAGE = 1;
-        const TX_PAGE_SIZE = 10;
+        const TX_PAGE_SIZE = 10; // nombre d'entrées par page
         let TX_TOTAL_PAGES = 1;
 
         function renderTransactions() {
