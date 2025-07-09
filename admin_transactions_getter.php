@@ -49,12 +49,15 @@ $countStmt = $pdo->prepare("SELECT COUNT(*) $baseSql");
 $countStmt->execute($linkedIds);
 $total = (int)$countStmt->fetchColumn();
 
-$sql = "SELECT t.operationNumber, t.user_id, t.type, t.amount, t.status, t.date, t.statusClass
+    // MySQL doesn't allow binding parameters for LIMIT/OFFSET reliably when
+    // using emulated prepares. Since the values are cast to integers above
+    // it is safe to directly inject them into the SQL string.
+    $sql = "SELECT t.operationNumber, t.user_id, t.type, t.amount, t.status, t.date, t.statusClass
         $baseSql
         ORDER BY STR_TO_DATE(t.date, '%Y/%m/%d') DESC
-        LIMIT ? OFFSET ?";
-$stmt = $pdo->prepare($sql);
-$stmt->execute(array_merge($linkedIds, [$pageSize, $offset]));
+        LIMIT $pageSize OFFSET $offset";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($linkedIds);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 echo json_encode(['transactions' => $rows, 'total' => $total, 'page' => $page, 'page_size' => $pageSize]);
