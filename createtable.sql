@@ -8,7 +8,7 @@ CREATE TABLE admins_agents (
 );
 
 CREATE TABLE personal_data (
-    user_id INTEGER PRIMARY KEY,
+    user_id BIGINT PRIMARY KEY,
     balance DECIMAL(18,2),
     totalDepots DECIMAL(18,2),
     totalRetraits DECIMAL(18,2),
@@ -44,7 +44,7 @@ CREATE TABLE personal_data (
 
 CREATE TABLE wallets (
     id BIGINT PRIMARY KEY,
-    user_id INTEGER,
+    user_id BIGINT,
     currency TEXT,
     network TEXT,
     address TEXT,
@@ -53,7 +53,7 @@ CREATE TABLE wallets (
 
 CREATE TABLE transactions (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    user_id INTEGER,
+    user_id BIGINT,
     admin_id INTEGER,
     operationNumber TEXT,
     type TEXT,
@@ -70,7 +70,7 @@ CREATE TABLE transactions (
 
 CREATE TABLE notifications (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    user_id INTEGER,
+    user_id BIGINT,
     type TEXT,
     title TEXT,
     message TEXT,
@@ -80,7 +80,7 @@ CREATE TABLE notifications (
 
 CREATE TABLE deposits (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    user_id INTEGER,
+    user_id BIGINT,
     admin_id INTEGER,
     operationNumber TEXT,
     date TEXT,
@@ -97,7 +97,7 @@ CREATE TABLE deposits (
 
 CREATE TABLE retraits (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    user_id INTEGER,
+    user_id BIGINT,
     admin_id INTEGER,
     operationNumber TEXT,
     date TEXT,
@@ -114,7 +114,7 @@ CREATE TABLE retraits (
 
 CREATE TABLE tradingHistory (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    user_id INTEGER,
+    user_id BIGINT,
     admin_id INTEGER,
     operationNumber TEXT,
     temps TEXT,
@@ -136,14 +136,14 @@ CREATE TABLE tradingHistory (
 
 CREATE TABLE loginHistory (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
-    user_id INTEGER,
+    user_id BIGINT,
     date TEXT,
     ip TEXT,
     device TEXT
 );
 
 CREATE TABLE bank_withdrawl_info (
-    user_id INTEGER PRIMARY KEY,
+    user_id BIGINT PRIMARY KEY,
     widhrawBankName TEXT,
     widhrawAccountName TEXT,
     widhrawAccountNumber TEXT,
