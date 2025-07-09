@@ -426,11 +426,18 @@ function initializeUI() {
         // keep full history for persistence; UI will limit display to 10
     }
 
-    function renderRecentTransactions() {
-        const $tbody = $('#transactionsRecents');
+    let TX_PAGE = 1;
+    const TX_PAGE_SIZE = 10;
+    let TX_TOTAL_PAGES = 1;
+    let ALL_TXS = [];
+
+    function renderTransactions() {
+        const $tbody = $('#transactionsTableBody');
         $tbody.empty();
-        if (dashboardData.transactions?.length > 0) {
-            dashboardData.transactions.slice(0, 5).forEach(t => {
+        if (ALL_TXS.length === 0) {
+            $tbody.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
+        } else {
+            ALL_TXS.forEach(t => {
                 $tbody.append(`
                     <tr>
                         <td>${escapeHtml(t.operationNumber)}</td>
@@ -440,8 +447,29 @@ function initializeUI() {
                         <td><span class="badge ${escapeHtml(t.statusClass)}">${escapeHtml(t.status)}</span></td>
                     </tr>`);
             });
-        } else {
-            $tbody.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
+        }
+        const $pag = $('#transactionsPagination');
+        if ($pag.length) {
+            $pag.empty();
+            const prevClass = TX_PAGE === 1 ? 'disabled' : '';
+            $pag.append(`<li class="page-item ${prevClass}"><a class="page-link" href="#" data-page="${TX_PAGE - 1}">Précédent</a></li>`);
+            for (let i = 1; i <= TX_TOTAL_PAGES; i++) {
+                const active = i === TX_PAGE ? 'active' : '';
+                $pag.append(`<li class="page-item ${active}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`);
+            }
+            const nextClass = TX_PAGE === TX_TOTAL_PAGES ? 'disabled' : '';
+            $pag.append(`<li class="page-item ${nextClass}"><a class="page-link" href="#" data-page="${TX_PAGE + 1}">Suivant</a></li>`);
+        }
+    }
+
+    async function loadTransactions() {
+        try {
+            const data = await apiFetch(`user_transactions_getter.php?user_id=${encodeURIComponent(userId)}&page=${TX_PAGE}&page_size=${TX_PAGE_SIZE}`);
+            ALL_TXS = data.transactions || [];
+            TX_TOTAL_PAGES = Math.ceil((data.total || 0) / TX_PAGE_SIZE) || 1;
+            renderTransactions();
+        } catch (err) {
+            console.error('Failed to load transactions', err);
         }
     }
 
@@ -776,7 +804,7 @@ function initializeUI() {
                 // retain full withdrawal history; display will cap items
                 addTransactionRecord('Retrait', amt, 'En cours', 'bg-warning', opNumR);
                 renderWithdrawHistory();
-                renderRecentTransactions();
+                loadTransactions();
                 showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
                 saveDashboardData();
             }
@@ -829,7 +857,7 @@ function initializeUI() {
                 // keep full deposit history; interface truncates to latest
                 renderDepositHistory();
                 addTransactionRecord('Dépôt', amt, 'En cours', 'bg-warning', opNumD);
-                renderRecentTransactions();
+                loadTransactions();
                 showBootstrapAlert('depositAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
                 saveDashboardData();
             }
@@ -1095,7 +1123,7 @@ function initializeUI() {
 
     renderDepositHistory();
     renderWithdrawHistory();
-    renderRecentTransactions();
+    loadTransactions();
 
     const apiPairs = {
         BTCUSD: 'BTCUSDT',
@@ -1171,7 +1199,7 @@ function initializeUI() {
         addTransactionRecord('Trading', order.montant, order.statut, order.statutClass, order.operationNumber);
         saveDashboardData();
         renderTradingHistory();
-        renderRecentTransactions();
+        loadTransactions();
     }
 
     function finalizeOrder(order, exitPrice) {
@@ -1207,7 +1235,7 @@ function initializeUI() {
         saveDashboardData();
         updateBalances();
         renderTradingHistory();
-        renderRecentTransactions();
+        loadTransactions();
     }
 
     function completeOrder(order) {
@@ -1447,4 +1475,12 @@ function initializeUI() {
     } else {
         $loginHistoryBody.html('<tr><td colspan="3" class="text-center">Aucune donnée disponible</td></tr>');
     }
-};
+
+    $('#transactionsPagination').on('click', 'a', function(e) {
+        e.preventDefault();
+        const page = parseInt($(this).data('page'));
+        if (!isNaN(page)) {
+            TX_PAGE = page;
+            loadTransactions();
+        }
+    });};

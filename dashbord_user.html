@@ -388,27 +388,27 @@
 </div>
 <div class="row mt-4">
 <div class="col-md-8">
-<div class="card" id="dernierestransactionsCard">
-<div class="card-header" id="dernierestransactionsHeader">
-<i class="fas fa-history me-2"></i> Dernières transactions
-                    </div>
-<div class="card-body">
-<div class="table-responsive">
-<table id="dernierestransactionstable" class="table table-hover">
-<thead>
-<tr>
-<th>Numéro Opération</th>
-<th>Type</th>
-<th>Montant</th>
-<th>Date</th>
-<th>Statut</th>
-</tr>
-</thead>
-  <tbody id="transactionsRecents">
-  </tbody>
-</table>
-</div>
-</div>
+<div class="card" id="transactionsCard">
+  <div class="card-header" id="transactionsHeader">
+    <i class="fas fa-history me-2"></i> Toutes les transactions
+  </div>
+  <div class="card-body">
+    <div class="table-responsive">
+      <table id="transactionsTable" class="table table-hover">
+        <thead>
+          <tr>
+            <th>Numéro Opération</th>
+            <th>Type</th>
+            <th>Montant</th>
+            <th>Date</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody id="transactionsTableBody"></tbody>
+      </table>
+    </div>
+    <ul class="pagination justify-content-center mt-3" id="transactionsPagination"></ul>
+  </div>
 </div>
 </div>
 <div class="col-md-4">
