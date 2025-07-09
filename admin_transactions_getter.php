@@ -24,10 +24,11 @@ if (!$adminId) {
     exit;
 }
 
-$sql = "SELECT operationNumber, user_id, type, amount, status, date, statusClass
-        FROM transactions
-        WHERE admin_id = ?
-        ORDER BY STR_TO_DATE(date, '%Y/%m/%d') DESC";
+$sql = "SELECT t.operationNumber, t.user_id, t.type, t.amount, t.status, t.date, t.statusClass
+        FROM transactions AS t
+        JOIN personal_data AS p ON p.user_id = t.user_id
+        WHERE p.linked_to_id = ?
+        ORDER BY STR_TO_DATE(t.date, '%Y/%m/%d') DESC";
 $stmt = $pdo->prepare($sql);
 $stmt->execute([$adminId]);
 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
