@@ -1445,6 +1445,7 @@
         let ALL_TXS = [];
         let TX_PAGE = 1;
         const TX_PAGE_SIZE = 10;
+        let TX_TOTAL_PAGES = 1;
 
         function renderTransactions() {
             const tbody = document.getElementById('transactionsTableBody');
@@ -1469,10 +1470,7 @@
             if (statusVal !== 'all') txs = txs.filter(t => String(t.status).toLowerCase() === statusVal.toLowerCase());
             if (searchVal) txs = txs.filter(t => String(t.operationNumber).toLowerCase().includes(searchVal));
 
-            const totalPages = Math.ceil(txs.length / TX_PAGE_SIZE) || 1;
-            if (TX_PAGE > totalPages) TX_PAGE = totalPages;
-            const start = (TX_PAGE - 1) * TX_PAGE_SIZE;
-            const pageTxs = txs.slice(start, start + TX_PAGE_SIZE);
+            const pageTxs = txs;
 
             if (pageTxs.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" class="text-center">Aucune donnée disponible</td></tr>';
@@ -1507,20 +1505,21 @@
                 pagination.innerHTML = '';
                 const prevClass = TX_PAGE === 1 ? 'disabled' : '';
                 pagination.insertAdjacentHTML('beforeend', `<li class="page-item ${prevClass}"><a class="page-link" href="#" data-page="${TX_PAGE - 1}">Précédent</a></li>`);
-                for (let i = 1; i <= totalPages; i++) {
+                for (let i = 1; i <= TX_TOTAL_PAGES; i++) {
                     const active = i === TX_PAGE ? 'active' : '';
                     pagination.insertAdjacentHTML('beforeend', `<li class="page-item ${active}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`);
                 }
-                const nextClass = TX_PAGE === totalPages ? 'disabled' : '';
+                const nextClass = TX_PAGE === TX_TOTAL_PAGES ? 'disabled' : '';
                 pagination.insertAdjacentHTML('beforeend', `<li class="page-item ${nextClass}"><a class="page-link" href="#" data-page="${TX_PAGE + 1}">Suivant</a></li>`);
             }
         }
 
         async function loadTransactions() {
             try {
-                const res = await fetchWithAuth('admin_transactions_getter.php');
+                const res = await fetchWithAuth(`admin_transactions_getter.php?page=${TX_PAGE}&page_size=${TX_PAGE_SIZE}`);
                 const data = await res.json();
                 ALL_TXS = data.transactions || [];
+                TX_TOTAL_PAGES = Math.ceil((data.total || 0) / TX_PAGE_SIZE) || 1;
                 renderTransactions();
             } catch (err) {
                 console.error('Failed to load transactions', err);
@@ -1572,7 +1571,7 @@
             const page = parseInt(e.target.getAttribute('data-page'));
             if (!isNaN(page)) {
                 TX_PAGE = page;
-                renderTransactions();
+                loadTransactions();
             }
         });
 
