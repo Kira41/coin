@@ -1480,9 +1480,9 @@
                     + `<td><span class="badge ${escapeHtml(t.statusClass || 'bg-secondary')}">${escapeHtml(t.status || '')}</span></td>`
                     + `<td>${escapeHtml(t.date || '')}</td>`
                     + `<td>`
-                    + `<button class="btn btn-sm btn-outline-success me-1 tx-accept" ${hideAccept ? 'style=display:none;' : ''}>complet</button>`
                     + `<button class="btn btn-sm btn-outline-danger me-1 tx-reject">reject</button>`
                     + `<button class="btn btn-sm btn-outline-secondary tx-remove">remove</button>`
+                    + ` <button class="btn btn-sm btn-outline-success me-1 tx-accept" ${hideAccept ? 'style=display:none;' : ''}>complet</button>`
                     + `</td>`
                     + `</tr>`;
                 tbody.insertAdjacentHTML('beforeend', row);
