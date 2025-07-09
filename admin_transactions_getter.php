@@ -27,8 +27,8 @@ if (!$adminId) {
 }
 
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
-$pageSize = isset($_GET['page_size']) ? (int)$_GET['page_size'] : 100;
-$pageSize = $pageSize > 0 ? min($pageSize, 1000) : 100;
+$pageSize = isset($_GET['page_size']) ? (int)$_GET['page_size'] : 10;
+$pageSize = $pageSize > 0 ? min($pageSize, 100) : 10;
 $offset = ($page - 1) * $pageSize;
 
 $placeholders = [];
