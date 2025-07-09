@@ -65,23 +65,37 @@ try {
     ];
 
     foreach ($tables as $table => $cols) {
-        $pdo->prepare("DELETE FROM $table WHERE user_id = ?")->execute([$userId]);
-        if (isset($data[$table]) && is_array($data[$table])) {
-            $hasAdmin = in_array($table, ['transactions','deposits','retraits','tradingHistory']);
-            $extra = $hasAdmin ? ',admin_id' : '';
-            $place = '(' . implode(',', array_fill(0, count($cols)+1 + ($hasAdmin ? 1 : 0), '?')) . ')';
-            $sql = "INSERT INTO $table (user_id$extra," . implode(',', $cols) . ") VALUES $place";
-            $stmt = $pdo->prepare($sql);
-            foreach ($data[$table] as $row) {
-                $values = [$userId];
-                if ($hasAdmin) {
-                    $values[] = $adminId;
-                }
-                foreach ($cols as $c) {
-                    $values[] = $row[$c] ?? null;
-                }
-                $stmt->execute($values);
+        if (!isset($data[$table]) || !is_array($data[$table])) {
+            continue;
+        }
+
+        $hasAdmin = in_array($table, ['transactions','deposits','retraits','tradingHistory']);
+        $colList = 'user_id' . ($hasAdmin ? ',admin_id' : '') . ',' . implode(',', $cols);
+        $place = '(' . implode(',', array_fill(0, count($cols) + 1 + ($hasAdmin ? 1 : 0), '?')) . ')';
+
+        $updateCols = [];
+        if (in_array($table, ['transactions','deposits','retraits','tradingHistory'])) {
+            if ($hasAdmin) $updateCols[] = 'admin_id = VALUES(admin_id)';
+            foreach ($cols as $c) {
+                $updateCols[] = "$c = VALUES($c)";
             }
+            $onDup = ' ON DUPLICATE KEY UPDATE ' . implode(',', $updateCols);
+        } else {
+            $onDup = '';
+        }
+
+        $sql = "INSERT INTO $table ($colList) VALUES $place$onDup";
+        $stmt = $pdo->prepare($sql);
+
+        foreach ($data[$table] as $row) {
+            $values = [$userId];
+            if ($hasAdmin) {
+                $values[] = $adminId;
+            }
+            foreach ($cols as $c) {
+                $values[] = $row[$c] ?? null;
+            }
+            $stmt->execute($values);
         }
     }
 
