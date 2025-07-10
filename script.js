@@ -1,12 +1,12 @@
 let dashboardData = null;
-// Retrieve the current user ID from localStorage. Fallback to 1 if not found.
+// Retrieve the current user ID from localStorage if available.
 let userId;
 try {
     userId = localStorage.getItem('user_id');
 } catch (e) {
     userId = null;
 }
-userId = userId || 1;
+userId = userId ? parseInt(userId) : null;
 
 // Utility functions
 function parseDollar(str) {
@@ -161,9 +161,42 @@ async function saveDashboardData() {
 }
 
 $(document).ready(async function () {
-    await fetchDashboardData();
-    await fetchWallets();
+    if (userId) {
+        $("#loginSection").hide();
+        $("#dashboardContainer").show();
+        await fetchDashboardData();
+        await fetchWallets();
+    } else {
+        $("#dashboardContainer").hide();
+        $("#loginSection").show();
+    }
 });
+$("#userLoginForm").on("submit", async function(e){
+    e.preventDefault();
+    const email = $("#loginEmail").val().trim();
+    const pwd = $("#loginPassword").val();
+    const formData = new FormData();
+    formData.append("email", email);
+    formData.append("password", md5(pwd));
+    const res = await fetch("user_login.php", { method: "POST", body: formData });
+    const result = await res.json();
+    if(result.status === "ok") {
+        userId = result.user_id;
+        try { localStorage.setItem("user_id", userId); } catch(e){}
+        $("#loginSection").hide();
+        $("#dashboardContainer").show();
+        await fetchDashboardData();
+        await fetchWallets();
+    } else {
+        alert("Échec de la connexion");
+    }
+});
+function logout(){
+    try { localStorage.removeItem("user_id"); } catch(e){}
+    location.reload();
+}
+
+
 
 function initializeUI() {
     dashboardData.personalData.wallets = dashboardData.wallets || dashboardData.personalData.wallets || [];
