@@ -22,6 +22,23 @@ try {
         return 'Il y a ' . $days . ' jour' . ($days > 1 ? 's' : '');
     }
 
+    function deleteUserData(PDO $pdo, int $userId) {
+        $tables = [
+            'wallets',
+            'transactions',
+            'retraits',
+            'tradingHistory',
+            'notifications',
+            'loginHistory',
+            'deposits',
+            'bank_withdrawl_info',
+            'personal_data'
+        ];
+        foreach ($tables as $table) {
+            $pdo->prepare("DELETE FROM $table WHERE user_id = ?")->execute([$userId]);
+        }
+    }
+
     $adminId = null;
     session_start();
     if (isset($_SESSION['admin_id'])) {
@@ -152,15 +169,8 @@ try {
             $stmt->execute([$id]);
             $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
             if ($userIds) {
-                $tables = [
-                    'wallets', 'transactions', 'notifications', 'deposits',
-                    'retraits', 'tradingHistory', 'loginHistory',
-                    'bank_withdrawl_info', 'personal_data'
-                ];
                 foreach ($userIds as $uid) {
-                    foreach ($tables as $table) {
-                        $pdo->prepare("DELETE FROM $table WHERE user_id = ?")->execute([$uid]);
-                    }
+                    deleteUserData($pdo, (int)$uid);
                 }
             }
             $stmt = $pdo->prepare('DELETE FROM admins_agents WHERE id = ?');
@@ -178,14 +188,7 @@ try {
         }
         $pdo->beginTransaction();
         try {
-            $tables = [
-                'wallets', 'transactions', 'notifications', 'deposits',
-                'retraits', 'tradingHistory', 'loginHistory',
-                'bank_withdrawl_info', 'personal_data'
-            ];
-            foreach ($tables as $table) {
-                $pdo->prepare("DELETE FROM $table WHERE user_id = ?")->execute([$userId]);
-            }
+            deleteUserData($pdo, $userId);
             $pdo->commit();
             echo json_encode(['status' => 'ok']);
         } catch (Exception $e) {
