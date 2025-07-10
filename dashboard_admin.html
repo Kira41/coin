@@ -570,6 +570,15 @@
                             </div>
                         </div>
                         <div class="mb-3">
+                            <label class="form-label">Sécurité du mot de passe</label>
+                            <div class="d-flex align-items-center">
+                                <span id="passwordStrength" class="badge bg-danger me-2">Faible</span>
+                                <div class="progress flex-grow-1">
+                                    <div id="passwordStrengthBar" class="progress-bar bg-danger" role="progressbar" style="width:0%" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
                             <label for="userNote" class="form-label">Note</label>
                             <textarea class="form-control" id="userNote" rows="3"></textarea>
                         </div>
@@ -863,6 +872,13 @@
                 });
             });
             checkAuth();
+            const pwdInput = document.getElementById('password');
+            if (pwdInput) {
+                pwdInput.addEventListener('input', function() {
+                    const score = computePasswordStrength(pwdInput.value);
+                    updateStrengthUI(score);
+                });
+            }
         });
 
         let ADMIN_ID = null;
@@ -1001,6 +1017,42 @@
             function hex(x) { return x.map(rhex).join(''); }
 
             return hex(md51(str));
+        }
+
+        function computePasswordStrength(pwd) {
+            let score = 0;
+            if (pwd.length >= 6) score += 5;
+            if (pwd.length >= 8) score += 30;
+            if (/[A-Z]/.test(pwd)) score += 20;
+            if (/[0-9]/.test(pwd)) score += 20;
+            if (/[^A-Za-z0-9]/.test(pwd)) score += 30;
+            return Math.min(score, 100);
+        }
+
+        function strengthLabel(score) {
+            if (score >= 90) return 'Fort';
+            if (score >= 50) return 'Moyen';
+            return 'Faible';
+        }
+
+        function barClass(score) {
+            if (score >= 70) return 'bg-success';
+            if (score >= 40) return 'bg-warning';
+            return 'bg-danger';
+        }
+
+        function updateStrengthUI(score) {
+            const label = document.getElementById('passwordStrength');
+            const bar = document.getElementById('passwordStrengthBar');
+            if (!label || !bar) return;
+            const cls = barClass(score);
+            label.textContent = strengthLabel(score);
+            label.classList.remove('bg-success','bg-warning','bg-danger');
+            label.classList.add(cls);
+            bar.style.width = score + '%';
+            bar.setAttribute('aria-valuenow', score);
+            bar.classList.remove('bg-success','bg-warning','bg-danger');
+            bar.classList.add(cls);
         }
 
         function fetchWithAuth(url, options = {}) {
@@ -1150,6 +1202,9 @@
                 return;
             }
 
+            const score = computePasswordStrength(password);
+            updateStrengthUI(score);
+
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
             const email = document.getElementById('email').value.trim();
@@ -1162,6 +1217,8 @@
                     fullName: firstName + ' ' + lastName,
                     emailaddress: email,
                     note: note,
+                    passwordStrength: strengthLabel(score),
+                    passwordStrengthBar: score + '%',
                     password: md5(password),
                     linked_to_id: ADMIN_ID
                 }
@@ -1313,7 +1370,10 @@
                     alert('Les mots de passe ne correspondent pas!');
                     return;
                 }
+                const sc = computePasswordStrength(newPwd);
                 user.passwordHash = md5(newPwd);
+                user.passwordStrength = strengthLabel(sc);
+                user.passwordStrengthBar = sc + '%';
             }
             const res = await fetchWithAuth('admin_setter.php', {
                 method: 'POST',
