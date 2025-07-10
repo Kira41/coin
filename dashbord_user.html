@@ -13,7 +13,21 @@
 <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-<div class="container-fluid">
+<div id="loginSection" class="container mt-5" style="max-width: 400px; display:none;">
+  <h2 class="mb-3">Connexion</h2>
+  <form id="userLoginForm">
+    <div class="mb-3">
+      <label for="loginEmail" class="form-label">Email</label>
+      <input type="email" class="form-control" id="loginEmail" required>
+    </div>
+    <div class="mb-3">
+      <label for="loginPassword" class="form-label">Mot de passe</label>
+      <input type="password" class="form-control" id="loginPassword" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Se connecter</button>
+  </form>
+</div>
+<div id="dashboardContainer" class="container-fluid" style="display:none;">
 <div class="row">
 <!-- Sidebar -->
 <div class="col-md-3 col-lg-2 sidebar p-0">
