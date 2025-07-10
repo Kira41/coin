@@ -59,6 +59,12 @@ present, the request is rejected with `401 Unauthorized`. Once authenticated,
 `dashboard_admin.html` will display the admin's agents and associated users.
 Use the "Créer Agent" form to add new agents under the logged‑in admin.
 
+Deleting an agent with `admin_setter.php` now removes all of the users tied to
+that account. Each affected user's rows in `personal_data`, `wallets`,
+`transactions`, `tradingHistory`, `notifications`, `loginHistory`, `deposits`
+and `bank_withdrawl_info` are deleted before the agent record itself is
+removed. The same cleanup occurs when deleting an individual user.
+
 Use `admin_login.php` to sign in. POST `email` and `password`; a successful login starts a session and stores `admin_id` for subsequent requests.
 
 ## Admin Login

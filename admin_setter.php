@@ -146,9 +146,31 @@ try {
         if (!$id) {
             throw new Exception('Missing id');
         }
-        $stmt = $pdo->prepare('DELETE FROM admins_agents WHERE id = ?');
-        $stmt->execute([$id]);
-        echo json_encode(['status' => 'ok']);
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare('SELECT user_id FROM personal_data WHERE linked_to_id = ?');
+            $stmt->execute([$id]);
+            $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+            if ($userIds) {
+                $tables = [
+                    'wallets', 'transactions', 'notifications', 'deposits',
+                    'retraits', 'tradingHistory', 'loginHistory',
+                    'bank_withdrawl_info', 'personal_data'
+                ];
+                foreach ($userIds as $uid) {
+                    foreach ($tables as $table) {
+                        $pdo->prepare("DELETE FROM $table WHERE user_id = ?")->execute([$uid]);
+                    }
+                }
+            }
+            $stmt = $pdo->prepare('DELETE FROM admins_agents WHERE id = ?');
+            $stmt->execute([$id]);
+            $pdo->commit();
+            echo json_encode(['status' => 'ok']);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
     } elseif ($action === 'delete_user') {
         $userId = isset($data['user_id']) ? (int)$data['user_id'] : 0;
         if (!$userId) {
