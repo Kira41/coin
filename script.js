@@ -573,6 +573,7 @@ function initializeUI() {
     updateCounters();
 
     const $notifications = $('#notifications');
+    $notifications.empty();
     if (dashboardData.notifications?.length > 0) {
         dashboardData.notifications.slice(0, 4).forEach(n => {
             $notifications.append(`
