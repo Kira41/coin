@@ -569,6 +569,10 @@
                                 <input type="password" class="form-control" id="confirmPassword" required>
                             </div>
                         </div>
+                        <div class="mb-3">
+                            <label for="userNote" class="form-label">Note</label>
+                            <textarea class="form-control" id="userNote" rows="3"></textarea>
+                        </div>
                         <!-- role field removed: user creation always creates a standard account -->
                     </form>
                 </div>
@@ -1149,6 +1153,7 @@
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
             const email = document.getElementById('email').value.trim();
+            const note = document.getElementById('userNote').value.trim();
 
             const payload = {
                 action: 'create_user',
@@ -1156,6 +1161,7 @@
                     user_id: Date.now(),
                     fullName: firstName + ' ' + lastName,
                     emailaddress: email,
+                    note: note,
                     password: md5(password),
                     linked_to_id: ADMIN_ID
                 }
