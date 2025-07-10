@@ -10,7 +10,7 @@ INSERT INTO personal_data VALUES (
 '2025-06-11', 'ca', '2025-01-01', 
 '0xABC123...', 'TRc123456...', 'USDT123...', 
 'Bank of Earth', 'Ahmed Kouraychi', 
-'ACC123456', 'IBAN123456', 'SWIFT123', 1
+'ACC123456', 'IBAN123456', 'SWIFT123', '', 1
 );
 
 

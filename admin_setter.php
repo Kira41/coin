@@ -51,7 +51,7 @@ try {
         'loginAlerts','transactionAlerts','twoFactorAuth','emailaddress','address',
         'phone','dob','nationality','created_at','btcAddress','ethAddress','usdtAddress',
         'userBankName','userAccountName','userAccountNumber','userIban','userSwiftCode',
-        'linked_to_id'
+        'note','linked_to_id'
     ];
 
     $action = $data['action'] ?? '';
