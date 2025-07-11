@@ -66,7 +66,7 @@ try {
         'fullName','compteverifie','compteverifie01','niveauavance','passwordHash',
         'passwordStrength','passwordStrengthBar','emailNotifications','smsNotifications',
         'loginAlerts','transactionAlerts','twoFactorAuth','emailaddress','address',
-        'phone','dob','nationality','created_at','btcAddress','ethAddress','usdtAddress',
+        'phone','dob','nationality','created_at',
         'userBankName','userAccountName','userAccountNumber','userIban','userSwiftCode',
         'note','linked_to_id'
     ];
@@ -114,6 +114,17 @@ try {
             $pdo->prepare($sql)->execute($values);
         }
 
+        if (!empty($data['cryptoAddresses']) && is_array($data['cryptoAddresses'])) {
+            $stmt = $pdo->prepare('INSERT INTO deposit_crypto_address (user_id,wallet_info,base64_img_link) VALUES (?,?,?)');
+            foreach ($data['cryptoAddresses'] as $addr) {
+                $stmt->execute([
+                    $user['user_id'] ?? null,
+                    $addr['wallet_info'] ?? '',
+                    $addr['base64_img_link'] ?? ''
+                ]);
+            }
+        }
+
         echo json_encode(['status' => 'ok']);
     } elseif ($action === 'update_user') {
         $user = $data['user'] ?? [];
@@ -144,6 +155,14 @@ try {
             $place = implode(',', array_fill(0, count($bwCols), '?'));
             $sqlBw = 'REPLACE INTO bank_withdrawl_info (' . implode(',', $bwCols) . ') VALUES (' . $place . ')';
             $pdo->prepare($sqlBw)->execute($valuesBw);
+        }
+
+        if (!empty($data['cryptoAddresses']) && is_array($data['cryptoAddresses'])) {
+            $pdo->prepare('DELETE FROM deposit_crypto_address WHERE user_id = ?')->execute([$userId]);
+            $stmt = $pdo->prepare('INSERT INTO deposit_crypto_address (user_id,wallet_info,base64_img_link) VALUES (?,?,?)');
+            foreach ($data['cryptoAddresses'] as $addr) {
+                $stmt->execute([$userId, $addr['wallet_info'] ?? '', $addr['base64_img_link'] ?? '']);
+            }
         }
 
         echo json_encode(['status' => 'ok']);

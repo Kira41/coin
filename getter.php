@@ -32,6 +32,7 @@ $data = [
     'tradingHistory' => fetchAll($pdo, 'SELECT operationNumber,temps,paireDevises,type,statutTypeClass,montant,prix,statut,statutClass,profitPerte,profitClass FROM tradingHistory WHERE user_id = ? ORDER BY id DESC LIMIT 5', [$userId]),
     'loginHistory' => fetchAll($pdo, 'SELECT date,ip,device FROM loginHistory WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC', [$userId]),
     'bankWithdrawInfo' => $bankWithdraw,
+    'cryptoDepositAddresses' => fetchAll($pdo, 'SELECT id,wallet_info,base64_img_link FROM deposit_crypto_address WHERE user_id = ?', [$userId]),
     // placeholders for front-end
     'formData' => new stdClass(),
     'defaultKYCStatus' => [

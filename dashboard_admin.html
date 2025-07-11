@@ -607,6 +607,9 @@
                             <label for="createBwSwiftCode" class="form-label">Code SWIFT/BIC</label>
                             <input type="text" class="form-control" id="createBwSwiftCode" name="bw_widhrawSwiftCode">
                         </div>
+                        <h6 class="mt-3">Adresses crypto de dépôt</h6>
+                        <div id="createCryptoAddresses"></div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary mb-3" id="addCreateCryptoAddr">Ajouter une adresse</button>
                         <!-- role field removed: user creation always creates a standard account -->
                     </form>
                 </div>
@@ -792,6 +795,9 @@
                             <label for="editBwSwiftCode" class="form-label">Code SWIFT/BIC</label>
                             <input type="text" class="form-control" id="editBwSwiftCode" name="bw_widhrawSwiftCode">
                         </div>
+                        <h6 class="mt-3">Adresses crypto de dépôt</h6>
+                        <div id="editCryptoAddresses"></div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary mb-3" id="addEditCryptoAddr">Ajouter une adresse</button>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -929,6 +935,26 @@
                     updateStrengthUI(score);
                 });
             }
+
+            const addCreateBtn = document.getElementById('addCreateCryptoAddr');
+            if (addCreateBtn) addCreateBtn.addEventListener('click', function() {
+                const cont = document.getElementById('createCryptoAddresses');
+                if (cont) createCryptoRow(cont);
+            });
+            const addEditBtn = document.getElementById('addEditCryptoAddr');
+            if (addEditBtn) addEditBtn.addEventListener('click', function() {
+                const cont = document.getElementById('editCryptoAddresses');
+                if (cont) createCryptoRow(cont);
+            });
+
+            const createModal = document.getElementById('createUserModal');
+            if (createModal) createModal.addEventListener('show.bs.modal', function() {
+                const cont = document.getElementById('createCryptoAddresses');
+                if (cont) {
+                    cont.innerHTML = '';
+                    createCryptoRow(cont);
+                }
+            });
         });
 
         let ADMIN_ID = null;
@@ -1105,6 +1131,32 @@
             bar.classList.add(cls);
         }
 
+        function createCryptoRow(container, info = '', img = '') {
+            const div = document.createElement('div');
+            div.className = 'row g-3 mb-2 crypto-row';
+            div.innerHTML = `
+                <div class="col-md-5"><input type="text" class="form-control wallet-info" placeholder="Infos" value="${escapeHtml(info)}"></div>
+                <div class="col-md-5"><input type="text" class="form-control img-link" placeholder="Lien img/base64" value="${escapeHtml(img)}"></div>
+                <div class="col-md-2 d-flex align-items-center"><button type="button" class="btn btn-outline-danger remove-crypto-row">&times;</button></div>`;
+            container.appendChild(div);
+        }
+
+        function gatherCryptoAddresses(containerId) {
+            const arr = [];
+            document.querySelectorAll('#' + containerId + ' .crypto-row').forEach(r => {
+                const info = r.querySelector('.wallet-info').value.trim();
+                const img = r.querySelector('.img-link').value.trim();
+                if (info) arr.push({ wallet_info: info, base64_img_link: img });
+            });
+            return arr;
+        }
+
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-crypto-row')) {
+                e.target.closest('.crypto-row')?.remove();
+            }
+        });
+
         function fetchWithAuth(url, options = {}) {
             options.headers = options.headers || {};
             if (ADMIN_ID) options.headers['Authorization'] = 'Bearer ' + ADMIN_ID;
@@ -1279,7 +1331,8 @@
                     password: md5(password),
                     linked_to_id: ADMIN_ID
                 },
-                bankWithdrawInfo: bankInfo
+                bankWithdrawInfo: bankInfo,
+                cryptoAddresses: gatherCryptoAddresses('createCryptoAddresses')
             };
 
             try {
@@ -1292,6 +1345,7 @@
                 if (result.status === 'ok') {
                     alert('Utilisateur créé avec succès!');
                     form.reset();
+                    document.getElementById('createCryptoAddresses').innerHTML = '';
                     const modal = bootstrap.Modal.getInstance(document.getElementById('createUserModal'));
                     modal.hide();
                     loadAdminData();
@@ -1407,6 +1461,16 @@
                 document.getElementById('editBwAccountNumber').value = bw.widhrawAccountNumber || '';
                 document.getElementById('editBwIban').value = bw.widhrawIban || '';
                 document.getElementById('editBwSwiftCode').value = bw.widhrawSwiftCode || '';
+                const cryptoCont = document.getElementById('editCryptoAddresses');
+                cryptoCont.innerHTML = '';
+                const arrCrypto = data.cryptoDepositAddresses || [];
+                if (arrCrypto.length === 0) {
+                    createCryptoRow(cryptoCont);
+                } else {
+                    arrCrypto.forEach(a => {
+                        createCryptoRow(cryptoCont, a.wallet_info || '', a.base64_img_link || '');
+                    });
+                }
                 new bootstrap.Modal(document.getElementById('editUserModal')).show();
             } else if (delBtn) {
                 const id = delBtn.getAttribute('data-id');
@@ -1450,6 +1514,7 @@
             if (Object.keys(bankInfo).length) {
                 payload.bankWithdrawInfo = bankInfo;
             }
+            payload.cryptoAddresses = gatherCryptoAddresses('editCryptoAddresses');
             const res = await fetchWithAuth('admin_setter.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
