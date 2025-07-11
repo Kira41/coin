@@ -153,7 +153,6 @@ CREATE TABLE deposit_crypto_address (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
     wallet_info TEXT,
-    base64_img_link TEXT,
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
