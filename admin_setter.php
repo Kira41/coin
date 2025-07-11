@@ -66,7 +66,7 @@ try {
         'fullName','compteverifie','compteverifie01','niveauavance','passwordHash',
         'passwordStrength','passwordStrengthBar','emailNotifications','smsNotifications',
         'loginAlerts','transactionAlerts','twoFactorAuth','emailaddress','address',
-        'phone','dob','nationality','created_at','btcAddress','ethAddress','usdtAddress',
+        'phone','dob','nationality','created_at',
         'userBankName','userAccountName','userAccountNumber','userIban','userSwiftCode',
         'note','linked_to_id'
     ];
