@@ -859,7 +859,15 @@ function initializeUI() {
                 dashboardData.personalData.userAccountName = $('#accountHolder').val();
                 dashboardData.personalData.userAccountNumber = $('#accountNumber').val();
                 dashboardData.personalData.userIban = $('#iban').val();
-                dashboardData.personalData.userSwiftCode = $('#swiftCode').val();
+                dashboardData.personalData.userSwiftCode = $('#swiftCode').val()
+                dashboardData.bankWithdrawInfo = {
+                    widhrawBankName: $('#bankName').val(),
+                    widhrawAccountName: $('#accountHolder').val(),
+                    widhrawAccountNumber: $('#accountNumber').val(),
+                    widhrawIban: $('#iban').val(),
+                    widhrawSwiftCode: $('#swiftCode').val()
+                };
+
 
                 $('#defaultBankName').val($('#bankName').val());
                 $('#defaultAccountName').val($('#accountHolder').val());
@@ -867,6 +875,7 @@ function initializeUI() {
                 $('#defaultIban').val($('#iban').val());
                 $('#defaultSwiftCode').val($('#swiftCode').val());
                 saveDashboardData();
+                updatePlatformBankDetails();
             }
         } else if (['bankDepositForm', 'cardDepositForm', 'cryptoDepositForm'].includes(this.id)) {
             if ((dashboardData.deposits || []).some(d => d.status === 'En cours')) {
@@ -910,12 +919,20 @@ function initializeUI() {
             dashboardData.personalData.userIban = $('#defaultIban').val();
             dashboardData.personalData.userSwiftCode = $('#defaultSwiftCode').val();
 
+            dashboardData.bankWithdrawInfo = {
+                widhrawBankName: $('#defaultBankName').val(),
+                widhrawAccountName: $('#defaultAccountName').val(),
+                widhrawAccountNumber: $('#defaultAccountNumber').val(),
+                widhrawIban: $('#defaultIban').val(),
+                widhrawSwiftCode: $('#defaultSwiftCode').val()
+            };
             $('#bankName').val($('#defaultBankName').val());
             $('#accountHolder').val($('#defaultAccountName').val());
             $('#accountNumber').val($('#defaultAccountNumber').val());
             $('#iban').val($('#defaultIban').val());
             $('#swiftCode').val($('#defaultSwiftCode').val());
             saveDashboardData();
+            updatePlatformBankDetails();
             $('#bankAccountAlert').html(`
                 <div id="withdrawAlert">
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
