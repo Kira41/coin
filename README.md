@@ -25,7 +25,9 @@ submitting withdrawal requests: `userBankName`, `userAccountName`,
 information is kept in the `bank_withdrawl_info` table. This table stores the
 bank coordinates shown on the deposit screen and each user has at most one
 record. These deposit details are filled in by an administrator when creating or
-editing a user.
+editing a user. The admin dashboard's create and edit user modals now include
+input fields for these coordinates so they can be entered or updated alongside
+other personal data.
 
 An additional table `admins_agents` stores admin and agent accounts. Each row
 contains an email, hashed password and an `is_admin` flag, plus a `created_by`
