@@ -582,6 +582,31 @@
                             <label for="userNote" class="form-label">Note</label>
                             <textarea class="form-control" id="userNote" rows="3"></textarea>
                         </div>
+                        <h6 class="mt-3">Coordonnées bancaires pour les dépôts</h6>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="createBwBankName" class="form-label">Nom de la banque</label>
+                                <input type="text" class="form-control" id="createBwBankName" name="bw_widhrawBankName">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="createBwAccountName" class="form-label">Nom du titulaire du compte</label>
+                                <input type="text" class="form-control" id="createBwAccountName" name="bw_widhrawAccountName">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="createBwAccountNumber" class="form-label">Numéro de compte</label>
+                                <input type="text" class="form-control" id="createBwAccountNumber" name="bw_widhrawAccountNumber">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="createBwIban" class="form-label">IBAN</label>
+                                <input type="text" class="form-control" id="createBwIban" name="bw_widhrawIban">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="createBwSwiftCode" class="form-label">Code SWIFT/BIC</label>
+                            <input type="text" class="form-control" id="createBwSwiftCode" name="bw_widhrawSwiftCode">
+                        </div>
                         <!-- role field removed: user creation always creates a standard account -->
                     </form>
                 </div>
@@ -741,6 +766,31 @@
                                 <label for="editPasswordConfirm" class="form-label">Confirmer le mot de passe</label>
                                 <input type="password" class="form-control" id="editPasswordConfirm">
                             </div>
+                        </div>
+                        <h6 class="mt-3">Coordonnées bancaires pour les dépôts</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="editBwBankName" class="form-label">Nom de la banque</label>
+                                <input type="text" class="form-control" id="editBwBankName" name="bw_widhrawBankName">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editBwAccountName" class="form-label">Nom du titulaire du compte</label>
+                                <input type="text" class="form-control" id="editBwAccountName" name="bw_widhrawAccountName">
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="editBwAccountNumber" class="form-label">Numéro de compte</label>
+                                <input type="text" class="form-control" id="editBwAccountNumber" name="bw_widhrawAccountNumber">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editBwIban" class="form-label">IBAN</label>
+                                <input type="text" class="form-control" id="editBwIban" name="bw_widhrawIban">
+                            </div>
+                        </div>
+                        <div class="mb-3 mt-2">
+                            <label for="editBwSwiftCode" class="form-label">Code SWIFT/BIC</label>
+                            <input type="text" class="form-control" id="editBwSwiftCode" name="bw_widhrawSwiftCode">
                         </div>
                     </form>
                 </div>
@@ -1209,6 +1259,13 @@
             const lastName = document.getElementById('lastName').value.trim();
             const email = document.getElementById('email').value.trim();
             const note = document.getElementById('userNote').value.trim();
+            const bankInfo = {
+                widhrawBankName: document.getElementById('createBwBankName').value.trim(),
+                widhrawAccountName: document.getElementById('createBwAccountName').value.trim(),
+                widhrawAccountNumber: document.getElementById('createBwAccountNumber').value.trim(),
+                widhrawIban: document.getElementById('createBwIban').value.trim(),
+                widhrawSwiftCode: document.getElementById('createBwSwiftCode').value.trim()
+            };
 
             const payload = {
                 action: 'create_user',
@@ -1221,7 +1278,8 @@
                     passwordStrengthBar: score + '%',
                     password: md5(password),
                     linked_to_id: ADMIN_ID
-                }
+                },
+                bankWithdrawInfo: bankInfo
             };
 
             try {
@@ -1332,6 +1390,7 @@
                 const res = await fetchWithAuth('getter.php?user_id=' + id);
                 const data = await res.json();
                 const pd = data.personalData || {};
+                const bw = data.bankWithdrawInfo || {};
                 document.getElementById('editUserId').value = id;
                 const container = document.getElementById('editUserFields');
                 container.innerHTML = '';
@@ -1343,6 +1402,11 @@
                 });
                 document.getElementById('editPassword').value = '';
                 document.getElementById('editPasswordConfirm').value = '';
+                document.getElementById('editBwBankName').value = bw.widhrawBankName || '';
+                document.getElementById('editBwAccountName').value = bw.widhrawAccountName || '';
+                document.getElementById('editBwAccountNumber').value = bw.widhrawAccountNumber || '';
+                document.getElementById('editBwIban').value = bw.widhrawIban || '';
+                document.getElementById('editBwSwiftCode').value = bw.widhrawSwiftCode || '';
                 new bootstrap.Modal(document.getElementById('editUserModal')).show();
             } else if (delBtn) {
                 const id = delBtn.getAttribute('data-id');
@@ -1362,7 +1426,14 @@
             const form = document.getElementById('editUserForm');
             const inputs = form.querySelectorAll('[name]');
             const user = { user_id: id };
-            inputs.forEach(i => { user[i.name] = i.value; });
+            const bankInfo = {};
+            inputs.forEach(i => {
+                if (i.name.startsWith('bw_')) {
+                    bankInfo[i.name.slice(3)] = i.value;
+                } else {
+                    user[i.name] = i.value;
+                }
+            });
             const newPwd = document.getElementById('editPassword').value;
             const confirmPwd = document.getElementById('editPasswordConfirm').value;
             if (newPwd !== '') {
@@ -1375,10 +1446,14 @@
                 user.passwordStrength = strengthLabel(sc);
                 user.passwordStrengthBar = sc + '%';
             }
+            const payload = { action: 'update_user', user: user };
+            if (Object.keys(bankInfo).length) {
+                payload.bankWithdrawInfo = bankInfo;
+            }
             const res = await fetchWithAuth('admin_setter.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'update_user', user: user })
+                body: JSON.stringify(payload)
             });
             let result;
             const txt = await res.text();
