@@ -827,6 +827,11 @@ function initializeUI() {
             }[this.id];
             const amt = parseFloat($(amountField).val());
             if (!isNaN(amt) && amt > 0) {
+                const available = parseDollar(dashboardData.personalData.balance);
+                if (amt > available) {
+                    showBootstrapAlert('withdrawAlert', 'Solde insuffisant.', 'danger');
+                    return;
+                }
                 const method = this.id === 'bankWithdrawForm' ? 'Banque' :
                     this.id === 'paypalWithdrawForm' ? 'Paypal' :
                     (currencyNames[$('#cryptoCurrencyWithdraw').val()] || 'Crypto');
