@@ -19,12 +19,13 @@ generated in JavaScript with `Date.now()`. User accounts use the same approach:
 the `personal_data.user_id` column is also a `BIGINT` so IDs created with
 `Date.now()` are inserted without overflowing.
 
-The `personal_data` table now includes columns for storing default bank details:
-`userBankName`, `userAccountName`, `userAccountNumber`, `userIban` and
-`userSwiftCode`. A helper table `bank_withdrawl_info` stores the default bank
-information shown on the deposit screen. Each record is tied to a specific user
-via a `user_id` column so multiple users can manage their own withdrawal
-details.
+The `personal_data` table now includes the user's own bank details used when
+submitting withdrawal requests: `userBankName`, `userAccountName`,
+`userAccountNumber`, `userIban` and `userSwiftCode`. Separate deposit
+information is kept in the `bank_withdrawl_info` table. This table stores the
+bank coordinates shown on the deposit screen and each user has at most one
+record. These deposit details are filled in by an administrator when creating or
+editing a user.
 
 An additional table `admins_agents` stores admin and agent accounts. Each row
 contains an email, hashed password and an `is_admin` flag, plus a `created_by`

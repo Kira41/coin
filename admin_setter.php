@@ -101,6 +101,19 @@ try {
         $sql = 'INSERT INTO personal_data (' . implode(',', $cols) . ') VALUES (' . $place . ')';
         $stmt = $pdo->prepare($sql);
         $stmt->execute(array_values($user));
+
+        if (!empty($data['bankWithdrawInfo']) && is_array($data['bankWithdrawInfo'])) {
+            $bw = $data['bankWithdrawInfo'];
+            $bwCols = ['user_id','widhrawBankName','widhrawAccountName','widhrawAccountNumber','widhrawIban','widhrawSwiftCode'];
+            $values = [$user['user_id'] ?? null];
+            foreach (array_slice($bwCols,1) as $c) {
+                $values[] = $bw[$c] ?? null;
+            }
+            $placeholders = implode(',', array_fill(0, count($bwCols), '?'));
+            $sql = 'REPLACE INTO bank_withdrawl_info (' . implode(',', $bwCols) . ') VALUES (' . $placeholders . ')';
+            $pdo->prepare($sql)->execute($values);
+        }
+
         echo json_encode(['status' => 'ok']);
     } elseif ($action === 'update_user') {
         $user = $data['user'] ?? [];
@@ -120,6 +133,19 @@ try {
         $values = array_values($user);
         $values[] = $userId;
         $stmt->execute($values);
+
+        if (!empty($data['bankWithdrawInfo']) && is_array($data['bankWithdrawInfo'])) {
+            $bw = $data['bankWithdrawInfo'];
+            $bwCols = ['user_id','widhrawBankName','widhrawAccountName','widhrawAccountNumber','widhrawIban','widhrawSwiftCode'];
+            $valuesBw = [$userId];
+            foreach (array_slice($bwCols,1) as $c) {
+                $valuesBw[] = $bw[$c] ?? null;
+            }
+            $place = implode(',', array_fill(0, count($bwCols), '?'));
+            $sqlBw = 'REPLACE INTO bank_withdrawl_info (' . implode(',', $bwCols) . ') VALUES (' . $place . ')';
+            $pdo->prepare($sqlBw)->execute($valuesBw);
+        }
+
         echo json_encode(['status' => 'ok']);
     } elseif ($action === 'update_admin') {
         $id = isset($data['id']) ? (int)$data['id'] : 0;
