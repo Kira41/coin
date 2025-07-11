@@ -3,15 +3,19 @@ VALUES ('admin@scampia.io', 'c1de8b176818ec85532879c60030aedd', 1, NULL);
 
 INSERT INTO personal_data VALUES (
 1, 3500, 1200, 800, '10',
-'Ahmed Kouraychi', 'Vérifié', '1', 'Niveau 2', 
-'c1de8b176818ec85532879c60030aedd', 'Fort', '90%', 
-'0', '0', '0', '1', '0', 
-'41kira41@gmail.com', 'Sousse, Tunisie', '+21690000000', 
-'2025-06-11', 'ca', '2025-01-01', 
-'0xABC123...', 'TRc123456...', 'USDT123...', 
-'Bank of Earth', 'Ahmed Kouraychi', 
+'Ahmed Kouraychi', 'Vérifié', '1', 'Niveau 2',
+'c1de8b176818ec85532879c60030aedd', 'Fort', '90%',
+'0', '0', '0', '1', '0',
+'41kira41@gmail.com', 'Sousse, Tunisie', '+21690000000',
+'2025-06-11', 'ca', '2025-01-01',
+'Bank of Earth', 'Ahmed Kouraychi',
 'ACC123456', 'IBAN123456', 'SWIFT123', '', 1
 );
+
+INSERT INTO deposit_crypto_address (user_id, wallet_info, base64_img_link) VALUES
+    (1, '0xABC123...', ''),
+    (1, 'TRc123456...', ''),
+    (1, 'USDT123...', '');
 
 
 INSERT INTO wallets VALUES (

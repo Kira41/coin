@@ -31,9 +31,6 @@ CREATE TABLE personal_data (
     dob TEXT,
     nationality TEXT,
     created_at TEXT,
-    btcAddress TEXT,
-    ethAddress TEXT,
-    usdtAddress TEXT,
     userBankName TEXT,
     userAccountName TEXT,
     userAccountNumber TEXT,
@@ -150,4 +147,13 @@ CREATE TABLE bank_withdrawl_info (
     widhrawAccountNumber TEXT,
     widhrawIban TEXT,
     widhrawSwiftCode TEXT
+);
+
+CREATE TABLE deposit_crypto_address (
+    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT,
+    wallet_info TEXT,
+    base64_img_link TEXT,
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
 );
