@@ -12,10 +12,10 @@ INSERT INTO personal_data VALUES (
 'ACC123456', 'IBAN123456', 'SWIFT123', '', 1
 );
 
-INSERT INTO deposit_crypto_address (user_id, wallet_info, base64_img_link) VALUES
-    (1, '0xABC123...', ''),
-    (1, 'TRc123456...', ''),
-    (1, 'USDT123...', '');
+INSERT INTO deposit_crypto_address (user_id, wallet_info) VALUES
+    (1, '0xABC123...'),
+    (1, 'TRc123456...'),
+    (1, 'USDT123...');
 
 
 INSERT INTO wallets VALUES (

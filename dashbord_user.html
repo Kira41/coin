@@ -580,7 +580,7 @@
 <div class="card-body text-center">
 <h5 class="card-title">Adresse du portefeuille</h5>
 <div class="qr-code bg-white p-3 d-inline-block mb-3">
-<img alt="QR Code" class="img-fluid" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&amp;data=bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"/>
+<img alt="QR Code" class="img-fluid" src="https://api.qrserver.com/v1/create-qr-code/?data={$encodedText}&size={$size}x{$size}"/>
 </div>
 <div class="input-group mb-3">
 <input class="form-control" id="cryptoDepositAddress" name="cryptoDepositAddress" readonly type="text" value=""/>

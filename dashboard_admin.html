@@ -1135,8 +1135,7 @@
             const div = document.createElement('div');
             div.className = 'row g-3 mb-2 crypto-row';
             div.innerHTML = `
-                <div class="col-md-5"><input type="text" class="form-control wallet-info" placeholder="Infos" value="${escapeHtml(info)}"></div>
-                <div class="col-md-5"><input type="text" class="form-control img-link" placeholder="Lien img/base64" value="${escapeHtml(img)}"></div>
+                <div class="col-md-10"><input type="text" class="form-control wallet-info" placeholder="Infos" value="${escapeHtml(info)}"></div>
                 <div class="col-md-2 d-flex align-items-center"><button type="button" class="btn btn-outline-danger remove-crypto-row">&times;</button></div>`;
             container.appendChild(div);
         }
@@ -1145,8 +1144,7 @@
             const arr = [];
             document.querySelectorAll('#' + containerId + ' .crypto-row').forEach(r => {
                 const info = r.querySelector('.wallet-info').value.trim();
-                const img = r.querySelector('.img-link').value.trim();
-                if (info) arr.push({ wallet_info: info, base64_img_link: img });
+                if (info) arr.push({ wallet_info: info });
             });
             return arr;
         }
@@ -1468,7 +1466,7 @@
                     createCryptoRow(cryptoCont);
                 } else {
                     arrCrypto.forEach(a => {
-                        createCryptoRow(cryptoCont, a.wallet_info || '', a.base64_img_link || '');
+                        createCryptoRow(cryptoCont, a.wallet_info || '');
                     });
                 }
                 new bootstrap.Modal(document.getElementById('editUserModal')).show();
