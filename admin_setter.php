@@ -115,10 +115,11 @@ try {
         }
 
         if (!empty($data['cryptoAddresses']) && is_array($data['cryptoAddresses'])) {
-            $stmt = $pdo->prepare('INSERT INTO deposit_crypto_address (user_id,wallet_info) VALUES (?,?)');
+            $stmt = $pdo->prepare('INSERT INTO deposit_crypto_address (user_id,crypto_name,wallet_info) VALUES (?,?,?)');
             foreach ($data['cryptoAddresses'] as $addr) {
                 $stmt->execute([
                     $user['user_id'] ?? null,
+                    $addr['crypto_name'] ?? '',
                     $addr['wallet_info'] ?? ''
                 ]);
             }
@@ -158,9 +159,9 @@ try {
 
         if (!empty($data['cryptoAddresses']) && is_array($data['cryptoAddresses'])) {
             $pdo->prepare('DELETE FROM deposit_crypto_address WHERE user_id = ?')->execute([$userId]);
-            $stmt = $pdo->prepare('INSERT INTO deposit_crypto_address (user_id,wallet_info) VALUES (?,?)');
+            $stmt = $pdo->prepare('INSERT INTO deposit_crypto_address (user_id,crypto_name,wallet_info) VALUES (?,?,?)');
             foreach ($data['cryptoAddresses'] as $addr) {
-                $stmt->execute([$userId, $addr['wallet_info'] ?? '']);
+                $stmt->execute([$userId, $addr['crypto_name'] ?? '', $addr['wallet_info'] ?? '']);
             }
         }
 
