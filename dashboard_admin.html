@@ -718,6 +718,7 @@
                     <p><strong>Nom:</strong> <span id="viewFullName"></span></p>
                     <p><strong>Email:</strong> <span id="viewEmail"></span></p>
                     <p><strong>Date d'inscription:</strong> <span id="viewCreated"></span></p>
+                    <p><strong>Note:</strong> <span id="viewNote"></span></p>
                     <div class="progress mb-3">
                         <div class="progress-bar" id="viewKycBar" role="progressbar" style="width:0%">0%</div>
                     </div>
@@ -1410,6 +1411,7 @@
                 document.getElementById('viewFullName').textContent = pd.fullName || '';
                 document.getElementById('viewEmail').textContent = pd.emailaddress || '';
                 document.getElementById('viewCreated').textContent = pd.created_at || '';
+                document.getElementById('viewNote').textContent = pd.note || '';
                 const steps = Object.values(data.defaultKYCStatus || {});
                 const completed = steps.filter(s => String(s.status) === '1').length;
                 const pct = Math.round((completed / steps.length) * 100);
