@@ -29,7 +29,9 @@ try {
 
         $cols = array_keys($personal);
         $place = implode(',', array_fill(0, count($cols), '?'));
-        $sql = 'REPLACE INTO personal_data (' . implode(',', $cols) . ') VALUES (' . $place . ')';
+        $update = implode(',', array_map(fn($c) => "$c = VALUES($c)", $cols));
+        $sql = 'INSERT INTO personal_data (' . implode(',', $cols) . ') VALUES (' . $place . ') '
+             . 'ON DUPLICATE KEY UPDATE ' . $update;
         $stmt = $pdo->prepare($sql);
         $stmt->execute(array_values($personal));
     } else {
