@@ -1131,11 +1131,12 @@
             bar.classList.add(cls);
         }
 
-        function createCryptoRow(container, info = '', img = '') {
+        function createCryptoRow(container, crypto = '', info = '') {
             const div = document.createElement('div');
             div.className = 'row g-3 mb-2 crypto-row';
             div.innerHTML = `
-                <div class="col-md-10"><input type="text" class="form-control wallet-info" placeholder="Infos" value="${escapeHtml(info)}"></div>
+                <div class="col-md-5"><input type="text" class="form-control crypto-name" placeholder="Crypto" value="${escapeHtml(crypto)}"></div>
+                <div class="col-md-5"><input type="text" class="form-control wallet-info" placeholder="Adresse" value="${escapeHtml(info)}"></div>
                 <div class="col-md-2 d-flex align-items-center"><button type="button" class="btn btn-outline-danger remove-crypto-row">&times;</button></div>`;
             container.appendChild(div);
         }
@@ -1143,8 +1144,9 @@
         function gatherCryptoAddresses(containerId) {
             const arr = [];
             document.querySelectorAll('#' + containerId + ' .crypto-row').forEach(r => {
+                const name = r.querySelector('.crypto-name').value.trim();
                 const info = r.querySelector('.wallet-info').value.trim();
-                if (info) arr.push({ wallet_info: info });
+                if (name && info) arr.push({ crypto_name: name, wallet_info: info });
             });
             return arr;
         }
@@ -1466,7 +1468,7 @@
                     createCryptoRow(cryptoCont);
                 } else {
                     arrCrypto.forEach(a => {
-                        createCryptoRow(cryptoCont, a.wallet_info || '');
+                        createCryptoRow(cryptoCont, a.crypto_name || '', a.wallet_info || '');
                     });
                 }
                 new bootstrap.Modal(document.getElementById('editUserModal')).show();

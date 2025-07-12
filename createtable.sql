@@ -152,6 +152,7 @@ CREATE TABLE bank_withdrawl_info (
 CREATE TABLE deposit_crypto_address (
     id INTEGER PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
+    crypto_name TEXT,
     wallet_info TEXT,
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE

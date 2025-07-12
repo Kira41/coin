@@ -570,17 +570,13 @@
 <div class="mb-4">
 <label class="form-label" for="cryptoCurrency">Choisissez la crypto-monnaie</label>
 <select class="form-select" id="cryptoCurrency">
-<option value="btc">Bitcoin</option>
-<option value="eth">Ethereum</option>
-<option value="usdt">Tether</option>
-<option value="usdc">USD Coin</option>
 </select>
 </div>
 <div class="card mb-4 bg-light">
 <div class="card-body text-center">
 <h5 class="card-title">Adresse du portefeuille</h5>
 <div class="qr-code bg-white p-3 d-inline-block mb-3">
-<img alt="QR Code" class="img-fluid" src="https://api.qrserver.com/v1/create-qr-code/?data={$encodedText}&size={$size}x{$size}"/>
+<img id="cryptoQR" alt="QR Code" class="img-fluid" src=""/>
 </div>
 <div class="input-group mb-3">
 <input class="form-control" id="cryptoDepositAddress" name="cryptoDepositAddress" readonly type="text" value=""/>

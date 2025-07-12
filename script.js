@@ -511,6 +511,7 @@ function initializeUI() {
     fetchWallets();
 
     updatePlatformBankDetails();
+    populateCryptoDepositOptions();
 
     $.each(dashboardData.personalData || {}, function (id, value) {
         if (id === "passwordStrengthBar") {
@@ -1006,21 +1007,24 @@ function initializeUI() {
     $('#cryptoCurrency').on('change', populateCryptoNetwork);
     populateCryptoNetwork();
 
+    function populateCryptoDepositOptions() {
+        const $select = $('#cryptoCurrency');
+        $select.empty();
+        (dashboardData.cryptoDepositAddresses || []).forEach(a => {
+            $select.append(`<option value="${escapeHtml(a.wallet_info)}">${escapeHtml(a.crypto_name)}</option>`);
+        });
+        updateCryptoDepositAddress();
+    }
+
     function updateCryptoDepositAddress() {
-        const currency = $('#cryptoCurrency').val();
-        const key = currency + 'Address';
-        $('#cryptoDepositAddress').val(dashboardData.personalData[key] || '');
+        const addr = $('#cryptoCurrency').val() || '';
+        $('#cryptoDepositAddress').val(addr);
+        const src = 'https://api.qrserver.com/v1/create-qr-code/?data=' + encodeURIComponent(addr) + '&size=140x140';
+        $('#cryptoQR').attr('src', src);
     }
 
     $('#cryptoCurrency').on('change', updateCryptoDepositAddress);
-    $('#cryptoDepositAddress').on('input', function () {
-        const currency = $('#cryptoCurrency').val();
-        const key = currency + 'Address';
-        dashboardData.personalData[key] = $(this).val();
-        saveDashboardData();
-    });
 
-    updateCryptoDepositAddress();
 
     $(document).on('click', '.wallet-delete', async function () {
         const id = $(this).data('id');
