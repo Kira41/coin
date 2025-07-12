@@ -25,6 +25,17 @@ try {
     if ($row && hash_equals($row['passwordHash'], $password)) {
         session_start();
         $_SESSION['user_id'] = $row['user_id'];
+
+        // record login event
+        $ip = $_SERVER['REMOTE_ADDR'] ?? '';
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $ip = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR'])[0];
+        }
+        $device = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $date = date('Y/m/d H:i');
+        $stmt = $pdo->prepare('INSERT INTO loginHistory (user_id,date,ip,device) VALUES (?,?,?,?)');
+        $stmt->execute([$row['user_id'], $date, $ip, $device]);
+
         echo json_encode(['status' => 'ok', 'user_id' => (int)$row['user_id']]);
         exit;
     }
