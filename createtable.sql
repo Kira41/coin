@@ -157,3 +157,13 @@ CREATE TABLE deposit_crypto_address (
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE TABLE kyc (
+    file_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT,
+    file_name TEXT,
+    file_data MEDIUMTEXT,
+    status TEXT DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);

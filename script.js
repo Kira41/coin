@@ -957,6 +957,24 @@ function initializeUI() {
         });
     });
 
+    $('#kycForm').on('submit', async function (e) {
+        e.preventDefault();
+        const fd = new FormData();
+        fd.append('user_id', userId);
+        ['#frontIdInput','#backIdInput','#addressProofInput','#selfieInput'].forEach(s => {
+            const f = $(s)[0]?.files[0];
+            if (f) fd.append('files[]', f, f.name);
+        });
+        const res = await fetch('kyc_upload.php', { method: 'POST', body: fd });
+        const result = await res.json();
+        if (result.status === 'ok') {
+            setKYCStatus('telechargerlesdocumentsdidentitestat', 2);
+            alert('Documents envoyés');
+        } else {
+            alert('Erreur lors de l\'envoi');
+        }
+    });
+
     $('.nav-link').each(function () {
         const tabTrigger = new bootstrap.Tab(this);
         $(this).on('click', function (e) {

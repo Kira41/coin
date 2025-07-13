@@ -22,6 +22,15 @@ $personal = $personal ? $personal[0] : [];
 $bankWithdraw = fetchAll($pdo, 'SELECT * FROM bank_withdrawl_info WHERE user_id = ? LIMIT 1', [$userId]);
 $bankWithdraw = $bankWithdraw ? $bankWithdraw[0] : [];
 
+$kycRows = fetchAll($pdo, 'SELECT status,created_at FROM kyc WHERE user_id = ? ORDER BY created_at DESC', [$userId]);
+$kycStatus = '0';
+$kycDate = null;
+foreach ($kycRows as $r) {
+    if ($kycDate === null) { $kycDate = $r['created_at']; }
+    if ($r['status'] === 'approved') { $kycStatus = '1'; break; }
+    if ($r['status'] === 'pending' && $kycStatus !== '1') { $kycStatus = '2'; }
+}
+
 $data = [
     'personalData' => $personal,
     'wallets' => fetchAll($pdo, 'SELECT * FROM wallets WHERE user_id = ?', [$userId]),
@@ -33,12 +42,13 @@ $data = [
     'loginHistory' => fetchAll($pdo, 'SELECT date,ip,device FROM loginHistory WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC', [$userId]),
     'bankWithdrawInfo' => $bankWithdraw,
     'cryptoDepositAddresses' => fetchAll($pdo, 'SELECT id,crypto_name,wallet_info FROM deposit_crypto_address WHERE user_id = ?', [$userId]),
+    'kycDocs' => $kycRows,
     // placeholders for front-end
     'formData' => new stdClass(),
     'defaultKYCStatus' => [
         'enregistrementducomptestat' => ['status' => '1', 'date' => date('Y-m-d')],
         'confirmationdeladresseemailstat' => ['status' => '1', 'date' => date('Y-m-d')],
-        'telechargerlesdocumentsdidentitestat' => ['status' => '0', 'date' => null],
+        'telechargerlesdocumentsdidentitestat' => ['status' => $kycStatus, 'date' => $kycDate],
         'verificationdeladressestat' => ['status' => '0', 'date' => null],
         'revisionfinalestat' => ['status' => '2', 'date' => null],
     ],
