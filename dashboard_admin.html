@@ -467,63 +467,7 @@
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <tr>
-                                                <td>
-                                                    <input type="checkbox" class="form-check-input">
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Avatar">
-                                                        <div>
-                                                            <div class="fw-bold">Pierre Dubois</div>
-                                                            <small class="text-muted">pierre.dubois@email.com</small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>Carte d'Identité</td>
-                                                <td>23/06/2025</td>
-                                                <td><span class="badge bg-warning">En Attente</span></td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#kycModal">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-success me-1">
-                                                        <i class="bi bi-check"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-danger">
-                                                        <i class="bi bi-x"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td>
-                                                    <input type="checkbox" class="form-check-input">
-                                                </td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <img src="https://via.placeholder.com/40" class="rounded-circle me-2" alt="Avatar">
-                                                        <div>
-                                                            <div class="fw-bold">Claire Moreau</div>
-                                                            <small class="text-muted">claire.moreau@email.com</small>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td>Passeport</td>
-                                                <td>22/06/2025</td>
-                                                <td><span class="badge bg-warning">En Attente</span></td>
-                                                <td>
-                                                    <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#kycModal">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-success me-1">
-                                                        <i class="bi bi-check"></i>
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-danger">
-                                                        <i class="bi bi-x"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
+                                        <tbody id="kycRequestsTable">
                                         </tbody>
                                     </table>
                                 </div>
@@ -821,27 +765,21 @@
                     <div class="row">
                         <div class="col-md-6">
                             <h6>Informations Utilisateur</h6>
-                            <p><strong>Nom:</strong> Pierre Dubois</p>
-                            <p><strong>Email:</strong> pierre.dubois@email.com</p>
-                            <p><strong>Date de naissance:</strong> 15/03/1985</p>
-                            <p><strong>Adresse:</strong> 123 Rue de la Paix, Paris</p>
+                            <p><strong>Nom:</strong> <span id="kycUserName"></span></p>
+                            <p><strong>Email:</strong> <span id="kycUserEmail"></span></p>
                         </div>
                         <div class="col-md-6">
-                            <h6>Documents Soumis</h6>
-                            <div class="mb-3">
-                                <img src="https://via.placeholder.com/200x120" class="img-fluid border rounded" alt="Document">
-                                <p class="mt-2"><small>Carte d'Identité - Recto</small></p>
-                            </div>
-                            <div class="mb-3">
-                                <img src="https://via.placeholder.com/200x120" class="img-fluid border rounded" alt="Document">
-                                <p class="mt-2"><small>Carte d'Identité - Verso</small></p>
+                            <h6>Document Soumis</h6>
+                            <div class="mb-3 text-center">
+                                <img id="kycModalImage" src="" class="img-fluid border rounded" alt="Document">
+                                <p class="mt-2"><small id="kycModalFilename"></small></p>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger">Rejeter</button>
-                    <button type="button" class="btn btn-success">Approuver</button>
+                    <button type="button" class="btn btn-danger" id="kycRejectBtn">Rejeter</button>
+                    <button type="button" class="btn btn-success" id="kycApproveBtn">Approuver</button>
                 </div>
             </div>
         </div>
@@ -1289,6 +1227,7 @@
                 }
                 TX_PAGE = 1;
                 loadTransactions();
+                loadKYCRequests();
             } catch (err) {
                 console.error('Failed to load admin data', err);
             }
@@ -1740,6 +1679,35 @@
                 console.error('Failed to load transactions', err);
             }
         }
+
+        async function loadKYCRequests() {
+            try {
+                const res = await fetchWithAuth('kyc_admin.php');
+                const data = await res.json();
+                const tbody = document.getElementById('kycRequestsTable');
+                tbody.innerHTML = '';
+                (data.kyc || []).forEach(doc => {
+                    const row = `<tr>
+                        <td><input type="checkbox" class="form-check-input" data-id="${doc.file_id}"></td>
+                        <td>${escapeHtml(doc.fullName || '')}</td>
+                        <td>${escapeHtml(doc.file_name)}</td>
+                        <td>${escapeHtml(doc.created_at)}</td>
+                        <td><span class="badge bg-warning">En Attente</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1 kyc-view" data-id="${doc.file_id}"><i class="bi bi-eye"></i></button>
+                            <button class="btn btn-sm btn-outline-success me-1 kyc-approve" data-id="${doc.file_id}"><i class="bi bi-check"></i></button>
+                            <button class="btn btn-sm btn-outline-danger kyc-reject" data-id="${doc.file_id}"><i class="bi bi-x"></i></button>
+                        </td>
+                    </tr>`;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+                if (!tbody.innerHTML) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Aucune demande</td></tr>';
+                }
+            } catch (err) {
+                console.error('Failed to load KYC requests', err);
+            }
+        }
         async function updateTransaction(id, status, statusClass, remove = false) {
             const payload = { action: 'update_transaction', id: id };
             if (remove) {
@@ -1791,6 +1759,50 @@
                 TX_PAGE = page;
                 loadTransactions();
             }
+        });
+
+        const kycTable = document.getElementById('kycRequestsTable');
+        if (kycTable) kycTable.addEventListener('click', async function(e){
+            const view = e.target.closest('.kyc-view');
+            const approve = e.target.closest('.kyc-approve');
+            const reject = e.target.closest('.kyc-reject');
+            const id = (view||approve||reject)?.getAttribute('data-id');
+            if(!id) return;
+            if(view){
+                const res = await fetchWithAuth('kyc_admin.php?id='+id);
+                const data = await res.json();
+                if(data.file){
+                    document.getElementById('kycUserName').textContent = data.file.fullName || '';
+                    document.getElementById('kycUserEmail').textContent = data.file.emailaddress || '';
+                    document.getElementById('kycModalImage').src = 'data:image/jpeg;base64,'+data.file.file_data;
+                    document.getElementById('kycModalFilename').textContent = data.file.file_name;
+                    document.getElementById('kycApproveBtn').setAttribute('data-id', id);
+                    document.getElementById('kycRejectBtn').setAttribute('data-id', id);
+                    new bootstrap.Modal(document.getElementById('kycModal')).show();
+                }
+            } else if(approve || reject){
+                const status = approve ? 'approved' : 'rejected';
+                await fetchWithAuth('kyc_admin.php', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({file_id:id,status:status})});
+                loadKYCRequests();
+            }
+        });
+
+        document.getElementById('kycApproveBtn').addEventListener('click', async function(){
+            const id = this.getAttribute('data-id');
+            if(id){
+                await fetchWithAuth('kyc_admin.php', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({file_id:id,status:'approved'})});
+                loadKYCRequests();
+            }
+            bootstrap.Modal.getInstance(document.getElementById('kycModal')).hide();
+        });
+
+        document.getElementById('kycRejectBtn').addEventListener('click', async function(){
+            const id = this.getAttribute('data-id');
+            if(id){
+                await fetchWithAuth('kyc_admin.php', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({file_id:id,status:'rejected'})});
+                loadKYCRequests();
+            }
+            bootstrap.Modal.getInstance(document.getElementById('kycModal')).hide();
         });
 
         // Add some interactive features

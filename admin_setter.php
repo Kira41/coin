@@ -362,13 +362,22 @@ try {
                         )->execute([$amount, $amount, $userId]);
                     }
                 }
-            }
-            $pdo->commit();
-            echo json_encode(['status' => 'ok']);
-        } catch (Exception $e) {
-            $pdo->rollBack();
-            throw $e;
         }
+        $pdo->commit();
+        echo json_encode(['status' => 'ok']);
+    } catch (Exception $e) {
+        $pdo->rollBack();
+        throw $e;
+    }
+    } elseif ($action === 'update_kyc') {
+        $fileId = isset($data['file_id']) ? (int)$data['file_id'] : 0;
+        $status = $data['status'] ?? '';
+        if (!$fileId || !in_array($status, ['approved','rejected'])) {
+            throw new Exception('Invalid parameters');
+        }
+        $stmt = $pdo->prepare('UPDATE kyc SET status = ? WHERE file_id = ?');
+        $stmt->execute([$status, $fileId]);
+        echo json_encode(['status' => 'ok']);
     } else {
         throw new Exception('Invalid action');
     }
