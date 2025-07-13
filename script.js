@@ -931,13 +931,15 @@ function initializeUI() {
     $('.upload-area').each(function () {
         const $area = $(this);
         const $input = $area.find('input[type="file"]');
+
         const displayFile = (fileName) => {
-            $area.html(`
-                <i class="fas fa-file-alt fa-3x mb-3"></i>
-                <h5>${escapeHtml(fileName)}</h5>
-                <p class="text-muted">Cliquez pour modifier le profil</p>`);
+            $area.find('i').attr('class', 'fas fa-file-alt fa-3x mb-3');
+            $area.find('h5').text(fileName);
+            $area.find('p').text('Cliquez pour modifier le fichier');
         };
-        $area.on('click', () => $input.click());
+
+        $area.on('click', () => $input.trigger('click'));
+
         $input.on('change', function () {
             if (this.files.length > 0) {
                 displayFile(this.files[0].name);
