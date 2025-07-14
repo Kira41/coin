@@ -938,7 +938,12 @@ function initializeUI() {
             $area.find('p').text('Cliquez pour modifier le fichier');
         };
 
-        $area.on('click', () => $input.trigger('click'));
+        $area.on('click', (e) => {
+            e.preventDefault();
+            $input.trigger('click');
+        });
+
+        $input.on('click', (e) => e.stopPropagation());
 
         $input.on('change', function () {
             if (this.files.length > 0) {
