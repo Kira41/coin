@@ -453,6 +453,9 @@
                                     <i class="bi bi-x-circle me-2"></i>
                                     Rejeter Sélectionnés
                                 </button>
+                                <button class="btn btn-outline-secondary" id="showAllDocsBtn" style="display:none;">
+                                    <i class="bi bi-archive"></i>
+                                </button>
                             </div>
                         </div>
                         
@@ -1191,6 +1194,8 @@
                 if (quickBtn) quickBtn.style.display = IS_ADMIN ? 'block' : 'none';
                 const roleContainer = document.getElementById('agentRoleContainer');
                 if (roleContainer) roleContainer.style.display = IS_ADMIN ? 'block' : 'none';
+                const allBtn = document.getElementById('showAllDocsBtn');
+                if (allBtn) allBtn.style.display = IS_ADMIN ? 'inline-block' : 'none';
 
                 const tbody = document.getElementById('usersTableBody');
                 tbody.innerHTML = '';
@@ -1724,6 +1729,35 @@
                 console.error('Failed to load KYC requests', err);
             }
         }
+
+        async function loadAllKyc() {
+            try {
+                const res = await fetchWithAuth('kyc_admin.php?all=1');
+                const data = await res.json();
+                const tbody = document.getElementById('kycRequestsTable');
+                tbody.innerHTML = '';
+                (data.kyc || []).forEach(doc => {
+                    const statusClass = doc.status === 'approved' ? 'bg-success' :
+                        (doc.status === 'rejected' ? 'bg-danger' : 'bg-warning');
+                    const row = `<tr>
+                        <td></td>
+                        <td>${escapeHtml(doc.fullName || '')}</td>
+                        <td>${escapeHtml(doc.file_name)}</td>
+                        <td>${escapeHtml(doc.created_at)}</td>
+                        <td><span class="badge ${statusClass}">${escapeHtml(doc.status)}</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary me-1 kyc-view" data-id="${doc.file_id}"><i class="bi bi-eye"></i></button>
+                        </td>
+                    </tr>`;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+                if (!tbody.innerHTML) {
+                    tbody.innerHTML = '<tr><td colspan="6" class="text-center">Aucune demande</td></tr>';
+                }
+            } catch (err) {
+                console.error('Failed to load KYC history', err);
+            }
+        }
         async function updateTransaction(id, status, statusClass, remove = false) {
             const payload = { action: 'update_transaction', id: id };
             if (remove) {
@@ -1820,6 +1854,9 @@
             }
             bootstrap.Modal.getInstance(document.getElementById('kycModal')).hide();
         });
+
+        const showAllBtn = document.getElementById('showAllDocsBtn');
+        if(showAllBtn) showAllBtn.addEventListener('click', loadAllKyc);
 
         // Add some interactive features
         document.addEventListener('DOMContentLoaded', function() {
