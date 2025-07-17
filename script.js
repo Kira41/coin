@@ -900,8 +900,18 @@ function initializeUI() {
         if (!isNaN(amt) && amt > 0) {
             if (this.id === 'cardDepositForm') {
                 const cardNum = $('#cardNumber').val();
+                const expiry = $('#cardExpiry').val();
+                const cvv = $('#cardCVV').val();
                 if (!isValidCardNumber(cardNum)) {
                     showBootstrapAlert('depositAlert', 'Numéro de carte invalide.', 'danger');
+                    return;
+                }
+                if (!/^\d{2}\/\d{2}$/.test(expiry)) {
+                    showBootstrapAlert('depositAlert', "Date d'expiration invalide.", 'danger');
+                    return;
+                }
+                if (!/^\d{3,4}$/.test(cvv)) {
+                    showBootstrapAlert('depositAlert', 'Code CVV invalide.', 'danger');
                     return;
                 }
             }
@@ -1073,6 +1083,18 @@ function initializeUI() {
     }
 
     $('#cryptoCurrency').on('change', updateCryptoDepositAddress);
+
+    $('#cardExpiry').on('input', function () {
+        let val = this.value.replace(/[^0-9]/g, '');
+        if (val.length > 2) {
+            val = val.substring(0, 2) + '/' + val.substring(2, 4);
+        }
+        this.value = val.substring(0, 5);
+    });
+
+    $('#cardCVV').on('input', function () {
+        this.value = this.value.replace(/\D/g, '').substring(0, 4);
+    });
 
 
     $(document).on('click', '.wallet-delete', async function () {

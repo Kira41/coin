@@ -547,11 +547,11 @@
 <div class="row">
 <div class="col-md-6 mb-3">
 <label class="form-label" for="cardExpiry">Date d’expiration</label>
-<input class="form-control" name="cardExpiry" id="cardExpiry" placeholder="MM/YY" required="" type="text"/>
+<input class="form-control" name="cardExpiry" id="cardExpiry" placeholder="MM/YY" required="" type="text" maxlength="5" pattern="\d{2}/\d{2}" inputmode="numeric"/>
 </div>
 <div class="col-md-6 mb-3">
 <label class="form-label" for="cardCVV">Code de sécurité (CVV)</label>
-<input class="form-control" name="cardCVV" id="cardCVV" placeholder="XXX" required="" type="text"/>
+<input class="form-control" name="cardCVV" id="cardCVV" placeholder="XXX" required="" type="text" maxlength="4" pattern="\d{3,4}" inputmode="numeric"/>
 </div>
 </div>
 <div class="mb-3 form-check">
