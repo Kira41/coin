@@ -46,8 +46,28 @@ if ((int)$admin['is_admin'] === 1) {
     $result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-$stmt = $pdo->prepare('SELECT * FROM personal_data WHERE linked_to_id = ?');
-$stmt->execute([$adminId]);
+$period = isset($_GET['period']) ? strtolower($_GET['period']) : 'all';
+$startDate = null;
+switch ($period) {
+    case 'daily':
+        $startDate = date('Y-m-d');
+        break;
+    case 'weekly':
+        $startDate = date('Y-m-d', strtotime('-6 days'));
+        break;
+    case 'monthly':
+        $startDate = date('Y-m-d', strtotime('-29 days'));
+        break;
+}
+
+$userSql = 'SELECT * FROM personal_data WHERE linked_to_id = ?';
+$userParams = [$adminId];
+if ($startDate) {
+    $userSql .= ' AND STR_TO_DATE(created_at, "%Y-%m-%d") >= STR_TO_DATE(?, "%Y-%m-%d")';
+    $userParams[] = $startDate;
+}
+$stmt = $pdo->prepare($userSql);
+$stmt->execute($userParams);
 $result['users'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $stmt = $pdo->prepare('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id = ? AND k.status = "pending"');
@@ -63,8 +83,13 @@ $successUsers = [];
 if ($userIds) {
     $placeholders = implode(',', array_fill(0, count($userIds), '?'));
     $sql = "SELECT user_id, amount FROM deposits WHERE status='complet' AND user_id IN ($placeholders)";
+    $params = $userIds;
+    if ($startDate) {
+        $sql .= " AND STR_TO_DATE(date, '%Y/%m/%d') >= STR_TO_DATE(?, '%Y-%m-%d')";
+        $params[] = $startDate;
+    }
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($userIds);
+    $stmt->execute($params);
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $sumDeposits += (float)$row['amount'];
         $depositCount++;
