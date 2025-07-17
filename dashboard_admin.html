@@ -153,6 +153,14 @@
                     
                     <!-- Home Section -->
                     <div id="home-section" class="content-section active">
+                        <div class="d-flex justify-content-end mb-2">
+                            <select id="statsPeriodSelect" class="form-select w-auto">
+                                <option value="daily">Journalier</option>
+                                <option value="weekly">Hebdomadaire</option>
+                                <option value="monthly">Mensuel</option>
+                                <option value="all" selected>Tout</option>
+                            </select>
+                        </div>
                         <div class="row mb-4">
                             <div class="col-md-3 mb-3">
                                 <div class="card stats-card">
@@ -866,6 +874,13 @@
                     if (targetSection === 'transactions') { TX_PAGE = 1; loadTransactions(); }
                 });
             });
+            const statsSelect = document.getElementById('statsPeriodSelect');
+            if (statsSelect) {
+                statsSelect.addEventListener('change', function() {
+                    STATS_PERIOD = this.value;
+                    loadAdminData();
+                });
+            }
             checkAuth();
             const pwdInput = document.getElementById('password');
             if (pwdInput) {
@@ -899,6 +914,7 @@
         let ADMIN_ID = null;
         let ADMIN_EMAIL = '';
         let IS_ADMIN = 0;
+        let STATS_PERIOD = 'all';
 
         // Minimal MD5 implementation used to hash passwords client-side
         function md5(str) {
@@ -1104,7 +1120,7 @@
 
         async function checkAuth() {
             try {
-                const res = await fetchWithAuth('admin_getter.php');
+                const res = await fetchWithAuth('admin_getter.php?period=' + encodeURIComponent(STATS_PERIOD));
                 if (!res.ok) throw new Error('unauthorized');
                 const data = await res.json();
                 if (data.admin_id) ADMIN_ID = data.admin_id;
@@ -1155,7 +1171,7 @@
 
         async function loadAdminData() {
             try {
-                const res = await fetchWithAuth('admin_getter.php');
+                const res = await fetchWithAuth('admin_getter.php?period=' + encodeURIComponent(STATS_PERIOD));
                 const data = await res.json();
                 if (data.admin_id) ADMIN_ID = data.admin_id;
                 if (data.email) ADMIN_EMAIL = data.email;
