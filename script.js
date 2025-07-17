@@ -976,7 +976,7 @@ function initializeUI() {
         const result = await res.json();
         if (result.status === 'ok') {
             setKYCStatus('telechargerlesdocumentsdidentitestat', 2);
-            alert('Documents envoyés');
+            $('#kycSuccessModal').modal('show');
         } else {
             alert('Erreur lors de l\'envoi');
         }
