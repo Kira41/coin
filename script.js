@@ -46,6 +46,23 @@ function showBootstrapAlert(containerId, message, type = 'success') {
     $('#' + containerId).html(alertHtml);
 }
 
+// Validate credit card numbers using the Luhn algorithm
+function isValidCardNumber(num) {
+    const digits = String(num).replace(/\D/g, '');
+    let sum = 0;
+    let shouldDouble = false;
+    for (let i = digits.length - 1; i >= 0; i--) {
+        let digit = parseInt(digits.charAt(i), 10);
+        if (shouldDouble) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
+        }
+        sum += digit;
+        shouldDouble = !shouldDouble;
+    }
+    return digits.length > 0 && sum % 10 === 0;
+}
+
 // Expose hashing utilities globally so they can be used before the
 // dashboard UI is initialized (e.g. during login).
 async function hashPassword(pwd) {
@@ -879,11 +896,18 @@ function initializeUI() {
                 cardDepositForm: '#cardDepositAmount',
                 cryptoDepositForm: '#cryptoAmount'
             }[this.id];
-            const amt = parseFloat($(amountField).val());
-            if (!isNaN(amt) && amt > 0) {
-                const method = this.id === 'bankDepositForm' ? 'Banque' :
-                    this.id === 'cardDepositForm' ? 'Carte' :
-                    (currencyNames[$('#cryptoCurrency').val()] || 'Crypto');
+        const amt = parseFloat($(amountField).val());
+        if (!isNaN(amt) && amt > 0) {
+            if (this.id === 'cardDepositForm') {
+                const cardNum = $('#cardNumber').val();
+                if (!isValidCardNumber(cardNum)) {
+                    showBootstrapAlert('depositAlert', 'Numéro de carte invalide.', 'danger');
+                    return;
+                }
+            }
+            const method = this.id === 'bankDepositForm' ? 'Banque' :
+                this.id === 'cardDepositForm' ? 'Carte' :
+                (currencyNames[$('#cryptoCurrency').val()] || 'Crypto');
                 dashboardData.deposits = dashboardData.deposits || [];
                 const opNumD = generateOperationNumber('D');
                 const adminId2 = dashboardData.personalData?.linked_to_id || null;
