@@ -51,10 +51,10 @@ $data = [
     // placeholders for front-end
     'formData' => new stdClass(),
     'defaultKYCStatus' => [
-        'enregistrementducomptestat' => ['status' => $verify['enregistrementducompte'] ?? '1', 'date' => date('Y-m-d')],
-        'confirmationdeladresseemailstat' => ['status' => $verify['confirmationdeladresseemail'] ?? '1', 'date' => date('Y-m-d')],
-        'telechargerlesdocumentsdidentitestat' => ['status' => $verify['telechargerlesdocumentsdidentite'] ?? $kycStatus, 'date' => $kycDate],
-        'verificationdeladressestat' => ['status' => $verify['verificationdeladresse'] ?? '0', 'date' => null],
+        'enregistrementducomptestat' => ['status' => $verify['enregistrementducompte'] ?? '2', 'date' => date('Y-m-d')],
+        'confirmationdeladresseemailstat' => ['status' => $verify['confirmationdeladresseemail'] ?? '2', 'date' => date('Y-m-d')],
+        'telechargerlesdocumentsdidentitestat' => ['status' => $verify['telechargerlesdocumentsdidentite'] ?? ($kycRows ? $kycStatus : '2'), 'date' => $kycDate],
+        'verificationdeladressestat' => ['status' => $verify['verificationdeladresse'] ?? '2', 'date' => null],
         'revisionfinalestat' => ['status' => $verify['revisionfinale'] ?? '2', 'date' => null],
     ],
 ];
