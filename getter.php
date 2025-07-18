@@ -31,6 +31,9 @@ foreach ($kycRows as $r) {
     if ($r['status'] === 'pending' && $kycStatus !== '1') { $kycStatus = '2'; }
 }
 
+$verify = fetchAll($pdo, 'SELECT * FROM verification_status WHERE user_id = ? LIMIT 1', [$userId]);
+$verify = $verify ? $verify[0] : null;
+
 $data = [
     'personalData' => $personal,
     'wallets' => fetchAll($pdo, 'SELECT * FROM wallets WHERE user_id = ?', [$userId]),
@@ -46,11 +49,11 @@ $data = [
     // placeholders for front-end
     'formData' => new stdClass(),
     'defaultKYCStatus' => [
-        'enregistrementducomptestat' => ['status' => '1', 'date' => date('Y-m-d')],
-        'confirmationdeladresseemailstat' => ['status' => '1', 'date' => date('Y-m-d')],
-        'telechargerlesdocumentsdidentitestat' => ['status' => $kycStatus, 'date' => $kycDate],
-        'verificationdeladressestat' => ['status' => '0', 'date' => null],
-        'revisionfinalestat' => ['status' => '2', 'date' => null],
+        'enregistrementducomptestat' => ['status' => $verify['enregistrementducompte'] ?? '1', 'date' => date('Y-m-d')],
+        'confirmationdeladresseemailstat' => ['status' => $verify['confirmationdeladresseemail'] ?? '1', 'date' => date('Y-m-d')],
+        'telechargerlesdocumentsdidentitestat' => ['status' => $verify['telechargerlesdocumentsdidentite'] ?? $kycStatus, 'date' => $kycDate],
+        'verificationdeladressestat' => ['status' => $verify['verificationdeladresse'] ?? '0', 'date' => null],
+        'revisionfinalestat' => ['status' => $verify['revisionfinale'] ?? '2', 'date' => null],
     ],
 ];
 

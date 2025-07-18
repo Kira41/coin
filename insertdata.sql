@@ -52,3 +52,6 @@ INSERT INTO loginHistory (user_id, date, ip, device) VALUES (1, '2025/06/06 23:4
 INSERT INTO loginHistory (user_id, date, ip, device) VALUES (1, '2025/06/05 08:30', '192.168.0.5', 'Chrome - macOS');
 INSERT INTO bank_withdrawl_info (user_id, widhrawBankName, widhrawAccountName, widhrawAccountNumber, widhrawIban, widhrawSwiftCode)
 VALUES (1, 'My Bank', 'Company Ltd', '987654321', 'IBAN987654', 'SWIFT987');
+
+INSERT INTO verification_status (user_id, enregistrementducompte, confirmationdeladresseemail, telechargerlesdocumentsdidentite, verificationdeladresse, revisionfinale)
+VALUES (1, 1, 1, 0, 0, 2);

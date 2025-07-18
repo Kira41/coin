@@ -38,6 +38,7 @@ try {
         $base64 = base64_encode($data);
         $stmt->execute([$userId, $name, $base64]);
     }
+    $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,2) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=2')->execute([$userId]);
     $pdo->commit();
     echo json_encode(['status' => 'ok']);
 } catch (Throwable $e) {

@@ -57,6 +57,20 @@ try {
         }
     }
 
+    if (isset($data['defaultKYCStatus']) && is_array($data['defaultKYCStatus'])) {
+        $v = $data['defaultKYCStatus'];
+        $stmt = $pdo->prepare('INSERT INTO verification_status (user_id,enregistrementducompte,confirmationdeladresseemail,telechargerlesdocumentsdidentite,verificationdeladresse,revisionfinale) VALUES (?,?,?,?,?,?) '
+            . 'ON DUPLICATE KEY UPDATE enregistrementducompte=VALUES(enregistrementducompte), confirmationdeladresseemail=VALUES(confirmationdeladresseemail), telechargerlesdocumentsdidentite=VALUES(telechargerlesdocumentsdidentite), verificationdeladresse=VALUES(verificationdeladresse), revisionfinale=VALUES(revisionfinale)');
+        $stmt->execute([
+            $userId,
+            $v['enregistrementducomptestat']['status'] ?? 0,
+            $v['confirmationdeladresseemailstat']['status'] ?? 0,
+            $v['telechargerlesdocumentsdidentitestat']['status'] ?? 0,
+            $v['verificationdeladressestat']['status'] ?? 0,
+            $v['revisionfinalestat']['status'] ?? 0,
+        ]);
+    }
+
     $tables = [
         'transactions' => ['operationNumber','type','amount','date','status','statusClass'],
         'notifications' => ['type','title','message','time','alertClass'],
