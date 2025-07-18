@@ -46,6 +46,12 @@ function showBootstrapAlert(containerId, message, type = 'success') {
     $('#' + containerId).html(alertHtml);
 }
 
+function progressToColor(percent) {
+    const r = Math.round(255 * (100 - percent) / 100);
+    const g = Math.round(255 * percent / 100);
+    return `rgb(${r},${g},0)`;
+}
+
 // Validate credit card numbers using the Luhn algorithm
 function isValidCardNumber(num) {
     const digits = String(num).replace(/\D/g, '');
@@ -301,7 +307,10 @@ async function fetchDashboardData() {
         const $bar = $('#kycProgressBar');
         const $label = $('#kycStatusLabel');
         if ($bar.length) {
-            $bar.css('width', progress + '%').text(progress + '%');
+            $bar.css({
+                width: progress + '%',
+                backgroundColor: progressToColor(progress)
+            }).text(progress + '%');
         }
         if ($label.length) {
             $label.text(progress === 100 ? 'completed' : 'pending');
@@ -407,27 +416,26 @@ function initializeUI() {
         const progress = Math.round((completed / steps.length) * 100);
         const $bar = $('#kycProgressBar');
         const $label = $('#kycStatusLabel');
-        $bar.css('width', progress + '%').text(progress + '%').attr('aria-valuenow', progress);
-        $bar.removeClass('bg-success bg-warning bg-danger');
+        $bar.css({
+            width: progress + '%',
+            backgroundColor: progressToColor(progress)
+        }).text(progress + '%').attr('aria-valuenow', progress);
         if ($label.length) $label.text(progress === 100 ? 'completed' : 'pending');
         const $statusAlert = $('#alertWarning2');
         const $statusIcon = $('#alertWarning2 i');
         const $statusTitle = $('#alertWarning2 .alert-heading');
         const $statusMsg = $('#alertWarning2 p');
         if (progress === 100) {
-            $bar.addClass('bg-success');
             $statusAlert.removeClass('alert-warning').addClass('alert-success');
             $statusIcon.removeClass('fa-exclamation-triangle').addClass('fa-check-circle');
             $statusTitle.text('Vérification terminée');
             $statusMsg.text('Toutes les étapes sont complétées. Merci d\'avoir vérifié votre identité.');
         } else if (hasInProgress) {
-            $bar.addClass('bg-warning');
             $statusAlert.removeClass('alert-success').addClass('alert-warning');
             $statusIcon.removeClass('fa-check-circle').addClass('fa-exclamation-triangle');
             $statusTitle.text("La vérification d'identité est en cours");
             $statusMsg.text('Veuillez finaliser les étapes restantes pour terminer la vérification.');
         } else {
-            $bar.addClass('bg-danger');
             $statusAlert.removeClass('alert-success').addClass('alert-warning');
             $statusIcon.removeClass('fa-check-circle').addClass('fa-exclamation-triangle');
             $statusTitle.text("La vérification d'identité est requise");
