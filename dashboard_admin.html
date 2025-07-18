@@ -758,6 +758,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-success" id="finalReviewBtn" style="display:none">Marquer révision finale</button>
                     <button type="button" class="btn btn-primary" id="saveEditUser">Enregistrer</button>
                 </div>
             </div>
@@ -1433,6 +1434,12 @@
                         createCryptoRow(cryptoCont, a.crypto_name || '', a.wallet_info || '');
                     });
                 }
+                const revBtn = document.getElementById('finalReviewBtn');
+                if (revBtn) {
+                    const revStat = (data.defaultKYCStatus || {}).revisionfinalestat || {};
+                    revBtn.style.display = String(revStat.status) === '1' ? 'none' : 'inline-block';
+                    revBtn.setAttribute('data-id', id);
+                }
                 new bootstrap.Modal(document.getElementById('editUserModal')).show();
             } else if (delBtn) {
                 const id = delBtn.getAttribute('data-id');
@@ -1497,6 +1504,18 @@
             } else {
                 alert('Erreur lors de la mise à jour');
             }
+        });
+
+        const finalBtn = document.getElementById('finalReviewBtn');
+        if (finalBtn) finalBtn.addEventListener('click', async function() {
+            const id = this.getAttribute('data-id');
+            if (!id) return;
+            await fetchWithAuth('admin_setter.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'set_revision_finale', user_id: id })
+            });
+            this.style.display = 'none';
         });
 
         // Agent table actions

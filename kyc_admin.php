@@ -47,6 +47,13 @@ try{
         if(!$id || !in_array($status,['approved','rejected'])) throw new Exception('Invalid params');
         $stmt=$pdo->prepare('UPDATE kyc SET status=? WHERE file_id=?');
         $stmt->execute([$status,(int)$id]);
+        $uidStmt=$pdo->prepare('SELECT user_id FROM kyc WHERE file_id=?');
+        $uidStmt->execute([(int)$id]);
+        $uid=$uidStmt->fetchColumn();
+        if($uid){
+            $val=$status==='approved'?1:0;
+            $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,?) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=VALUES(telechargerlesdocumentsdidentite)')->execute([$uid,$val]);
+        }
         echo json_encode(['status'=>'ok']);
     }
 }catch(Throwable $e){

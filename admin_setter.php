@@ -102,6 +102,16 @@ try {
         $stmt = $pdo->prepare($sql);
         $stmt->execute(array_values($user));
 
+        $pdo->prepare('INSERT INTO verification_status (user_id,enregistrementducompte,confirmationdeladresseemail,telechargerlesdocumentsdidentite,verificationdeladresse,revisionfinale) VALUES (?,?,?,?,?,?)')
+            ->execute([
+                $user['user_id'],
+                1,
+                1,
+                0,
+                0,
+                2
+            ]);
+
         if (!empty($data['bankWithdrawInfo']) && is_array($data['bankWithdrawInfo'])) {
             $bw = $data['bankWithdrawInfo'];
             $bwCols = ['user_id','widhrawBankName','widhrawAccountName','widhrawAccountNumber','widhrawIban','widhrawSwiftCode'];
@@ -377,6 +387,19 @@ try {
         }
         $stmt = $pdo->prepare('UPDATE kyc SET status = ? WHERE file_id = ?');
         $stmt->execute([$status, $fileId]);
+        $uidStmt = $pdo->prepare('SELECT user_id FROM kyc WHERE file_id = ?');
+        $uidStmt->execute([$fileId]);
+        $uid = $uidStmt->fetchColumn();
+        if ($uid) {
+            $val = $status === 'approved' ? 1 : 0;
+            $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,?) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=VALUES(telechargerlesdocumentsdidentite)')
+                ->execute([$uid, $val]);
+        }
+        echo json_encode(['status' => 'ok']);
+    } elseif ($action === 'set_revision_finale') {
+        $uid = isset($data['user_id']) ? (int)$data['user_id'] : 0;
+        if (!$uid) { throw new Exception('Missing user_id'); }
+        $pdo->prepare('INSERT INTO verification_status (user_id, revisionfinale) VALUES (?,1) ON DUPLICATE KEY UPDATE revisionfinale=1')->execute([$uid]);
         echo json_encode(['status' => 'ok']);
     } else {
         throw new Exception('Invalid action');

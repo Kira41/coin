@@ -167,3 +167,14 @@ CREATE TABLE kyc (
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 );
+
+CREATE TABLE verification_status (
+    user_id BIGINT PRIMARY KEY,
+    enregistrementducompte TINYINT(1) DEFAULT 0,
+    confirmationdeladresseemail TINYINT(1) DEFAULT 0,
+    telechargerlesdocumentsdidentite TINYINT(1) DEFAULT 0,
+    verificationdeladresse TINYINT(1) DEFAULT 0,
+    revisionfinale TINYINT(1) DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
+        ON DELETE CASCADE ON UPDATE CASCADE
+);
