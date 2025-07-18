@@ -78,3 +78,13 @@ Use `admin_login.php` to sign in. POST `email` and `password`; a successful logi
 ## User Login
 
 `dashbord_user.html` now includes a login form. Submit your email and password to `user_login.php`; on success the script stores your `user_id` in `localStorage` and loads the dashboard for that account. Each successful login is also recorded in the `loginHistory` table along with the IP address and device used.
+
+## Automated trade closing
+
+Open trades can be finalized automatically even when users are offline. The `cron_trading.php` script checks all orders with the status `En cours`, fetches the latest price from Binance and updates the order with the resulting profit or loss. To keep trading positions active, schedule the script with cron for example:
+
+```cron
+* * * * * php /path/to/cron_trading.php
+```
+
+This will close any open trades once per minute using the current market price.

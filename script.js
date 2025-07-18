@@ -1269,10 +1269,11 @@ function initializeUI() {
                         <td>${formatDollar(trade.prix)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutClass)}">${escapeHtml(trade.statut)}</span></td>
                         <td class="${escapeHtml(trade.profitClass || '')}">${trade.profitPerte==null?'-':formatDollar(trade.profitPerte)}</td>
+                        <td>${trade.statut==='En cours'?`<button class="btn btn-sm btn-danger stop-trade" data-op="${escapeHtml(trade.operationNumber)}"><i class="fas fa-stop"></i></button>`:'-'}</td>
                     </tr>`);
             });
         } else {
-            $tbodyTrading.html('<tr><td colspan="8" class="text-center">Aucune donnée disponible</td></tr>');
+            $tbodyTrading.html('<tr><td colspan="9" class="text-center">Aucune donnée disponible</td></tr>');
         }
     }
 
@@ -1591,6 +1592,14 @@ function initializeUI() {
     } else {
         $loginHistoryBody.html('<tr><td colspan="3" class="text-center">Aucune donnée disponible</td></tr>');
     }
+
+    $('#tradingHistory').on('click', '.stop-trade', function() {
+        const op = $(this).data('op');
+        const trade = (dashboardData.tradingHistory || []).find(t => t.operationNumber === op);
+        if (trade && trade.statut === 'En cours') {
+            finalizeOrder(trade, currentPrice);
+        }
+    });
 
     $('#transactionsPagination').on('click', 'a', function(e) {
         e.preventDefault();
