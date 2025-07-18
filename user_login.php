@@ -9,6 +9,15 @@ try {
     $pdo = new PDO($dsn, 'root', '');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+    // Ensure the loginHistory table exists in case the schema was not loaded
+    $pdo->exec("CREATE TABLE IF NOT EXISTS loginHistory (
+        id INTEGER PRIMARY KEY AUTO_INCREMENT,
+        user_id BIGINT,
+        date TEXT,
+        ip TEXT,
+        device TEXT
+    )");
+
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
 
