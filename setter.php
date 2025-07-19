@@ -76,7 +76,7 @@ try {
         'notifications' => ['type','title','message','time','alertClass'],
         'deposits' => ['operationNumber','date','amount','method','status','statusClass'],
         'retraits' => ['operationNumber','date','amount','method','status','statusClass'],
-        'tradingHistory' => ['operationNumber','temps','paireDevises','type','statutTypeClass','montant','prix','statut','statutClass','profitPerte','profitClass'],
+        'tradingHistory' => ['operationNumber','temps','paireDevises','type','statutTypeClass','montant','prix','statut','statutClass','profitPerte','profitClass','details'],
         'loginHistory' => ['date','ip','device'],
     ];
 
@@ -109,7 +109,11 @@ try {
                 $values[] = $adminId;
             }
             foreach ($cols as $c) {
-                $values[] = $row[$c] ?? null;
+                if ($c === 'details') {
+                    $values[] = isset($row[$c]) ? json_encode($row[$c]) : null;
+                } else {
+                    $values[] = $row[$c] ?? null;
+                }
             }
             $stmt->execute($values);
         }

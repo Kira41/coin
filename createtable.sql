@@ -125,6 +125,7 @@ CREATE TABLE tradingHistory (
     statutClass TEXT,
     profitPerte DECIMAL(18,2),
     profitClass TEXT,
+    details TEXT,
     UNIQUE(operationNumber),
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE,

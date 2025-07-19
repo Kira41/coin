@@ -298,6 +298,12 @@ async function fetchDashboardData() {
             r.montant = parseDollar(r.montant);
             r.prix = parseDollar(r.prix);
             r.profitPerte = r.profitPerte === null || r.profitPerte === '-' ? null : parseFloat(r.profitPerte);
+            if (r.details) {
+                try {
+                    const d = typeof r.details === 'string' ? JSON.parse(r.details) : r.details;
+                    Object.assign(r, d);
+                } catch (e) {}
+            }
         });
         console.log("Fetched dashboard data", dashboardData);
         const steps = Object.values(dashboardData.defaultKYCStatus || {});
@@ -325,10 +331,24 @@ async function fetchDashboardData() {
 
 async function saveDashboardData() {
     try {
+        const dataToSave = { ...dashboardData };
+        if (Array.isArray(dataToSave.tradingHistory)) {
+            dataToSave.tradingHistory = dataToSave.tradingHistory.map(o => ({
+                ...o,
+                details: {
+                    stopLoss: o.stopLoss || null,
+                    stopLimit: o.stopLimit || null,
+                    stopPrice: o.stopPrice || null,
+                    takeProfit: o.takeProfit || null,
+                    ocoId: o.ocoId || null,
+                    invested: o.invested || null
+                }
+            }));
+        }
         const result = await apiFetch('setter.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ...dashboardData, user_id: userId })
+            body: JSON.stringify({ ...dataToSave, user_id: userId })
         });
         console.log("Saved dashboard data", result);
     } catch (err) {
@@ -1554,12 +1574,25 @@ function initializeUI() {
             stopPrice: orderType === 'stop' ? stopPrice : null,
             takeProfit: ocoEnabled ? takeProfit : null,
             ocoId: ocoId,
-            invested: cost
+            invested: cost,
+            details: {}
+        };
+
+        order.details = {
+            stopLoss: order.stopLoss,
+            stopLimit: order.stopLimit,
+            stopPrice: order.stopPrice,
+            takeProfit: order.takeProfit,
+            ocoId: order.ocoId,
+            invested: order.invested
         };
 
         if (ocoEnabled) {
             const tpOrder = Object.assign({}, order, { stopLoss: null, takeProfit: takeProfit, prix: takeProfit });
+            tpOrder.details.stopLoss = null;
+            tpOrder.details.takeProfit = takeProfit;
             const slOrder = Object.assign({}, order, { takeProfit: null });
+            slOrder.details.takeProfit = null;
             addTrade(tpOrder);
             addTrade(slOrder);
         } else {

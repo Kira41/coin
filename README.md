@@ -88,3 +88,23 @@ Open trades can be finalized automatically even when users are offline. The `cro
 ```
 
 This will close any open trades once per minute using the current market price.
+
+### Order types and stop loss
+
+User trades can be created with several execution methods:
+
+- **Ordre au marché** – buy or sell immediately at the best price.
+- **Ordre à cours limité** – specify the exact price to execute.
+- **Ordre stop** – becomes a market order when the stop price is reached.
+- **Stop‑limit** – after the stop price is hit a limit order is placed.
+
+For risk management the following stop loss modes are available:
+
+- Fixed price stop
+- Percentage based stop
+- Time based exit
+- Trailing stop which follows the market in your favor.
+
+Trades may also combine a take profit and stop loss using an OCO (One Cancels the Other) order. When one of the two triggers the other is automatically cancelled.
+
+All parameters are stored in the `details` column of the `tradingHistory` table so they remain active even when the user is offline. The `cron_trading.php` script evaluates these rules on each run and finalizes trades whose conditions are met.
