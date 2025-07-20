@@ -1,11 +1,11 @@
 CREATE TABLE admins_agents (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     email TEXT NOT NULL,
     password TEXT NOT NULL,
     is_admin TINYINT(1) NOT NULL,
     created_by INTEGER NULL,
     UNIQUE(email)
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE personal_data (
     user_id BIGINT PRIMARY KEY,
@@ -38,7 +38,7 @@ CREATE TABLE personal_data (
     userSwiftCode TEXT,
     note TEXT,
     linked_to_id INTEGER
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE wallets (
     id BIGINT PRIMARY KEY,
@@ -47,10 +47,10 @@ CREATE TABLE wallets (
     network TEXT,
     address TEXT,
     label TEXT
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE transactions (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
     admin_id INTEGER,
     operationNumber TEXT,
@@ -64,20 +64,20 @@ CREATE TABLE transactions (
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (admin_id) REFERENCES admins_agents(id)
         ON DELETE SET NULL ON UPDATE CASCADE
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE notifications (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
     type TEXT,
     title TEXT,
     message TEXT,
     time TEXT,
     alertClass TEXT
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE deposits (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
     admin_id INTEGER,
     operationNumber TEXT,
@@ -91,10 +91,10 @@ CREATE TABLE deposits (
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (admin_id) REFERENCES admins_agents(id)
         ON DELETE SET NULL ON UPDATE CASCADE
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE retraits (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
     admin_id INTEGER,
     operationNumber TEXT,
@@ -108,10 +108,10 @@ CREATE TABLE retraits (
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (admin_id) REFERENCES admins_agents(id)
         ON DELETE SET NULL ON UPDATE CASCADE
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE tradingHistory (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
     admin_id INTEGER,
     operationNumber TEXT,
@@ -131,15 +131,15 @@ CREATE TABLE tradingHistory (
         ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (admin_id) REFERENCES admins_agents(id)
         ON DELETE SET NULL ON UPDATE CASCADE
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE loginHistory (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
     date TEXT,
     ip TEXT,
     device TEXT
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE bank_withdrawl_info (
     user_id BIGINT PRIMARY KEY,
@@ -148,18 +148,18 @@ CREATE TABLE bank_withdrawl_info (
     widhrawAccountNumber TEXT,
     widhrawIban TEXT,
     widhrawSwiftCode TEXT
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE deposit_crypto_address (
-    id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
     crypto_name TEXT,
     wallet_info TEXT,
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE
-);
+) ENGINE=InnoDB;
 CREATE TABLE kyc (
-    file_id INTEGER PRIMARY KEY AUTO_INCREMENT,
+    file_id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
     file_name TEXT,
     file_data MEDIUMTEXT,
@@ -167,7 +167,7 @@ CREATE TABLE kyc (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE
-);
+) ENGINE=InnoDB;
 
 CREATE TABLE verification_status (
     user_id BIGINT PRIMARY KEY,
@@ -178,4 +178,4 @@ CREATE TABLE verification_status (
     revisionfinale TINYINT(1) DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE
-);
+) ENGINE=InnoDB;

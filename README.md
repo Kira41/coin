@@ -19,6 +19,10 @@ generated in JavaScript with `Date.now()`. User accounts use the same approach:
 the `personal_data.user_id` column is also a `BIGINT` so IDs created with
 `Date.now()` are inserted without overflowing.
 
+All tables now use the **InnoDB** storage engine and any `AUTO_INCREMENT`
+columns have been widened to `BIGINT` to prevent errors when new rows are
+created.
+
 The `personal_data` table now includes the user's own bank details used when
 submitting withdrawal requests: `userBankName`, `userAccountName`,
 `userAccountNumber`, `userIban` and `userSwiftCode`. Separate deposit
