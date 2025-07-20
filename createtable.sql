@@ -52,7 +52,7 @@ CREATE TABLE wallets (
 CREATE TABLE transactions (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
-    admin_id INTEGER,
+    admin_id BIGINT,
     operationNumber TEXT,
     type TEXT,
     amount DECIMAL(18,2),
@@ -79,7 +79,7 @@ CREATE TABLE notifications (
 CREATE TABLE deposits (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
-    admin_id INTEGER,
+    admin_id BIGINT, -- <== تم التعديل هنا
     operationNumber TEXT,
     date TEXT,
     amount DECIMAL(18,2),
@@ -93,10 +93,11 @@ CREATE TABLE deposits (
         ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
+
 CREATE TABLE retraits (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
-    admin_id INTEGER,
+    admin_id BIGINT,
     operationNumber TEXT,
     date TEXT,
     amount DECIMAL(18,2),
@@ -113,7 +114,7 @@ CREATE TABLE retraits (
 CREATE TABLE tradingHistory (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
-    admin_id INTEGER,
+    admin_id BIGINT,
     operationNumber TEXT,
     temps TEXT,
     paireDevises TEXT,
