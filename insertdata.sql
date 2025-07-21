@@ -18,8 +18,8 @@ INSERT INTO deposit_crypto_address (user_id, crypto_name, wallet_info) VALUES
     (1, 'USDT', 'USDT123...');
 
 
-INSERT INTO wallets VALUES (
-    1751038645430, 1, 'btc', 'Bitcoin',
+INSERT INTO wallets (id, user_id, currency, amount, network, address, label) VALUES (
+    1751038645430, 1, 'btc', 0, 'Bitcoin',
     'BTC12345678', ''
 );
 
@@ -52,6 +52,14 @@ INSERT INTO loginHistory (user_id, date, ip, device) VALUES (1, '2025/06/06 23:4
 INSERT INTO loginHistory (user_id, date, ip, device) VALUES (1, '2025/06/05 08:30', '192.168.0.5', 'Chrome - macOS');
 INSERT INTO bank_withdrawl_info (user_id, widhrawBankName, widhrawAccountName, widhrawAccountNumber, widhrawIban, widhrawSwiftCode)
 VALUES (1, 'My Bank', 'Company Ltd', '987654321', 'IBAN987654', 'SWIFT987');
+
+-- example pending order
+INSERT INTO orders (user_id, pair, type, side, quantity, target_price, stop_price)
+VALUES (1, 'BTC/USDT', 'limit', 'buy', 0.1, 30000, NULL);
+
+-- example executed trade for that order
+INSERT INTO trades (user_id, order_id, pair, side, quantity, price, total_value, fee, profit_loss)
+VALUES (1, 1, 'BTC/USDT', 'buy', 0.1, 30000, 3000, 0, 0);
 
 INSERT INTO verification_status (user_id, enregistrementducompte, confirmationdeladresseemail, telechargerlesdocumentsdidentite, verificationdeladresse, revisionfinale)
 VALUES (1, 1, 1, 0, 0, 2);
