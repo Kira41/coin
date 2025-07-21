@@ -7,6 +7,7 @@ CREATE TABLE admins_agents (
     UNIQUE(email)
 ) ENGINE=InnoDB;
 
+
 CREATE TABLE personal_data (
     user_id BIGINT PRIMARY KEY,
     balance DECIMAL(18,2),
@@ -41,12 +42,15 @@ CREATE TABLE personal_data (
 ) ENGINE=InnoDB;
 
 CREATE TABLE wallets (
-    id BIGINT PRIMARY KEY,
-    user_id BIGINT,
-    currency TEXT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    currency VARCHAR(10) NOT NULL,
+    amount DECIMAL(20,10) NOT NULL DEFAULT 0,
     network TEXT,
     address TEXT,
-    label TEXT
+    label TEXT,
+    UNIQUE(user_id, currency),
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
 CREATE TABLE transactions (
@@ -179,4 +183,35 @@ CREATE TABLE verification_status (
     revisionfinale TINYINT(1) DEFAULT 0,
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE orders (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    pair VARCHAR(20) NOT NULL,
+    type ENUM('market','limit','stop','stop_limit','oco','trailing_stop') NOT NULL,
+    side ENUM('buy','sell') NOT NULL,
+    quantity DECIMAL(20,10) NOT NULL,
+    target_price DECIMAL(20,10),
+    stop_price DECIMAL(20,10),
+    status ENUM('open','filled','cancelled') DEFAULT 'open',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+CREATE TABLE trades (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    order_id BIGINT,
+    pair VARCHAR(20),
+    side ENUM('buy','sell'),
+    quantity DECIMAL(20,10),
+    price DECIMAL(20,10),
+    total_value DECIMAL(20,10),
+    fee DECIMAL(20,10) DEFAULT 0,
+    profit_loss DECIMAL(20,10),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (order_id) REFERENCES orders(id)
 ) ENGINE=InnoDB;

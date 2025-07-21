@@ -50,6 +50,11 @@ foreign key errors.
 
 ## Wallet management
 
+Wallets now store the amount of each currency owned by a user. The `wallets`
+table contains an `amount` column and one row per `(user, currency)` pair. If a
+user buys a currency for the first time a new row is created with the address
+set to `local address`.
+
 Each wallet row includes edit and delete icons. Clicking the **edit** icon opens
 a modal where you can update the address or its label. The **trash** icon
 removes the wallet entirely. Edits and deletions are sent to
@@ -93,6 +98,11 @@ Open trades can be finalized automatically even when users are offline. The `cro
 
 This will close any open trades once per minute using the current market price.
 
+Open positions are stored in the new `orders` table. When an order is executed a
+record is written to the `trades` table and the user's wallet balances are
+updated accordingly. The `cron_trading.php` script simply updates these rows
+based on live prices.
+
 ### Order types and stop loss
 
 User trades can be created with several execution methods:
@@ -112,3 +122,27 @@ For risk management the following stop loss modes are available:
 Trades may also combine a take profit and stop loss using an OCO (One Cancels the Other) order. When one of the two triggers the other is automatically cancelled.
 
 All parameters are stored in the `details` column of the `tradingHistory` table so they remain active even when the user is offline. The `cron_trading.php` script evaluates these rules on each run and finalizes trades whose conditions are met.
+
+Example pseudo-code for order execution:
+
+```php
+// Market order execution
+$price = getLivePrice($pair);
+$total = $price * $quantity;
+if ($side === 'buy') {
+    deductFromWallet($userId, 'USDT', $total);
+    addOrUpdateWallet($userId, $base, $quantity, 'local address');
+} else {
+    deductFromWallet($userId, $base, $quantity);
+    addOrUpdateWallet($userId, 'USDT', $total, 'local address');
+}
+recordTrade($userId, $pair, $side, $quantity, $price);
+
+// Periodic check for limit/stop orders
+foreach (getOpenOrders() as $order) {
+    $current = getLivePrice($order['pair']);
+    if (shouldExecute($order, $current)) {
+        executeOrder($order, $current);
+    }
+}
+```
