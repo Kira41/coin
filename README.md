@@ -103,6 +103,15 @@ record is written to the `trades` table and the user's wallet balances are
 updated accordingly. The `cron_trading.php` script simply updates these rows
 based on live prices.
 
+The `order_processor.php` script offers a more complete example. It reads all
+rows from the `orders` table with status `open`, checks the current Binance
+price and, when conditions match, updates user wallets and records the trade in
+the `trades` table. Run it periodically just like the cron script:
+
+```cron
+* * * * * php /path/to/order_processor.php
+```
+
 ### Order types and stop loss
 
 User trades can be created with several execution methods:
