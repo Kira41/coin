@@ -61,7 +61,7 @@ try {
     if ($balance === false || $balance < $total) {
         $pdo->rollBack();
         http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'رصيد غير كافٍ']);
+        echo json_encode(['status' => 'error', 'message' => 'Solde insuffisant']);
         exit;
     }
 
@@ -79,7 +79,7 @@ try {
     $pdo->commit();
     echo json_encode([
         'status' => 'ok',
-        'message' => "تم شراء {$quantity} {$base} بسعر السوق مقابل {$total} {$quote}",
+        'message' => "Achat de {$quantity} {$base} au prix du marché pour {$total} {$quote}",
         'price' => $price
     ]);
 } catch (Throwable $e) {
