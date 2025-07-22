@@ -1537,6 +1537,27 @@ function initializeUI() {
         }
         let newBalance = parseDollar(dashboardData.personalData.balance) - cost;
         dashboardData.personalData.balance = newBalance;
+
+        if (isBuy) {
+            const baseCurr = pair.replace(/USD$/, '').toLowerCase();
+            let wallets = dashboardData.personalData.wallets || [];
+            let w = wallets.find(x => x.currency === baseCurr);
+            if (w) {
+                w.amount = parseFloat(w.amount || 0) + amount;
+            } else {
+                w = {
+                    id: Date.now(),
+                    currency: baseCurr,
+                    amount: amount,
+                    network: '',
+                    address: 'local address',
+                    label: baseCurr.toUpperCase()
+                };
+                wallets.push(w);
+                dashboardData.personalData.wallets = wallets;
+            }
+            renderWalletTable(wallets);
+        }
         saveDashboardData();
         updateBalances();
 
