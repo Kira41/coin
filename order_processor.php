@@ -10,6 +10,8 @@ $pdo = new PDO($dsn, 'root', '', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
  */
 function getLivePrice(string $pair): float {
     $symbol = str_replace('/', '', strtoupper($pair));
+    // Binance symbols use USDT instead of USD
+    $symbol = str_replace('USD', 'USDT', $symbol);
     $url = "https://api.binance.com/api/v3/ticker/price?symbol={$symbol}";
     $data = @json_decode(file_get_contents($url), true);
     return isset($data['price']) ? (float)$data['price'] : 0.0;

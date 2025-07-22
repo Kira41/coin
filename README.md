@@ -134,6 +134,8 @@ Trades may also combine a take profit and stop loss using an OCO (One Cancels th
 
 All parameters are stored in the `details` column of the `tradingHistory` table so they remain active even when the user is offline. The `cron_trading.php` script evaluates these rules on each run and finalizes trades whose conditions are met.
 
+When querying Binance for live prices remember that pairs use the `USDT` quote currency. A pair like `ADA/USD` should be converted to `ADAUSDT` before requesting the price.
+
 Example pseudo-code for order execution:
 
 ```php
