@@ -30,6 +30,29 @@ function addToWallet(PDO $pdo, int $userId, string $currency, float $amount): vo
 }
 
 /**
+ * Deduct dollars from the user's account balance.
+ */
+function deductFromAccount(PDO $pdo, int $userId, float $amount): bool {
+    $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id=?');
+    $stmt->execute([$userId]);
+    $bal = $stmt->fetchColumn();
+    if ($bal === false || $bal < $amount) {
+        return false;
+    }
+    $stmt = $pdo->prepare('UPDATE personal_data SET balance = balance - ? WHERE user_id=?');
+    $stmt->execute([$amount, $userId]);
+    return true;
+}
+
+/**
+ * Credit dollars to the user's account balance.
+ */
+function addToAccount(PDO $pdo, int $userId, float $amount): void {
+    $pdo->prepare('UPDATE personal_data SET balance = balance + ? WHERE user_id=?')
+        ->execute([$amount, $userId]);
+}
+
+/**
  * Decrease amount of a currency in user's wallet.
  */
 function deductFromWallet(PDO $pdo, int $userId, string $currency, float $amount): bool {
@@ -74,7 +97,7 @@ function executeOrder(PDO $pdo, array $order, float $price): void {
     $total = $price * $qty;
 
     if ($order['side'] === 'buy') {
-        if (!deductFromWallet($pdo, $order['user_id'], $quote, $total)) {
+        if (!deductFromAccount($pdo, $order['user_id'], $total)) {
             // insufficient balance, cancel order
             $pdo->prepare('UPDATE orders SET status="cancelled" WHERE id=?')->execute([$order['id']]);
             return;
@@ -85,7 +108,7 @@ function executeOrder(PDO $pdo, array $order, float $price): void {
             $pdo->prepare('UPDATE orders SET status="cancelled" WHERE id=?')->execute([$order['id']]);
             return;
         }
-        addToWallet($pdo, $order['user_id'], $quote, $total);
+        addToAccount($pdo, $order['user_id'], $total);
     }
     recordTrade($pdo, $order, $price);
 }

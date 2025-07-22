@@ -143,11 +143,13 @@ Example pseudo-code for order execution:
 $price = getLivePrice($pair);
 $total = $price * $quantity;
 if ($side === 'buy') {
-    deductFromWallet($userId, 'USDT', $total);
+    // deduct dollars from the user's account balance
+    deductFromAccount($userId, $total);
     addOrUpdateWallet($userId, $base, $quantity, 'local address');
 } else {
     deductFromWallet($userId, $base, $quantity);
-    addOrUpdateWallet($userId, 'USDT', $total, 'local address');
+    // credit dollars back to the account
+    addToAccount($userId, $total);
 }
 recordTrade($userId, $pair, $side, $quantity, $price);
 
