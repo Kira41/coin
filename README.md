@@ -59,7 +59,8 @@ Each wallet row includes edit and delete icons. Clicking the **edit** icon opens
 a modal where you can update the address or its label. The **trash** icon
 removes the wallet entirely. Edits and deletions are sent to
 `get_wallets.php`, and the wallet list refreshes immediately to show the latest
-data.
+data. The wallet table on the user dashboard now also displays the current
+balance for each address.
 
 ## Admin dashboard
 
