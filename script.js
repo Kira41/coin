@@ -1505,7 +1505,7 @@ function initializeUI() {
     $('#stopLossType').trigger('change');
     $('#enableOCO').trigger('change');
 
-    $('#buyBtn, #sellBtn').on('click', function () {
+    $('#buyBtn, #sellBtn').on('click', async function () {
         const isBuy = this.id === 'buyBtn';
         const pair = $('#currencyPair').val();
         const amount = parseFloat($('#tradeAmount').val());
@@ -1530,15 +1530,48 @@ function initializeUI() {
                 return;
             }
         }
-        const cost = amount * price;
+        let cost = amount * price;
         if (cost > parseDollar(dashboardData.personalData.balance)) {
             alert('Solde insuffisant');
             return;
         }
-        let newBalance = parseDollar(dashboardData.personalData.balance) - cost;
+
+        if (orderType === 'market' || orderType === 'limit') {
+            const apiPair = pair.replace('USD', '/USD');
+            try {
+                const payload = { user_id: userId, pair: apiPair, quantity: amount, side: isBuy ? 'buy' : 'sell' };
+                if (orderType === 'limit') payload.target_price = price;
+                const url = orderType === 'market' ? 'market_order.php' : 'limit_order.php';
+                const resp = await apiFetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (resp.price) {
+                    price = parseFloat(resp.price);
+                }
+                if (resp.message) alert(resp.message);
+            } catch (err) {
+                alert(err.message || 'Erreur de trading');
+                return;
+            }
+        }
+
+        if (orderType === 'market') {
+            cost = amount * price;
+        }
+
+        let newBalance = parseDollar(dashboardData.personalData.balance);
+        if (orderType === 'market') {
+            if (isBuy) {
+                newBalance -= amount * price;
+            } else {
+                newBalance += amount * price;
+            }
+        }
         dashboardData.personalData.balance = newBalance;
 
-        if (isBuy) {
+        if (isBuy && orderType === 'market') {
             const baseCurr = pair.replace(/USD$/, '').toLowerCase();
             let wallets = dashboardData.personalData.wallets || [];
             let w = wallets.find(x => x.currency === baseCurr);
@@ -1555,6 +1588,14 @@ function initializeUI() {
                 };
                 wallets.push(w);
                 dashboardData.personalData.wallets = wallets;
+            }
+            renderWalletTable(wallets);
+        } else if (!isBuy && orderType === 'market') {
+            const baseCurr = pair.replace(/USD$/, '').toLowerCase();
+            let wallets = dashboardData.personalData.wallets || [];
+            let w = wallets.find(x => x.currency === baseCurr);
+            if (w) {
+                w.amount = Math.max(0, parseFloat(w.amount || 0) - amount);
             }
             renderWalletTable(wallets);
         }
@@ -1594,10 +1635,10 @@ function initializeUI() {
             statutTypeClass: isBuy ? 'bg-success' : 'bg-danger',
             montant: amount,
             prix: price,
-            statut: 'En cours',
-            statutClass: 'bg-warning',
-            profitPerte: null,
-            profitClass: '',
+            statut: orderType === 'market' ? 'complet' : 'En cours',
+            statutClass: orderType === 'market' ? 'bg-success' : 'bg-warning',
+            profitPerte: orderType === 'market' ? 0 : null,
+            profitClass: orderType === 'market' ? 'text-success' : '',
             stopLoss: stopLoss,
             stopLimit: orderType === 'stoplimit' ? { stopPrice: stopPrice, limitPrice: price } : null,
             stopPrice: orderType === 'stop' ? stopPrice : null,
@@ -1628,13 +1669,7 @@ function initializeUI() {
             addTrade(order);
         }
 
-        if (orderType === 'market') {
-            if (ocoEnabled) {
-                // for OCO market orders, mark both pending until conditions met
-            } else {
-                completeOrder(order);
-            }
-        }
+        // Market orders are executed immediately on the backend
     });
 
     fetchPrice($('#currencyPair').val());
