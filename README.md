@@ -111,6 +111,7 @@ the `trades` table. Run it periodically just like the cron script:
 ```cron
 * * * * * php /path/to/order_processor.php
 ```
+To place a pending limit order use `limit_order.php`. POST a JSON body containing `user_id`, `pair`, `quantity`, `side` and `target_price`. The script verifies the account balance and stores the order with status `open`. Once the market price reaches the target, `order_processor.php` will execute the trade and update wallets.
 
 ### Order types and stop loss
 
