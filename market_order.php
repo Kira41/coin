@@ -69,6 +69,7 @@ try {
 
     $stmt = $pdo->prepare('UPDATE personal_data SET balance = balance - ? WHERE user_id = ?');
     $stmt->execute([$total, $userId]);
+    $newBalance = $balance - $total;
 
     addToWallet($pdo, $userId, $base, $quantity);
 
@@ -82,7 +83,8 @@ try {
     echo json_encode([
         'status' => 'ok',
         'message' => "تم شراء {$quantity} {$base} بسعر السوق مقابل {$total} {$quote}",
-        'price' => $price
+        'price' => $price,
+        'new_balance' => $newBalance
     ]);
 } catch (Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();

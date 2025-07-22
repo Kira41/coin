@@ -1550,6 +1550,9 @@ function initializeUI() {
                 if (resp.price) {
                     price = parseFloat(resp.price);
                 }
+                if (resp.new_balance !== undefined) {
+                    dashboardData.personalData.balance = parseFloat(resp.new_balance);
+                }
                 if (resp.message) alert(resp.message);
             } catch (err) {
                 alert(err.message || 'Erreur de trading');
@@ -1563,7 +1566,9 @@ function initializeUI() {
 
         let newBalance = parseDollar(dashboardData.personalData.balance);
         if (orderType === 'market') {
-            if (isBuy) {
+            if (resp && resp.new_balance !== undefined) {
+                newBalance = parseFloat(resp.new_balance);
+            } else if (isBuy) {
                 newBalance -= amount * price;
             } else {
                 newBalance += amount * price;
