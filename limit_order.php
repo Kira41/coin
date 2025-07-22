@@ -9,7 +9,7 @@ try {
     $data = json_decode($input, true);
     if (!is_array($data)) {
         http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Invalid JSON']);
+        echo json_encode(['status' => 'error', 'message' => 'JSON invalide']);
         exit;
     }
 
@@ -21,7 +21,7 @@ try {
 
     if (!$userId || !$pair || $quantity <= 0 || $target <= 0 || !in_array($side, ['buy','sell'])) {
         http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Missing parameters']);
+        echo json_encode(['status' => 'error', 'message' => 'Paramètres manquants']);
         exit;
     }
 
@@ -37,7 +37,7 @@ try {
         $balance = $stmt->fetchColumn();
         if ($balance === false || $balance < $total) {
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'رصيد غير كافٍ']);
+            echo json_encode(['status' => 'error', 'message' => 'Solde insuffisant']);
             exit;
         }
     } else { // sell
@@ -46,7 +46,7 @@ try {
         $bal = $stmt->fetchColumn();
         if ($bal === false || $bal < $quantity) {
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'رصيد غير كافٍ']);
+            echo json_encode(['status' => 'error', 'message' => 'Solde insuffisant']);
             exit;
         }
     }
@@ -55,13 +55,13 @@ try {
 
     echo json_encode([
         'status' => 'ok',
-        'message' => "تم إنشاء أمر محدد بقيمة {$quantity} {$base} على سعر {$target} {$quote}",
+        'message' => "Ordre limite de {$quantity} {$base} au prix de {$target} {$quote} créé",
         'order_id' => $pdo->lastInsertId()
     ]);
 } catch (Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
     error_log(__FILE__ . ' - ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+    echo json_encode(['status' => 'error', 'message' => 'Une erreur est survenue: ' . $e->getMessage()]);
 }
 ?>
