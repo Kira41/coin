@@ -1531,18 +1531,30 @@ function initializeUI() {
             }
         }
         let cost = amount * price;
-        if (cost > parseDollar(dashboardData.personalData.balance)) {
-            alert('Solde insuffisant');
-            return;
+        if (isBuy) {
+            if (cost > parseDollar(dashboardData.personalData.balance)) {
+                alert('Solde insuffisant');
+                return;
+            }
+        } else {
+            const baseCurr = pair.replace(/USD$/, '').toLowerCase();
+            const wallets = dashboardData.personalData.wallets || [];
+            const w = wallets.find(x => x.currency === baseCurr);
+            const available = w ? parseFloat(w.amount || 0) : 0;
+            if (amount > available) {
+                alert('Solde insuffisant dans le wallet');
+                return;
+            }
         }
 
+        let resp;
         if (orderType === 'market' || orderType === 'limit') {
             const apiPair = pair.replace('USD', '/USD');
             try {
                 const payload = { user_id: userId, pair: apiPair, quantity: amount, side: isBuy ? 'buy' : 'sell' };
                 if (orderType === 'limit') payload.target_price = price;
                 const url = orderType === 'market' ? 'market_order.php' : 'limit_order.php';
-                const resp = await apiFetch(url, {
+                resp = await apiFetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
