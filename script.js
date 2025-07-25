@@ -617,6 +617,10 @@ function initializeUI() {
     const nameValInit = dashboardData.personalData.fullName || '';
     $('#fullNameHeader, #nameincompte').text(nameValInit);
     $('#firstname').text(nameValInit.split(' ')[0] || nameValInit);
+    const picData = dashboardData.personalData.profile_pic;
+    if (picData) {
+        $('.Profil-img').attr('src', 'data:image/*;base64,' + picData);
+    }
     const createdAt = dashboardData.personalData.created_at;
     if (createdAt) {
         const dt = new Date(createdAt);
@@ -863,6 +867,28 @@ function initializeUI() {
         $('#changePasswordModal').modal('hide');
         $('#changePasswordForm')[0].reset();
         saveDashboardData();
+    });
+
+    $('#saveProfilePicBtn').on('click', async function () {
+        const file = $('#ProfilPicture')[0]?.files[0];
+        if (!file) {
+            alert('Veuillez choisir une image.');
+            return;
+        }
+        const fd = new FormData();
+        fd.append('user_id', userId);
+        fd.append('file', file, file.name);
+        const res = await fetch('profile_pic_upload.php', { method: 'POST', body: fd });
+        const result = await res.json();
+        if (result.status === 'ok') {
+            const url = 'data:image/*;base64,' + result.data;
+            $('.Profil-img').attr('src', url);
+            dashboardData.personalData.profile_pic = result.data;
+            $('#changeProfilePicModal').modal('hide');
+            $('#changeProfilePicForm')[0].reset();
+        } else {
+            alert("Erreur lors de la mise à jour de la photo.");
+        }
     });
 
     $('#bankDepositForm, #cardDepositForm, #cryptoDepositForm, #bankWithdrawForm, #cryptoWithdrawForm, #paypalWithdrawForm, #bankAccountForm, #changePasswordForm, #changeProfilePicForm').on('submit', function (e) {
