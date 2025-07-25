@@ -285,7 +285,7 @@ function updatePlatformBankDetails() {
     const bw = dashboardData.bankWithdrawInfo || {};
     $('#widhrawbankname').text(bw.widhrawBankName || '---');
     $('#widhrawusername').text(bw.widhrawAccountName || '---');
-    $('#widhrawacountnumber').text(bw.widhrawAccountNumber || '---');
+    $('#widhrawAccountNumber').text(bw.widhrawAccountNumber || '---');
     $('#widhrawiben').text(bw.widhrawIban || '---');
     $('#widhrawswift').text(bw.widhrawSwiftCode || '---');
 }
