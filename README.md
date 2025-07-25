@@ -18,6 +18,9 @@ crypto addresses with a `BIGINT` `id` so each entry keeps the unique identifier
 generated in JavaScript with `Date.now()`. User accounts use the same approach:
 the `personal_data.user_id` column is also a `BIGINT` so IDs created with
 `Date.now()` are inserted without overflowing.
+User profile photos can be uploaded via `profile_pic_upload.php`. This endpoint
+accepts a `user_id` and image file and stores the photo as base64 in the new
+`profile_pic` column of `personal_data`.
 
 All tables now use the **InnoDB** storage engine and any `AUTO_INCREMENT`
 columns have been widened to `BIGINT` to prevent errors when new rows are
@@ -31,7 +34,8 @@ bank coordinates shown on the deposit screen and each user has at most one
 record. These deposit details are filled in by an administrator when creating or
 editing a user. The admin dashboard's create and edit user modals now include
 input fields for these coordinates so they can be entered or updated alongside
-other personal data.
+other personal data. The `personal_data` table also has a `profile_pic` column
+where the user's profile image is stored as a base64 string.
 
 An additional table `admins_agents` stores admin and agent accounts. Each row
 contains an email, hashed password and an `is_admin` flag, plus a `created_by`

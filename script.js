@@ -617,6 +617,9 @@ function initializeUI() {
     const nameValInit = dashboardData.personalData.fullName || '';
     $('#fullNameHeader, #nameincompte').text(nameValInit);
     $('#firstname').text(nameValInit.split(' ')[0] || nameValInit);
+    if (dashboardData.personalData.profile_pic) {
+        $('.Profil-img').attr('src', 'data:image/jpeg;base64,' + dashboardData.personalData.profile_pic);
+    }
     const createdAt = dashboardData.personalData.created_at;
     if (createdAt) {
         const dt = new Date(createdAt);
@@ -994,6 +997,25 @@ function initializeUI() {
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 </div>`);
+        } else if (this.id === 'changeProfilePicForm') {
+            const file = $('#ProfilPicture')[0]?.files[0];
+            if (!file) return;
+            const fd = new FormData();
+            fd.append('user_id', userId);
+            fd.append('file', file, file.name);
+            fetch('profile_pic_upload.php', { method: 'POST', body: fd })
+                .then(r => r.json())
+                .then(res => {
+                    if (res.status === 'ok') {
+                        dashboardData.personalData.profile_pic = res.data;
+                        $('.Profil-img').attr('src', 'data:image/jpeg;base64,' + res.data);
+                        $('#changeProfilePicModal').modal('hide');
+                        saveDashboardData();
+                    } else {
+                        alert('Erreur lors du téléchargement');
+                    }
+                })
+                .catch(err => alert(err.message || 'Erreur'));
 
         }
     });

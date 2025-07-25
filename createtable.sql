@@ -38,6 +38,7 @@ CREATE TABLE personal_data (
     userIban TEXT,
     userSwiftCode TEXT,
     note TEXT,
+    profile_pic MEDIUMTEXT,
     linked_to_id INTEGER
 ) ENGINE=InnoDB;
 
