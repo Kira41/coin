@@ -394,6 +394,18 @@ try {
             $val = $status === 'approved' ? 1 : 0;
             $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,?) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=VALUES(telechargerlesdocumentsdidentite)')
                 ->execute([$uid, $val]);
+            if ($status === 'approved') {
+                $timeAgo = formatTimeAgoFromDate(date('Y-m-d H:i:s'));
+                $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
+                    ->execute([
+                        $uid,
+                        'kyc',
+                        'Vérification approuvée',
+                        "Votre vérification d'identité a été approuvée.",
+                        $timeAgo,
+                        'alert-success'
+                    ]);
+            }
         }
         echo json_encode(['status' => 'ok']);
     } elseif ($action === 'set_revision_finale') {
