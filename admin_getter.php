@@ -104,6 +104,22 @@ $result['stats'] = [
     'success_rate' => $successRate,
 ];
 
+// Fetch recent notifications for the admin's users
+$notifications = [];
+if ($userIds) {
+    $place = implode(',', array_fill(0, count($userIds), '?'));
+    $sql = "SELECT n.type,n.title,n.message,n.time,n.alertClass,p.fullName
+            FROM notifications n
+            JOIN personal_data p ON p.user_id = n.user_id
+            WHERE n.user_id IN ($place)
+            ORDER BY n.id DESC
+            LIMIT 10";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($userIds);
+    $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+$result['notifications'] = $notifications;
+
 echo json_encode($result);
 } catch (Throwable $e) {
     error_log(__FILE__ . ' - ' . $e->getMessage());
