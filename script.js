@@ -1722,4 +1722,4 @@ function initializeUI() {
             TX_PAGE = page;
             loadTransactions();
         }
-    });};
+    });
