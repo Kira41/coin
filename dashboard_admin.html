@@ -207,29 +207,7 @@
                                         <h5 class="mb-0">Activité Récente</h5>
                                     </div>
                                     <div class="card-body">
-                                        <div class="list-group list-group-flush">
-                                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <i class="bi bi-person-plus text-success me-2"></i>
-                                                    Nouvel utilisateur inscrit: Marie Dupont
-                                                </div>
-                                                <small class="text-muted">Il y a 5 min</small>
-                                            </div>
-                                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <i class="bi bi-credit-card text-primary me-2"></i>
-                                                    Transaction de €1,250 approuvée
-                                                </div>
-                                                <small class="text-muted">Il y a 12 min</small>
-                                            </div>
-                                            <div class="list-group-item d-flex justify-content-between align-items-center">
-                                                <div>
-                                                    <i class="bi bi-check-circle text-success me-2"></i>
-                                                    KYC approuvé pour Jean Martin
-                                                </div>
-                                                <small class="text-muted">Il y a 1 heure</small>
-                                            </div>
-                                        </div>
+                                        <div id="recentActivity" class="list-group list-group-flush"></div>
                                     </div>
                                 </div>
                             </div>
@@ -1244,6 +1222,31 @@
                                 </td>
                             </tr>`;
                             agentsBody.insertAdjacentHTML('beforeend', row);
+                        });
+                    }
+                }
+
+                const activity = document.getElementById('recentActivity');
+                if (activity) {
+                    activity.innerHTML = '';
+                    const notifs = data.notifications || [];
+                    if (notifs.length === 0) {
+                        activity.innerHTML = '<div class="list-group-item text-center">Aucune activité récente</div>';
+                    } else {
+                        const icons = {
+                            success: 'check-circle',
+                            info: 'info-circle',
+                            warning: 'exclamation-triangle',
+                            danger: 'exclamation-triangle',
+                            kyc: 'person-check'
+                        };
+                        notifs.forEach(n => {
+                            const icon = icons[n.type] || 'info-circle';
+                            const item = `<div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div><i class="bi bi-${icon} me-2"></i>${escapeHtml(n.title)} - ${escapeHtml(n.message)} (${escapeHtml(n.fullName || '')})</div>
+                                <small class="text-muted">${escapeHtml(n.time)}</small>
+                            </div>`;
+                            activity.insertAdjacentHTML('beforeend', item);
                         });
                     }
                 }
