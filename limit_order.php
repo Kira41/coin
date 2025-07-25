@@ -29,6 +29,7 @@ try {
     $pdo = new PDO($dsn, 'root', '', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
     [$base, $quote] = explode('/', strtoupper($pair));
+    $baseLower = strtolower($base); // wallets store currencies in lowercase
 
     if ($side === 'buy') {
         $total = $target * $quantity;
@@ -42,7 +43,7 @@ try {
         }
     } else { // sell
         $stmt = $pdo->prepare('SELECT amount FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
-        $stmt->execute([$userId, $base]);
+        $stmt->execute([$userId, $baseLower]);
         $bal = $stmt->fetchColumn();
         if ($bal === false || $bal < $quantity) {
             http_response_code(400);
