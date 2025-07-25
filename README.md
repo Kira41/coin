@@ -91,7 +91,7 @@ Use `admin_login.php` to sign in. POST `email` and `password`; a successful logi
 
 ## Automated trade closing
 
-Open trades can be finalized automatically even when users are offline. The `cron_trading.php` script checks all orders with the status `En cours`, fetches the latest price from Binance and updates the order with the resulting profit or loss. To keep trading positions active, schedule the script with cron for example:
+Open trades can be finalized automatically even when users are offline. The `cron_trading.php` script checks entries in the `tradingHistory` table with the status `En cours`, fetches the latest price from Binance and updates the record with the resulting profit or loss. To keep trading positions active, schedule the script with cron for example:
 
 ```cron
 * * * * * php /path/to/cron_trading.php
@@ -99,10 +99,10 @@ Open trades can be finalized automatically even when users are offline. The `cro
 
 This will close any open trades once per minute using the current market price.
 
-Open positions are stored in the new `orders` table. When an order is executed a
-record is written to the `trades` table and the user's wallet balances are
-updated accordingly. The `cron_trading.php` script simply updates these rows
-based on live prices.
+Open positions are stored in the `tradingHistory` table. When a trade closes the
+row is updated with the realized profit and the user's wallet balances are
+adjusted. The `cron_trading.php` script simply updates these rows based on live
+prices.
 
 The `order_processor.php` script offers a more complete example. It reads all
 rows from the `orders` table with status `open`, checks the current Binance
