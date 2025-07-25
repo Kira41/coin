@@ -9,7 +9,7 @@ INSERT INTO personal_data VALUES (
 '41kira41@gmail.com', 'Sousse, Tunisie', '+21690000000',
 '2025-06-11', 'ca', '2025-01-01',
 'Bank of Earth', 'Ahmed Kouraychi',
-'ACC123456', 'IBAN123456', 'SWIFT123', '', 1
+'ACC123456', 'IBAN123456', 'SWIFT123', '', '', 1
 );
 
 INSERT INTO deposit_crypto_address (user_id, crypto_name, wallet_info) VALUES
