@@ -21,13 +21,12 @@ function getLivePrice(string $pair): float {
  * Increase amount of a currency in user's wallet or create a new row.
  */
 function addToWallet(PDO $pdo, int $userId, string $currency, float $amount): void {
-    $currency = strtolower($currency); // keep wallet currencies consistent
     $stmt = $pdo->prepare(
         'INSERT INTO wallets (user_id,currency,amount,address,label)
          VALUES (?,?,?,?,?)
          ON DUPLICATE KEY UPDATE amount = amount + VALUES(amount)'
     );
-    $stmt->execute([$userId, $currency, $amount, 'local address', strtoupper($currency)]);
+    $stmt->execute([$userId, $currency, $amount, 'local address', $currency]);
 }
 
 /**
@@ -57,7 +56,6 @@ function addToAccount(PDO $pdo, int $userId, float $amount): void {
  * Decrease amount of a currency in user's wallet.
  */
 function deductFromWallet(PDO $pdo, int $userId, string $currency, float $amount): bool {
-    $currency = strtolower($currency);
     $stmt = $pdo->prepare('SELECT amount FROM wallets WHERE user_id=? AND currency=?');
     $stmt->execute([$userId, $currency]);
     $bal = $stmt->fetchColumn();

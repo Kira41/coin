@@ -45,18 +45,6 @@ try {
         $stmt->execute([$userId, strtolower($currency), $amount, 'local address', $currency]);
     }
 
-    function deductFromWallet(PDO $pdo, int $userId, string $currency, float $amount): bool {
-        $stmt = $pdo->prepare('SELECT amount FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
-        $stmt->execute([$userId, strtolower($currency)]);
-        $bal = $stmt->fetchColumn();
-        if ($bal === false || $bal < $amount) {
-            return false;
-        }
-        $stmt = $pdo->prepare('UPDATE wallets SET amount = amount - ? WHERE user_id=? AND currency=?');
-        $stmt->execute([$amount, $userId, strtolower($currency)]);
-        return true;
-    }
-
     [$base, $quote] = explode('/', strtoupper($pair));
     $price = getLivePrice($pair);
     if ($price <= 0) {
@@ -69,34 +57,21 @@ try {
 
     $pdo->beginTransaction();
 
-    if ($side === 'buy') {
-        $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id = ? FOR UPDATE');
-        $stmt->execute([$userId]);
-        $balance = $stmt->fetchColumn();
-        if ($balance === false || $balance < $total) {
-            $pdo->rollBack();
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'رصيد غير كافٍ']);
-            exit;
-        }
-        $stmt = $pdo->prepare('UPDATE personal_data SET balance = balance - ? WHERE user_id = ?');
-        $stmt->execute([$total, $userId]);
-        $newBalance = $balance - $total;
-        addToWallet($pdo, $userId, $base, $quantity);
-    } else { // sell
-        if (!deductFromWallet($pdo, $userId, $base, $quantity)) {
-            $pdo->rollBack();
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Solde insuffisant dans le wallet']);
-            exit;
-        }
-        $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id = ? FOR UPDATE');
-        $stmt->execute([$userId]);
-        $balance = $stmt->fetchColumn();
-        $stmt = $pdo->prepare('UPDATE personal_data SET balance = balance + ? WHERE user_id = ?');
-        $stmt->execute([$total, $userId]);
-        $newBalance = $balance + $total;
+    $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id = ? FOR UPDATE');
+    $stmt->execute([$userId]);
+    $balance = $stmt->fetchColumn();
+    if ($balance === false || $balance < $total) {
+        $pdo->rollBack();
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'رصيد غير كافٍ']);
+        exit;
     }
+
+    $stmt = $pdo->prepare('UPDATE personal_data SET balance = balance - ? WHERE user_id = ?');
+    $stmt->execute([$total, $userId]);
+    $newBalance = $balance - $total;
+
+    addToWallet($pdo, $userId, $base, $quantity);
 
     $stmt = $pdo->prepare(
         'INSERT INTO trades (user_id, pair, side, quantity, price, total_value, fee, profit_loss) '
@@ -105,12 +80,9 @@ try {
     $stmt->execute([$userId, $pair, $side, $quantity, $price, $total]);
 
     $pdo->commit();
-    $msg = ($side === 'buy')
-        ? "تم شراء {$quantity} {$base} بسعر السوق مقابل {$total} {$quote}"
-        : "تم بيع {$quantity} {$base} بسعر السوق مقابل {$total} {$quote}";
     echo json_encode([
         'status' => 'ok',
-        'message' => $msg,
+        'message' => "تم شراء {$quantity} {$base} بسعر السوق مقابل {$total} {$quote}",
         'price' => $price,
         'new_balance' => $newBalance
     ]);

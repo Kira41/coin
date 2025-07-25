@@ -18,9 +18,6 @@ crypto addresses with a `BIGINT` `id` so each entry keeps the unique identifier
 generated in JavaScript with `Date.now()`. User accounts use the same approach:
 the `personal_data.user_id` column is also a `BIGINT` so IDs created with
 `Date.now()` are inserted without overflowing.
-User profile photos can be uploaded via `profile_pic_upload.php`. This endpoint
-accepts a `user_id` and image file and stores the photo as base64 in the new
-`profile_pic` column of `personal_data`.
 
 All tables now use the **InnoDB** storage engine and any `AUTO_INCREMENT`
 columns have been widened to `BIGINT` to prevent errors when new rows are
@@ -34,8 +31,7 @@ bank coordinates shown on the deposit screen and each user has at most one
 record. These deposit details are filled in by an administrator when creating or
 editing a user. The admin dashboard's create and edit user modals now include
 input fields for these coordinates so they can be entered or updated alongside
-other personal data. The `personal_data` table also has a `profile_pic` column
-where the user's profile image is stored as a base64 string.
+other personal data.
 
 An additional table `admins_agents` stores admin and agent accounts. Each row
 contains an email, hashed password and an `is_admin` flag, plus a `created_by`
@@ -95,7 +91,7 @@ Use `admin_login.php` to sign in. POST `email` and `password`; a successful logi
 
 ## Automated trade closing
 
-Open trades can be finalized automatically even when users are offline. The `cron_trading.php` script checks entries in the `tradingHistory` table with the status `En cours`, fetches the latest price from Binance and updates the record with the resulting profit or loss. To keep trading positions active, schedule the script with cron for example:
+Open trades can be finalized automatically even when users are offline. The `cron_trading.php` script checks all orders with the status `En cours`, fetches the latest price from Binance and updates the order with the resulting profit or loss. To keep trading positions active, schedule the script with cron for example:
 
 ```cron
 * * * * * php /path/to/cron_trading.php
@@ -103,10 +99,10 @@ Open trades can be finalized automatically even when users are offline. The `cro
 
 This will close any open trades once per minute using the current market price.
 
-Open positions are stored in the `tradingHistory` table. When a trade closes the
-row is updated with the realized profit and the user's wallet balances are
-adjusted. The `cron_trading.php` script simply updates these rows based on live
-prices.
+Open positions are stored in the new `orders` table. When an order is executed a
+record is written to the `trades` table and the user's wallet balances are
+updated accordingly. The `cron_trading.php` script simply updates these rows
+based on live prices.
 
 The `order_processor.php` script offers a more complete example. It reads all
 rows from the `orders` table with status `open`, checks the current Binance
