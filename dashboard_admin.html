@@ -1440,7 +1440,8 @@
                 tradeBody.innerHTML = '';
                 (data.tradingHistory || []).slice(0,10).forEach(t => {
                     const profit = t.profitPerte == null ? '-' : formatDollar(t.profitPerte);
-                    tradeBody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHtml(t.temps)}</td><td>${escapeHtml(t.paireDevises)}</td><td><span class="badge ${escapeHtml(t.statutTypeClass)}">${escapeHtml(t.type)}</span></td><td>${formatDollar(t.montant)}</td><td>${formatDollar(t.prix)}</td><td><span class="badge ${escapeHtml(t.statutClass)}">${escapeHtml(t.statut)}</span></td><td class="${escapeHtml(t.profitClass || '')}">${profit}</td></tr>`);
+                    const baseCoin = (t.paireDevises || '').split('/')[0];
+                    tradeBody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHtml(t.temps)}</td><td>${escapeHtml(t.paireDevises)}</td><td><span class="badge ${escapeHtml(t.statutTypeClass)}">${escapeHtml(t.type)}</span></td><td>${formatCrypto(t.montant)} ${escapeHtml(baseCoin)}</td><td>${formatDollar(t.prix)}</td><td><span class="badge ${escapeHtml(t.statutClass)}">${escapeHtml(t.statut)}</span></td><td class="${escapeHtml(t.profitClass || '')}">${profit}</td></tr>`);
                 });
                 if (!tradeBody.innerHTML) tradeBody.innerHTML = '<tr><td colspan="7" class="text-center">Aucune donnée</td></tr>';
                 new bootstrap.Modal(document.getElementById('viewUserModal')).show();

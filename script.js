@@ -1319,7 +1319,7 @@ function initializeUI() {
                         <td>${escapeHtml(trade.temps)}</td>
                         <td>${escapeHtml(trade.paireDevises)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutTypeClass)}">${escapeHtml(trade.type)}</span></td>
-                        <td>${formatDollar(trade.montant)}</td>
+                        <td>${formatCrypto(trade.montant)} ${escapeHtml((trade.paireDevises||'').split('/')[0])}</td>
                         <td>${formatDollar(trade.prix)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutClass)}">${escapeHtml(trade.statut)}</span></td>
                         <td class="${escapeHtml(trade.profitClass || '')}">${trade.profitPerte==null?'-':formatDollar(trade.profitPerte)}</td>
