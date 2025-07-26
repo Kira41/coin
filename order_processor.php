@@ -131,6 +131,11 @@ function shouldExecute(array &$order, float $price): bool {
                 return $price >= (float)$order['stop_price'] && $price <= (float)$order['target_price'];
             }
             return $price <= (float)$order['stop_price'] && $price >= (float)$order['target_price'];
+        case 'oco':
+            if ($order['side'] === 'buy') {
+                return $price <= (float)$order['target_price'] || $price >= (float)$order['stop_price'];
+            }
+            return $price >= (float)$order['target_price'] || $price <= (float)$order['stop_price'];
         case 'trailing_stop':
             $trail = (float)$order['target_price']; // percentage
             $highest = (float)$order['stop_price'];
