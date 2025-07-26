@@ -90,7 +90,7 @@ try {
         if ($balance === false || $balance < $total) {
             $pdo->rollBack();
             http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => '\u0631\u0635\u064a\u062f \u063a\u064a\u0631 \u0643\u0627\u0641\u064d']);
+            echo json_encode(['status' => 'error', 'message' => 'Solde insuffisant']);
             exit;
         }
         $pdo->prepare('UPDATE personal_data SET balance = balance - ? WHERE user_id = ?')
@@ -122,8 +122,8 @@ try {
 
     $pdo->commit();
     $actionMsg = $side === 'buy'
-        ? "تم شراء {$quantity} {$base} بسعر السوق مقابل {$total} {$quote}"
-        : "تم بيع {$quantity} {$base} بسعر السوق مقابل {$total} {$quote}";
+        ? "Achat de {$quantity} {$base} au prix du march\xC3\xA9 pour {$total} {$quote}"
+        : "Vente de {$quantity} {$base} au prix du march\xC3\xA9 pour {$total} {$quote}";
     echo json_encode([
         'status' => 'ok',
         'message' => $actionMsg,
