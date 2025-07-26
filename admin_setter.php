@@ -379,6 +379,24 @@ try {
         $pdo->rollBack();
         throw $e;
     }
+    } elseif ($action === 'broadcast_update') {
+        $date = $data['date'] ?? '';
+        if (!$date) { throw new Exception('Missing date'); }
+        $stmt = $pdo->query('SELECT user_id FROM personal_data');
+        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $timeAgo = formatTimeAgoFromDate(date('Y-m-d H:i:s'));
+        $insert = $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)');
+        foreach ($userIds as $uid) {
+            $insert->execute([
+                (int)$uid,
+                'info',
+                'Mise à jour du système',
+                "Le système sera mis à jour le $date.",
+                $timeAgo,
+                'alert-info'
+            ]);
+        }
+        echo json_encode(['status' => 'ok']);
     } elseif ($action === 'update_kyc') {
         $fileId = isset($data['file_id']) ? (int)$data['file_id'] : 0;
         $status = $data['status'] ?? '';
