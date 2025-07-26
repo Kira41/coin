@@ -1,6 +1,6 @@
 CREATE TABLE admins_agents (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    email TEXT NOT NULL,
+    email VARCHAR(255) NOT NULL,
     password TEXT NOT NULL,
     is_admin TINYINT(1) NOT NULL,
     created_by INTEGER NULL,
