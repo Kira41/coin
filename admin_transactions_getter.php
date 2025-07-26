@@ -5,8 +5,8 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 
 try {
-    $dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
-    $pdo = new PDO($dsn, 'root', '');
+    require __DIR__ . '/config.php';
+    $pdo = new PDO($dsn, $dbUser, $dbPass);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     $adminId = null;
