@@ -46,6 +46,7 @@ CREATE TABLE wallets (
     user_id BIGINT NOT NULL,
     currency VARCHAR(10) NOT NULL,
     amount DECIMAL(20,10) NOT NULL DEFAULT 0,
+    purchase_price DECIMAL(20,10) DEFAULT 0,
     network TEXT,
     address TEXT,
     label TEXT,
