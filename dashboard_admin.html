@@ -82,6 +82,24 @@
         #recentActivity .list-group-item:last-child {
             border-bottom: none;
         }
+        #recentActivity .activity-text {
+            font-weight: 600;
+        }
+        #recentActivity .text-success {
+            color: #198754;
+        }
+        #recentActivity .text-info {
+            color: #0dcaf0;
+        }
+        #recentActivity .text-warning {
+            color: #ffc107;
+        }
+        #recentActivity .text-danger {
+            color: #dc3545;
+        }
+        #recentActivity .text-primary {
+            color: #0d6efd;
+        }
     </style>
 </head>
 <body>
@@ -1279,10 +1297,18 @@
                             danger: 'exclamation-triangle',
                             kyc: 'person-check'
                         };
+                        const colors = {
+                            success: 'text-success',
+                            info: 'text-info',
+                            warning: 'text-warning',
+                            danger: 'text-danger',
+                            kyc: 'text-primary'
+                        };
                         notifs.forEach(n => {
                             const icon = icons[n.type] || 'info-circle';
-                            const item = `<div class="list-group-item d-flex justify-content-between align-items-center">
-                                <div><i class="bi bi-${icon} me-2"></i>${escapeHtml(n.title)} - ${escapeHtml(n.message)} (${escapeHtml(n.fullName || '')})</div>
+                            const color = colors[n.type] || 'text-body';
+                            const item = `<div class="list-group-item d-flex justify-content-between align-items-center ${color}">
+                                <div class="activity-text"><i class="bi bi-${icon} me-2"></i>${escapeHtml(n.title)} - ${escapeHtml(n.message)} (${escapeHtml(n.fullName || '')})</div>
                                 <small class="text-muted">${escapeHtml(n.time)}</small>
                             </div>`;
                             activity.insertAdjacentHTML('beforeend', item);
