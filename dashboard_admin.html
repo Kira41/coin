@@ -236,13 +236,29 @@
                                             </button>
                                         </div>
                                     </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <div class="col-md-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5 class="mb-0">Notifier les utilisateurs</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="input-group">
+                                    <span class="input-group-text">Date de mise à jour</span>
+                                    <input type="date" class="form-control" id="sysUpdateDate">
+                                    <button class="btn btn-primary" id="sendUpdateNotification">Envoyer</button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Users Section -->
-                    <div id="users-section" class="content-section">
+                </div>
+            </div>
+
+            <!-- Users Section -->
+            <div id="users-section" class="content-section">
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h3>Gestion des Utilisateurs</h3>
                             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
@@ -1875,6 +1891,32 @@
                 loadKYCRequests();
             }
             bootstrap.Modal.getInstance(document.getElementById('kycModal')).hide();
+        });
+
+        const notifyBtn = document.getElementById('sendUpdateNotification');
+        if(notifyBtn) notifyBtn.addEventListener('click', async function(){
+            const date = document.getElementById('sysUpdateDate').value;
+            if(!date){
+                alert('Veuillez choisir une date');
+                return;
+            }
+            try {
+                const res = await fetchWithAuth('admin_setter.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'broadcast_update', date: date })
+                });
+                const result = await res.json();
+                if(result.status === 'ok'){
+                    alert('Notification envoyée');
+                    document.getElementById('sysUpdateDate').value = '';
+                } else {
+                    alert(result.message || 'Erreur');
+                }
+            } catch(err){
+                console.error('Notification error', err);
+                alert('Erreur');
+            }
         });
 
         const showAllBtn = document.getElementById('showAllDocsBtn');
