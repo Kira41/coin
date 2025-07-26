@@ -81,7 +81,6 @@ try {
 
     $total = $price * $quantity;
 
-    $stmt->execute([$userId, $pair, $side, $quantity, $price, $total]);
     $pdo->beginTransaction();
 
     if ($side === 'buy') {
