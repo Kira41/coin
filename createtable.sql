@@ -84,7 +84,7 @@ CREATE TABLE notifications (
 CREATE TABLE deposits (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
-    admin_id BIGINT, -- <== تم التعديل هنا
+    admin_id BIGINT, -- <== modifi\xC3\xA9 ici
     operationNumber TEXT,
     date TEXT,
     amount DECIMAL(18,2),
