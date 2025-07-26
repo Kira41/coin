@@ -2,8 +2,8 @@
 // Basic order processing script using orders, wallets and trades tables
 // Run periodically (e.g. via cron) to execute open orders based on market prices
 
-$dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
-$pdo = new PDO($dsn, 'root', '', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+require __DIR__ . '/config.php';
+$pdo = new PDO($dsn, $dbUser, $dbPass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
 /**
  * Fetch live price for a trading pair using Binance.

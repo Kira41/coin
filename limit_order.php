@@ -25,8 +25,8 @@ try {
         exit;
     }
 
-    $dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
-    $pdo = new PDO($dsn, 'root', '', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    require __DIR__ . '/config.php';
+    $pdo = new PDO($dsn, $dbUser, $dbPass, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
     [$base, $quote] = explode('/', strtoupper($pair));
 
