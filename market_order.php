@@ -36,13 +36,39 @@ try {
         return isset($data['price']) ? (float)$data['price'] : 0.0;
     }
 
-    function addToWallet(PDO $pdo, int $userId, string $currency, float $amount): void {
-        $stmt = $pdo->prepare(
-            'INSERT INTO wallets (user_id,currency,amount,address,label) '
-            . 'VALUES (?,?,?,?,?) '
-            . 'ON DUPLICATE KEY UPDATE amount = amount + VALUES(amount)'
-        );
-        $stmt->execute([$userId, strtolower($currency), $amount, 'local address', $currency]);
+    function addToWallet(PDO $pdo, int $userId, string $currency, float $amount, float $price): void {
+        $currency = strtolower($currency);
+        $stmt = $pdo->prepare('SELECT amount,purchase_price FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
+        $stmt->execute([$userId, $currency]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($row) {
+            $newAmount = $row['amount'] + $amount;
+            $avg = ($row['amount'] * $row['purchase_price'] + $amount * $price) / $newAmount;
+            $pdo->prepare('UPDATE wallets SET amount=?, purchase_price=? WHERE user_id=? AND currency=?')
+                ->execute([$newAmount, $avg, $userId, $currency]);
+        } else {
+            $pdo->prepare('INSERT INTO wallets (user_id,currency,amount,address,label,purchase_price) VALUES (?,?,?,?,?,?)')
+                ->execute([$userId, $currency, $amount, 'local address', $currency, $price]);
+        }
+    }
+
+    function deductFromWallet(PDO $pdo, int $userId, string $currency, float $amount) {
+        $currency = strtolower($currency);
+        $stmt = $pdo->prepare('SELECT amount,purchase_price FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
+        $stmt->execute([$userId, $currency]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row || $row['amount'] < $amount) {
+            return false;
+        }
+        $newAmt = $row['amount'] - $amount;
+        if ($newAmt > 0) {
+            $pdo->prepare('UPDATE wallets SET amount=? WHERE user_id=? AND currency=?')
+                ->execute([$newAmt, $userId, $currency]);
+        } else {
+            $pdo->prepare('DELETE FROM wallets WHERE user_id=? AND currency=?')
+                ->execute([$userId, $currency]);
+        }
+        return (float)$row['purchase_price'];
     }
 
     [$base, $quote] = explode('/', strtoupper($pair));
@@ -55,34 +81,53 @@ try {
 
     $total = $price * $quantity;
 
+    $stmt->execute([$userId, $pair, $side, $quantity, $price, $total]);
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id = ? FOR UPDATE');
-    $stmt->execute([$userId]);
-    $balance = $stmt->fetchColumn();
-    if ($balance === false || $balance < $total) {
-        $pdo->rollBack();
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'رصيد غير كافٍ']);
-        exit;
+    if ($side === 'buy') {
+        $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id = ? FOR UPDATE');
+        $stmt->execute([$userId]);
+        $balance = $stmt->fetchColumn();
+        if ($balance === false || $balance < $total) {
+            $pdo->rollBack();
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => '\u0631\u0635\u064a\u062f \u063a\u064a\u0631 \u0643\u0627\u0641\u064d']);
+            exit;
+        }
+        $pdo->prepare('UPDATE personal_data SET balance = balance - ? WHERE user_id = ?')
+            ->execute([$total, $userId]);
+        $newBalance = $balance - $total;
+        addToWallet($pdo, $userId, $base, $quantity, $price);
+        $profit = 0;
+    } else {
+        $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id = ? FOR UPDATE');
+        $stmt->execute([$userId]);
+        $balance = $stmt->fetchColumn();
+        $purchase = deductFromWallet($pdo, $userId, $base, $quantity);
+        if ($purchase === false) {
+            $pdo->rollBack();
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Solde insuffisant']);
+            exit;
+        }
+        $pdo->prepare('UPDATE personal_data SET balance = balance + ? WHERE user_id = ?')
+            ->execute([$total, $userId]);
+        $newBalance = $balance + $total;
+        $profit = ($price - $purchase) * $quantity;
     }
-
-    $stmt = $pdo->prepare('UPDATE personal_data SET balance = balance - ? WHERE user_id = ?');
-    $stmt->execute([$total, $userId]);
-    $newBalance = $balance - $total;
-
-    addToWallet($pdo, $userId, $base, $quantity);
-
     $stmt = $pdo->prepare(
         'INSERT INTO trades (user_id, pair, side, quantity, price, total_value, fee, profit_loss) '
-        . 'VALUES (?,?,?,?,?,?,0,0)'
+        . 'VALUES (?,?,?,?,?,?,0,?)'
     );
-    $stmt->execute([$userId, $pair, $side, $quantity, $price, $total]);
+    $stmt->execute([$userId, $pair, $side, $quantity, $price, $total, $profit]);
 
     $pdo->commit();
+    $actionMsg = $side === 'buy'
+        ? "تم شراء {$quantity} {$base} بسعر السوق مقابل {$total} {$quote}"
+        : "تم بيع {$quantity} {$base} بسعر السوق مقابل {$total} {$quote}";
     echo json_encode([
         'status' => 'ok',
-        'message' => "تم شراء {$quantity} {$base} بسعر السوق مقابل {$total} {$quote}",
+        'message' => $actionMsg,
         'price' => $price,
         'new_balance' => $newBalance
     ]);

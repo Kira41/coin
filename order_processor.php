@@ -20,13 +20,19 @@ function getLivePrice(string $pair): float {
 /**
  * Increase amount of a currency in user's wallet or create a new row.
  */
-function addToWallet(PDO $pdo, int $userId, string $currency, float $amount): void {
-    $stmt = $pdo->prepare(
-        'INSERT INTO wallets (user_id,currency,amount,address,label)
-         VALUES (?,?,?,?,?)
-         ON DUPLICATE KEY UPDATE amount = amount + VALUES(amount)'
-    );
-    $stmt->execute([$userId, $currency, $amount, 'local address', $currency]);
+function addToWallet(PDO $pdo, int $userId, string $currency, float $amount, float $price): void {
+    $stmt = $pdo->prepare('SELECT amount,purchase_price FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
+    $stmt->execute([$userId, $currency]);
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if ($row) {
+        $newAmount = $row['amount'] + $amount;
+        $avgPrice = ($row['amount'] * $row['purchase_price'] + $amount * $price) / $newAmount;
+        $upd = $pdo->prepare('UPDATE wallets SET amount=?, purchase_price=? WHERE user_id=? AND currency=?');
+        $upd->execute([$newAmount, $avgPrice, $userId, $currency]);
+    } else {
+        $ins = $pdo->prepare('INSERT INTO wallets (user_id,currency,amount,address,label,purchase_price) VALUES (?,?,?,?,?,?)');
+        $ins->execute([$userId, $currency, $amount, 'local address', $currency, $price]);
+    }
 }
 
 /**
@@ -55,26 +61,31 @@ function addToAccount(PDO $pdo, int $userId, float $amount): void {
 /**
  * Decrease amount of a currency in user's wallet.
  */
-function deductFromWallet(PDO $pdo, int $userId, string $currency, float $amount): bool {
-    $stmt = $pdo->prepare('SELECT amount FROM wallets WHERE user_id=? AND currency=?');
+function deductFromWallet(PDO $pdo, int $userId, string $currency, float $amount) {
+    $stmt = $pdo->prepare('SELECT amount,purchase_price FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
     $stmt->execute([$userId, $currency]);
-    $bal = $stmt->fetchColumn();
-    if ($bal === false || $bal < $amount) {
-        return false; // insufficient funds
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$row || $row['amount'] < $amount) {
+        return false;
     }
-    $stmt = $pdo->prepare('UPDATE wallets SET amount = amount - ? WHERE user_id=? AND currency=?');
-    $stmt->execute([$amount, $userId, $currency]);
-    return true;
+    $newAmount = $row['amount'] - $amount;
+    if ($newAmount > 0) {
+        $upd = $pdo->prepare('UPDATE wallets SET amount=? WHERE user_id=? AND currency=?');
+        $upd->execute([$newAmount, $userId, $currency]);
+    } else {
+        $pdo->prepare('DELETE FROM wallets WHERE user_id=? AND currency=?')->execute([$userId, $currency]);
+    }
+    return (float)$row['purchase_price'];
 }
 
 /**
  * Record executed trade and mark order filled.
  */
-function recordTrade(PDO $pdo, array $order, float $price): void {
+function recordTrade(PDO $pdo, array $order, float $price, float $profit = 0.0): void {
     $total = $order['quantity'] * $price;
     $stmt = $pdo->prepare(
-        'INSERT INTO trades (user_id,order_id,pair,side,quantity,price,total_value,profit_loss)
-         VALUES (?,?,?,?,?,?,?,0)'
+        'INSERT INTO trades (user_id,order_id,pair,side,quantity,price,total_value,profit_loss)' .
+        ' VALUES (?,?,?,?,?,?,?,?)'
     );
     $stmt->execute([
         $order['user_id'],
@@ -83,9 +94,11 @@ function recordTrade(PDO $pdo, array $order, float $price): void {
         $order['side'],
         $order['quantity'],
         $price,
-        $total
+        $total,
+        $profit
     ]);
     $pdo->prepare('UPDATE orders SET status="filled" WHERE id=?')->execute([$order['id']]);
+
 }
 
 /**
@@ -102,17 +115,19 @@ function executeOrder(PDO $pdo, array $order, float $price): void {
             $pdo->prepare('UPDATE orders SET status="cancelled" WHERE id=?')->execute([$order['id']]);
             return;
         }
-        addToWallet($pdo, $order['user_id'], $base, $qty);
+        addToWallet($pdo, $order['user_id'], $base, $qty, $price);
+        $profit = 0;
     } else { // sell
-        if (!deductFromWallet($pdo, $order['user_id'], $base, $qty)) {
+        $purchase = deductFromWallet($pdo, $order['user_id'], $base, $qty);
+        if ($purchase === false) {
             $pdo->prepare('UPDATE orders SET status="cancelled" WHERE id=?')->execute([$order['id']]);
             return;
         }
         addToAccount($pdo, $order['user_id'], $total);
+        $profit = ($price - $purchase) * $qty;
     }
-    recordTrade($pdo, $order, $price);
+    recordTrade($pdo, $order, $price, $profit);
 }
-
 /**
  * Determine if an order should execute at the given price.
  */

@@ -18,8 +18,9 @@ INSERT INTO deposit_crypto_address (user_id, crypto_name, wallet_info) VALUES
     (1, 'USDT', 'USDT123...');
 
 
-INSERT INTO wallets (id, user_id, currency, amount, network, address, label) VALUES (
-    1751038645430, 1, 'btc', 0, 'Bitcoin',
+INSERT INTO wallets (id, user_id, currency, amount, purchase_price, network, address, label) VALUES (
+    1751038645430, 1, 'btc', 0, 0,
+    'Bitcoin',
     'BTC12345678', ''
 );
 
