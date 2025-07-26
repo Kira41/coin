@@ -59,6 +59,29 @@
         .btn-primary:hover {
             background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
         }
+
+        /* Recent Activity styling */
+        .recent-activity-card .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 0.5rem 1rem;
+        }
+        .recent-activity-card .card-header h5 {
+            font-size: 1rem;
+        }
+        #recentActivity {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        #recentActivity .list-group-item {
+            font-size: 0.875rem;
+            padding: 0.35rem 0.75rem;
+            border: none;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        #recentActivity .list-group-item:last-child {
+            border-bottom: none;
+        }
     </style>
 </head>
 <body>
@@ -202,7 +225,7 @@
                         
                         <div class="row">
                             <div class="col-md-8">
-                                <div class="card">
+                                <div class="card recent-activity-card">
                                     <div class="card-header">
                                         <h5 class="mb-0">Activité Récente</h5>
                                     </div>
