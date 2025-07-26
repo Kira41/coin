@@ -1359,6 +1359,17 @@ function initializeUI() {
             });
     }
 
+    async function fetchCurrentPrice(pair) {
+        const symbol = apiPairs[pair] || 'BTCUSDT';
+        try {
+            const resp = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+            const info = await resp.json();
+            return parseFloat(info.price);
+        } catch (e) {
+            return NaN;
+        }
+    }
+
     function addTrade(order) {
         dashboardData.tradingHistory = dashboardData.tradingHistory || [];
         if (!order.operationNumber) {
@@ -1721,11 +1732,17 @@ function initializeUI() {
         $loginHistoryBody.html('<tr><td colspan="3" class="text-center">Aucune donnée disponible</td></tr>');
     }
 
-    $('#tradingHistory').on('click', '.stop-trade', function() {
+    $('#tradingHistory').on('click', '.stop-trade', async function() {
         const op = $(this).data('op');
         const trade = (dashboardData.tradingHistory || []).find(t => t.operationNumber === op);
         if (trade && trade.statut === 'En cours') {
-            finalizeOrder(trade, currentPrice);
+            const pairKey = trade.paireDevises.replace('/', '');
+            const price = await fetchCurrentPrice(pairKey);
+            if (!isNaN(price)) {
+                finalizeOrder(trade, price);
+            } else {
+                alert('Impossible de récupérer le prix pour ' + trade.paireDevises);
+            }
         }
     });
 
