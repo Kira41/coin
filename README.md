@@ -62,6 +62,9 @@ removes the wallet entirely. Edits and deletions are sent to
 data. The wallet table on the user dashboard now also displays the current
 balance for each address.
 
+The trading history table was updated as well. Amounts are shown with the
+traded coin symbol instead of dollars, e.g. `100 XRP`.
+
 ## Admin dashboard
 
 `insertdata.sql` seeds a default administrator account (`admin@scampia.io`) with
