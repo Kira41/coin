@@ -1417,7 +1417,9 @@ function initializeUI() {
         order.admin_id = dashboardData.personalData?.linked_to_id || null;
         dashboardData.tradingHistory.unshift(order);
         dashboardData.tradingHistory = dashboardData.tradingHistory.slice(0, 5);
-        addTransactionRecord('Trading', order.montant, order.statut, order.statutClass, order.operationNumber);
+        // Record the dollar value of the trade rather than just the quantity
+        const tradeValue = order.montant * order.prix;
+        addTransactionRecord('Trading', tradeValue, order.statut, order.statutClass, order.operationNumber);
         saveDashboardData();
         renderTradingHistory();
         loadTransactions();
