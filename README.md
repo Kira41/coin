@@ -5,12 +5,12 @@ This project uses small PHP helpers (`getter.php` and `setter.php`) to read and 
 ## Database setup
 
 1. Make sure the PHP MySQL PDO extension is installed and a MySQL server is running.
-2. Create a database named `admin_coindb` and load the schema and sample data:
+2. Create a database named `coin_db` and load the schema and sample data:
    ```sh
-   mysql -u admin_coin admin_coindb < createtable.sql
-   mysql -u admin_coin admin_coindb < insertdata.sql
+   mysql -u root coin_db < createtable.sql
+   mysql -u root coin_db < insertdata.sql
    ```
-3. Database credentials are stored in `config.php`. The default configuration uses `localhost` with the `admin_coin` user and password `Perfect.41`.
+3. The PHP scripts connect to `coin_db` on `localhost` using the `root` user with an empty password. Update the connection settings in `getter.php` and `setter.php` if your environment differs.
 
 The dashboard pages (`dashbord_user.html` and `script.js`) request data from `getter.php` and send updates to `setter.php`.
 `script.js` now fetches wallet addresses from `get_wallets.php`, which returns `SELECT * FROM wallets WHERE user_id = ?` in JSON. The `wallets` table stores

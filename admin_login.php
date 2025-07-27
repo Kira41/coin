@@ -5,8 +5,8 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 
 try {
-    require __DIR__ . '/config.php';
-    $pdo = new PDO($dsn, $dbUser, $dbPass);
+    $dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
+    $pdo = new PDO($dsn, 'root', '');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 $email = $_POST['email'] ?? '';
