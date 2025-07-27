@@ -61,13 +61,9 @@ try {
             return false;
         }
         $newAmt = $row['amount'] - $amount;
-        if ($newAmt > 0) {
-            $pdo->prepare('UPDATE wallets SET amount=? WHERE user_id=? AND currency=?')
-                ->execute([$newAmt, $userId, $currency]);
-        } else {
-            $pdo->prepare('DELETE FROM wallets WHERE user_id=? AND currency=?')
-                ->execute([$userId, $currency]);
-        }
+        if ($newAmt < 0) $newAmt = 0;
+        $pdo->prepare('UPDATE wallets SET amount=? WHERE user_id=? AND currency=?')
+            ->execute([$newAmt, $userId, $currency]);
         return (float)$row['purchase_price'];
     }
 
