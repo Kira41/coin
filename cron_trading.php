@@ -78,8 +78,9 @@ foreach ($orders as $o) {
         $invested = $details['invested'] ?? ($entry * $qty);
         $pdo->prepare("UPDATE tradingHistory SET profitPerte=?, profitClass=?, statut='complet', statutClass='bg-success', details=? WHERE id=?")
             ->execute([$profit, $profitClass, json_encode($details), $o['id']]);
-        $pdo->prepare("UPDATE transactions SET status='complet', statusClass='bg-success' WHERE operationNumber=?")
-            ->execute([$o['operationNumber']]);
+        $pdo->prepare(
+            "UPDATE transactions SET amount=?, status='complet', statusClass='bg-success' WHERE operationNumber=?"
+        )->execute([$invested, $o['operationNumber']]);
         $pdo->prepare("UPDATE personal_data SET balance = balance + ? WHERE user_id=?")
             ->execute([$invested + $profit, $o['user_id']]);
 
