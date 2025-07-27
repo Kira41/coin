@@ -1671,7 +1671,7 @@ function initializeUI() {
                 dashboardData.personalData.wallets = wallets;
             }
             renderWalletTable(wallets);
-        } else if (!isBuy && orderType === 'market') {
+        } else if (!isBuy) {
             const baseCurr = pair.replace(/USD$/, '').toLowerCase();
             let wallets = dashboardData.personalData.wallets || [];
             let w = wallets.find(x => x.currency === baseCurr);
