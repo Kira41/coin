@@ -96,7 +96,28 @@ try {
     $stmt = $pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,target_price,stop_price,status) VALUES (?,?,?,?,?,?,?,?)');
     $stmt->execute([$userId,$pair,$type,$side,$quantity,$target,$stop,'open']);
 
-    echo json_encode(['status'=>'ok','order_id'=>$pdo->lastInsertId()]);
+    $orderId = $pdo->lastInsertId();
+    $opNum = 'T' . $orderId;
+    $date = date('Y/m/d');
+    $adm = $pdo->prepare('SELECT linked_to_id FROM personal_data WHERE user_id=?');
+    $adm->execute([$userId]);
+    $adminId = $adm->fetchColumn() ?: null;
+    $approx = ($target ?? $stop ?? getLivePrice($pair)) * $quantity;
+    $pdo->prepare(
+        'INSERT INTO transactions (user_id,admin_id,operationNumber,type,amount,date,status,statusClass) '
+        . 'VALUES (?,?,?,?,?,?,?,?)'
+    )->execute([
+        $userId,
+        $adminId,
+        $opNum,
+        'Trading',
+        $approx,
+        $date,
+        'En cours',
+        'bg-warning'
+    ]);
+
+    echo json_encode(['status'=>'ok','order_id'=>$orderId]);
 } catch(Throwable $e) {
     error_log(__FILE__.' - '.$e->getMessage());
     http_response_code(500);

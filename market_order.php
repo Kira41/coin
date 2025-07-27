@@ -120,6 +120,26 @@ try {
     );
     $stmt->execute([$userId, $pair, $side, $quantity, $price, $total, $profit]);
 
+    // create matching transaction record
+    $opNum = 'T' . $pdo->lastInsertId();
+    $date = date('Y/m/d');
+    $adm = $pdo->prepare('SELECT linked_to_id FROM personal_data WHERE user_id=?');
+    $adm->execute([$userId]);
+    $adminId = $adm->fetchColumn() ?: null;
+    $pdo->prepare(
+        'INSERT INTO transactions (user_id,admin_id,operationNumber,type,amount,date,status,statusClass) '
+        . 'VALUES (?,?,?,?,?,?,?,?)'
+    )->execute([
+        $userId,
+        $adminId,
+        $opNum,
+        'Trading',
+        $total,
+        $date,
+        'complet',
+        'bg-success'
+    ]);
+
     $pdo->commit();
     $actionMsg = $side === 'buy'
         ? "Achat de {$quantity} {$base} au prix du march\xC3\xA9 pour {$total} {$quote}"

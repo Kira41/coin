@@ -127,6 +127,11 @@ function executeOrder(PDO $pdo, array $order, float $price): void {
         $profit = ($price - $purchase) * $qty;
     }
     recordTrade($pdo, $order, $price, $profit);
+
+    // mark related transaction as complete
+    $opNum = 'T' . $order['id'];
+    $pdo->prepare("UPDATE transactions SET status='complet', statusClass='bg-success' WHERE operationNumber=?")
+        ->execute([$opNum]);
 }
 /**
  * Determine if an order should execute at the given price.
