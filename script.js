@@ -1595,14 +1595,14 @@ function initializeUI() {
         let price = currentPrice;
         let stopPrice = null;
         if (orderType === 'limit' || orderType === 'stoplimit') {
-            price = parseFloat($('#limitPrice').val());
+            price = parseDollar($('#limitPrice').val());
             if (!price) {
                 alert('Veuillez entrer le prix souhaité');
                 return;
             }
         }
         if (orderType === 'stop' || orderType === 'stoplimit') {
-            stopPrice = parseFloat($('#stopPrice').val());
+            stopPrice = parseDollar($('#stopPrice').val());
             if (!stopPrice) {
                 alert('Veuillez entrer le prix stop');
                 return;
@@ -1689,7 +1689,7 @@ function initializeUI() {
         if ($('#enableStopLoss').is(':checked')) {
             const slType = $('#stopLossType').val();
             if (slType === 'price') {
-                const slPrice = parseFloat($('#stopLossPrice').val());
+                const slPrice = parseDollar($('#stopLossPrice').val());
                 if (slPrice) stopLoss = { type: 'price', price: slPrice };
             } else if (slType === 'percentage') {
                 const slPerc = parseFloat($('#stopLossPercentage').val());
@@ -1704,7 +1704,7 @@ function initializeUI() {
         }
 
         const ocoEnabled = $('#enableOCO').is(':checked');
-        const takeProfit = ocoEnabled ? parseFloat($('#takeProfitPrice').val()) : null;
+        const takeProfit = ocoEnabled ? parseDollar($('#takeProfitPrice').val()) : null;
         if (ocoEnabled && (!stopLoss || !takeProfit)) {
             alert('Veuillez définir un stop loss et un take profit pour OCO');
             return;
