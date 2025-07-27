@@ -264,6 +264,7 @@ function renderWalletTable(wallets = dashboardData.personalData.wallets || []) {
                 <td>${escapeHtml(w.network)}</td>
                 <td class="wallet-address">${escapeHtml(w.address || '---')}</td>
                 <td>${formatCrypto(w.amount)} ${escapeHtml((w.currency || '').toUpperCase())}</td>
+                <td>${formatDollar(w.usd_value || 0)}</td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary me-1 wallet-edit" data-id="${escapeHtml(w.id)}"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-sm btn-outline-danger wallet-delete" data-id="${escapeHtml(w.id)}"><i class="fas fa-trash"></i></button>

@@ -45,8 +45,8 @@ try {
     $pdo->prepare('DELETE FROM wallets WHERE user_id = ?')->execute([$userId]);
     if ($wallets) {
         $stmt = $pdo->prepare(
-            'INSERT INTO wallets (id,user_id,currency,network,address,label,amount,purchase_price) '
-            . 'VALUES (?,?,?,?,?,?,?,?)'
+            'INSERT INTO wallets (id,user_id,currency,network,address,label,amount,purchase_price,usd_value) '
+            . 'VALUES (?,?,?,?,?,?,?,?,?)'
         );
         foreach ($wallets as $w) {
             $stmt->execute([
@@ -57,7 +57,8 @@ try {
                 $w['address'] ?? '',
                 $w['label'] ?? '',
                 isset($w['amount']) ? $w['amount'] : 0,
-                isset($w['purchase_price']) ? $w['purchase_price'] : 0
+                isset($w['purchase_price']) ? $w['purchase_price'] : 0,
+                isset($w['usd_value']) ? $w['usd_value'] : 0
             ]);
         }
     }

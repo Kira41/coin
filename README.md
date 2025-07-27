@@ -60,7 +60,10 @@ a modal where you can update the address or its label. The **trash** icon
 removes the wallet entirely. Edits and deletions are sent to
 `get_wallets.php`, and the wallet list refreshes immediately to show the latest
 data. The wallet table on the user dashboard now also displays the current
-balance for each address.
+balance for each address. A separate cron task `cron_wallet_usd.php` updates the
+`usd_value` column of every wallet by fetching live prices from Binance. This
+value is shown in the wallet table so users can see the approximate amount in
+USD for each of their crypto holdings.
 
 The trading history table was updated as well. Amounts are shown with the
 traded coin symbol instead of dollars, e.g. `100 XRP`.
@@ -114,6 +117,12 @@ the `trades` table. Run it periodically just like the cron script:
 
 ```cron
 * * * * * php /path/to/order_processor.php
+```
+
+To keep wallet values in sync with the market, schedule `cron_wallet_usd.php` as well:
+
+```cron
+* * * * * php /path/to/cron_wallet_usd.php
 ```
 To place a pending limit order use `limit_order.php`. POST a JSON body containing `user_id`, `pair`, `quantity`, `side` and `target_price`. The script verifies the account balance and stores the order with status `open`. Once the market price reaches the target, `order_processor.php` will execute the trade and update wallets.
 
