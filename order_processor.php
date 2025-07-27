@@ -128,10 +128,11 @@ function executeOrder(PDO $pdo, array $order, float $price): void {
     }
     recordTrade($pdo, $order, $price, $profit);
 
-    // mark related transaction as complete
+    // mark related transaction as complete and update the executed amount
     $opNum = 'T' . $order['id'];
-    $pdo->prepare("UPDATE transactions SET status='complet', statusClass='bg-success' WHERE operationNumber=?")
-        ->execute([$opNum]);
+    $pdo->prepare(
+        "UPDATE transactions SET amount=?, status='complet', statusClass='bg-success' WHERE operationNumber=?"
+    )->execute([$total, $opNum]);
 }
 /**
  * Determine if an order should execute at the given price.
