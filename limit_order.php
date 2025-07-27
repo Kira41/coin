@@ -53,10 +53,30 @@ try {
     $stmt = $pdo->prepare("INSERT INTO orders (user_id,pair,type,side,quantity,target_price,status) VALUES (?,?,?,?,?,?,?)");
     $stmt->execute([$userId, $pair, 'limit', $side, $quantity, $target, 'open']);
 
+    $orderId = $pdo->lastInsertId();
+    $opNum = 'T' . $orderId;
+    $date = date('Y/m/d');
+    $adm = $pdo->prepare('SELECT linked_to_id FROM personal_data WHERE user_id=?');
+    $adm->execute([$userId]);
+    $adminId = $adm->fetchColumn() ?: null;
+    $pdo->prepare(
+        'INSERT INTO transactions (user_id,admin_id,operationNumber,type,amount,date,status,statusClass) '
+        . 'VALUES (?,?,?,?,?,?,?,?)'
+    )->execute([
+        $userId,
+        $adminId,
+        $opNum,
+        'Trading',
+        $target * $quantity,
+        $date,
+        'En cours',
+        'bg-warning'
+    ]);
+
     echo json_encode([
         'status' => 'ok',
         'message' => "Ordre limite de {$quantity} {$base} au prix de {$target} {$quote} créé",
-        'order_id' => $pdo->lastInsertId()
+        'order_id' => $orderId
     ]);
 } catch (Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
