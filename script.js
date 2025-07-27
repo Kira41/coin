@@ -8,6 +8,9 @@ try {
 }
 userId = userId ? parseInt(userId) : null;
 
+let dashboardInitialized = false;
+let autoRefreshHandle = null;
+
 // Utility functions
 function parseDollar(str) {
     return parseFloat(String(str).replace(/[^0-9.-]+/g, '')) || 0;
@@ -330,10 +333,31 @@ async function fetchDashboardData() {
             $label.text(progress === 100 ? 'completed' : 'pending');
         }
         updatePlatformBankDetails();
-        initializeUI();
+        if (!dashboardInitialized) {
+            initializeUI();
+            dashboardInitialized = true;
+        } else if (typeof window.refreshUI === 'function') {
+            window.refreshUI();
+        }
     } catch (err) {
         console.error("Failed to load dashboard data", err.message || err);
         alert("Erreur : Impossible de charger les données utilisateur.");
+    }
+}
+
+function startAutoRefresh() {
+    if (autoRefreshHandle) return;
+    autoRefreshHandle = setInterval(async () => {
+        if (document.hidden || !userId) return;
+        await fetchDashboardData();
+        await fetchWallets();
+    }, 30000);
+}
+
+function stopAutoRefresh() {
+    if (autoRefreshHandle) {
+        clearInterval(autoRefreshHandle);
+        autoRefreshHandle = null;
     }
 }
 
@@ -371,6 +395,7 @@ $(document).ready(async function () {
         $("#dashboardContainer").show();
         await fetchDashboardData();
         await fetchWallets();
+        startAutoRefresh();
     } else {
         $("#dashboardContainer").hide();
         $("#loginSection").show();
@@ -392,12 +417,14 @@ $("#userLoginForm").on("submit", async function(e){
         $("#dashboardContainer").show();
         await fetchDashboardData();
         await fetchWallets();
+        startAutoRefresh();
     } else {
         alert("Échec de la connexion");
     }
 });
 function logout(){
     try { localStorage.removeItem("user_id"); } catch(e){}
+    stopAutoRefresh();
     location.reload();
 }
 
@@ -522,6 +549,17 @@ function initializeUI() {
 
     updateKYCProgress();
     window.setKYCStatus = setKYCStatus;
+    window.refreshUI = function() {
+        updateBalances();
+        updateCounters();
+        updateKYCProgress();
+        renderDepositHistory();
+        renderWithdrawHistory();
+        renderTradingHistory();
+        renderWalletTable();
+        loadTransactions();
+        updatePlatformBankDetails();
+    };
 
     function populateForm(formId) {
         const formData = dashboardData.formData[formId];
