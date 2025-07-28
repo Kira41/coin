@@ -97,56 +97,15 @@ Use `admin_login.php` to sign in. POST `email` and `password`; a successful logi
 
 ## Automated trade closing
 
-Open trades can be finalized automatically even when users are offline. The `cron_trading.php` script checks all orders with the status `En cours`, fetches the latest price from Binance and updates the order with the resulting profit or loss. To keep trading positions active, schedule the script with cron for example:
-
-```cron
-* * * * * php /path/to/cron_trading.php
-```
-
-This will close any open trades once per minute using the current market price.
-
-Open positions are stored in the new `orders` table. When an order is executed a
-record is written to the `trades` table and the user's wallet balances are
-updated accordingly. The `cron_trading.php` script simply updates these rows
-based on live prices.
-
-The `order_processor.php` script offers a more complete example. It reads all
-rows from the `orders` table with status `open`, checks the current Binance
-price and, when conditions match, updates user wallets and records the trade in
-the `trades` table. Run it periodically just like the cron script:
-
-```cron
-* * * * * php /path/to/order_processor.php
-```
-
 To keep wallet values in sync with the market, schedule `cron_wallet_usd.php` as well:
 
 ```cron
 * * * * * php /path/to/cron_wallet_usd.php
 ```
-To place a pending limit order use `limit_order.php`. POST a JSON body containing `user_id`, `pair`, `quantity`, `side` and `target_price`. The script verifies the account balance and stores the order with status `open`. Once the market price reaches the target, `order_processor.php` will execute the trade and update wallets.
 
-For stop, stop‑limit, trailing stop or OCO orders send the same parameters to `advanced_order.php` and specify `type`, `stop_price` and/or `target_price` as needed. The order is saved in the `orders` table until `order_processor.php` triggers its execution.
+### Order type
 
-### Order types and stop loss
-
-User trades can be created with several execution methods:
-
-- **Ordre au marché** – buy or sell immediately at the best price.
-- **Ordre à cours limité** – specify the exact price to execute.
-- **Ordre stop** – becomes a market order when the stop price is reached.
-- **Stop‑limit** – after the stop price is hit a limit order is placed.
-
-For risk management the following stop loss modes are available:
-
-- Fixed price stop
-- Percentage based stop
-- Time based exit
-- Trailing stop which follows the market in your favor.
-
-Trades may also combine a take profit and stop loss using an OCO (One Cancels the Other) order. When one of the two triggers the other is automatically cancelled.
-
-All parameters are stored in the `details` column of the `tradingHistory` table so they remain active even when the user is offline. The `cron_trading.php` script evaluates these rules on each run and finalizes trades whose conditions are met.
+Only market orders are supported. Trades are executed immediately at the current market price and recorded in the `trades` table.
 
 When querying Binance for live prices remember that pairs use the `USDT` quote currency. A pair like `ADA/USD` should be converted to `ADAUSDT` before requesting the price.
 
@@ -166,12 +125,4 @@ if ($side === 'buy') {
     addToAccount($userId, $total);
 }
 recordTrade($userId, $pair, $side, $quantity, $price);
-
-// Periodic check for limit/stop orders
-foreach (getOpenOrders() as $order) {
-    $current = getLivePrice($order['pair']);
-    if (shouldExecute($order, $current)) {
-        executeOrder($order, $current);
-    }
-}
 ```
