@@ -5,9 +5,8 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 
 try {
-    $dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
-    $pdo = new PDO($dsn, 'root', '');
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    require_once __DIR__.'/../config/db_connection.php';
+    $pdo = db();
 
 $email = $_POST['email'] ?? '';
 $password = $_POST['password'] ?? '';

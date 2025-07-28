@@ -1,7 +1,7 @@
 <?php
 // Update wallet USD values using live prices
-$dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
-$pdo = new PDO($dsn, 'root', '', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+require_once __DIR__.'/../config/db_connection.php';
+$pdo = db();
 
 function getPrice(string $currency): float {
     $symbol = strtoupper($currency);

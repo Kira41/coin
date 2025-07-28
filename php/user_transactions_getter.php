@@ -5,9 +5,8 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 
 try {
-    $dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
-    $pdo = new PDO($dsn, 'root', '');
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    require_once __DIR__.'/../config/db_connection.php';
+    $pdo = db();
 
     $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 1;
     $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;

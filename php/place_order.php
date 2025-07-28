@@ -1,0 +1,66 @@
+<?php
+header('Content-Type: application/json');
+set_error_handler(function($s,$m,$f,$l){throw new ErrorException($m,0,$s,$f,$l);});
+
+try {
+    $input = json_decode(file_get_contents('php://input'), true);
+    if (!is_array($input)) {
+        http_response_code(400);
+        echo json_encode(['status'=>'error','message'=>'Invalid JSON']);
+        exit;
+    }
+    $userId = (int)($input['user_id'] ?? 0);
+    $pair = $input['pair'] ?? '';
+    $qty = isset($input['quantity']) ? (float)$input['quantity'] : 0.0;
+    $side = strtolower($input['side'] ?? 'buy');
+    $type = strtolower($input['type'] ?? 'market');
+    $limit = isset($input['limit_price']) ? (float)$input['limit_price'] : null;
+    $stop = isset($input['stop_price']) ? (float)$input['stop_price'] : null;
+    $stopLimit = isset($input['stop_limit_price']) ? (float)$input['stop_limit_price'] : null;
+    $trailPerc = isset($input['trailing_percentage']) ? (float)$input['trailing_percentage'] : null;
+
+    if(!$userId || !$pair || $qty <= 0 || !in_array($side,['buy','sell'])){
+        http_response_code(400);
+        echo json_encode(['status'=>'error','message'=>'Missing parameters']);
+        exit;
+    }
+
+    require_once __DIR__.'/../config/db_connection.php';
+    require_once __DIR__.'/../utils/helpers.php';
+
+    $pdo = db();
+
+    $livePrice = getLivePrice($pair);
+    if($livePrice<=0) $livePrice = 0.0;
+
+    if($type==='market'){
+        $pdo->beginTransaction();
+        $order=['id'=>0,'user_id'=>$userId,'pair'=>$pair,'side'=>$side,'quantity'=>$qty];
+        $result = executeTrade($pdo,$order,$livePrice);
+        if(!$result['ok']){ $pdo->rollBack(); http_response_code(400); echo json_encode(['status'=>'error','message'=>$result['msg']]); return; }
+        $pdo->commit();
+        echo json_encode(['status'=>'ok','price'=>$result['price'],'new_balance'=>$result['balance']]);
+        return;
+    }
+
+    // For pending orders just record
+    $stmt=$pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,target_price,stop_price,trailing_percentage,trail_price,related_order_id) VALUES (?,?,?,?,?,?,?,?,?,NULL)');
+    $trailPrice = $livePrice>0 ? $livePrice : null;
+    $stmt->execute([$userId,$pair,$type,$side,$qty,$limit,$stop,$trailPerc,$trailPrice]);
+    $id=$pdo->lastInsertId();
+
+    if($type==='oco'){
+        // create second order for stop limit part using provided stop_limit_price
+        $stopLimitOrder=$pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,target_price,stop_price,related_order_id) VALUES (?,?,?,?,?,?,?,?)');
+        $stopLimitOrder->execute([$userId,$pair,'stop_limit',$side,$qty,$stopLimit,$stop,$id]);
+        $secondId=$pdo->lastInsertId();
+        $pdo->prepare('UPDATE orders SET related_order_id=? WHERE id=?')->execute([$secondId,$id]);
+    }
+
+    echo json_encode(['status'=>'ok','order_id'=>$id]);
+} catch(Throwable $e){
+    if(isset($pdo)&&$pdo->inTransaction()) $pdo->rollBack();
+    http_response_code(500);
+    echo json_encode(['status'=>'error','message'=>$e->getMessage()]);
+}
+?>

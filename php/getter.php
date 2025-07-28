@@ -5,11 +5,8 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 
 try {
-    $dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
-    $pdo = new PDO($dsn, 'root', '', [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false
-    ]);
+    require_once __DIR__.'/../config/db_connection.php';
+    $pdo = db();
 
     $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 1;
 
