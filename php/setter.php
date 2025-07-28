@@ -140,13 +140,13 @@ try {
 
     $pdo->commit();
 
-    require_once __DIR__.'/../utils/socket.php';
+    require_once __DIR__.'/../utils/poll.php';
     $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id = ?');
     $stmt->execute([$userId]);
     $bal = $stmt->fetchColumn();
-    emitEvent('balance_updated', ['newBalance' => $bal], $userId);
-    emitEvent('wallet_updated', [], $userId);
-    emitEvent('data_saved', [], $userId);
+    pushEvent('balance_updated', ['newBalance' => $bal], $userId);
+    pushEvent('wallet_updated', [], $userId);
+    pushEvent('data_saved', [], $userId);
 
     echo json_encode(['status' => 'ok']);
 } catch (Throwable $e) {

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__.'/../utils/socket.php';
+require_once __DIR__.'/../utils/poll.php';
 header('Content-Type: application/json');
 $input = json_decode(file_get_contents('php://input'), true);
 if (!is_array($input) || empty($input['event'])) {
@@ -9,7 +9,7 @@ if (!is_array($input) || empty($input['event'])) {
 }
 $userId = $input['user_id'] ?? null;
 $data = $input['data'] ?? [];
-if (emitEvent($input['event'], $data, $userId)) {
+if (pushEvent($input['event'], $data, $userId)) {
     echo json_encode(['status' => 'ok']);
 } else {
     http_response_code(500);
