@@ -102,6 +102,7 @@ To keep wallet values in sync with the market, schedule `cron_wallet_usd.php` as
 ```cron
 * * * * * php /path/to/cron_wallet_usd.php
 ```
+For Windows users, double-click `run_cron_jobs.bat` in the project root to execute all cron tasks manually.
 
 ### Order type
 
