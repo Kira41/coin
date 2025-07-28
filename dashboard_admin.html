@@ -1141,7 +1141,7 @@
 
         async function checkAuth() {
             try {
-                const res = await fetchWithAuth('admin_getter.php?period=' + encodeURIComponent(STATS_PERIOD));
+                const res = await fetchWithAuth('php/admin_getter.php?period=' + encodeURIComponent(STATS_PERIOD));
                 if (!res.ok) throw new Error('unauthorized');
                 const data = await res.json();
                 if (data.admin_id) ADMIN_ID = data.admin_id;
@@ -1162,7 +1162,7 @@
             const formData = new FormData();
             formData.append('email', email);
             formData.append('password', md5(pwd));
-            const res = await fetch('admin_login.php', { method: 'POST', body: formData });
+            const res = await fetch('php/admin_login.php', { method: 'POST', body: formData });
             const result = await res.json();
             if (result.status === 'ok') {
                 if (result.admin_id) ADMIN_ID = result.admin_id;
@@ -1192,7 +1192,7 @@
 
         async function loadAdminData() {
             try {
-                const res = await fetchWithAuth('admin_getter.php?period=' + encodeURIComponent(STATS_PERIOD));
+                const res = await fetchWithAuth('php/admin_getter.php?period=' + encodeURIComponent(STATS_PERIOD));
                 const data = await res.json();
                 if (data.admin_id) ADMIN_ID = data.admin_id;
                 if (data.email) ADMIN_EMAIL = data.email;
@@ -1340,7 +1340,7 @@
             };
 
             try {
-                const res = await fetchWithAuth('admin_setter.php', {
+                const res = await fetchWithAuth('php/admin_setter.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1380,7 +1380,7 @@
                 created_by: ADMIN_ID
             };
             try {
-                const res = await fetchWithAuth('admin_setter.php', {
+                const res = await fetchWithAuth('php/admin_setter.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
@@ -1408,7 +1408,7 @@
             const delBtn = e.target.closest('.user-delete');
             if (viewBtn) {
                 const id = viewBtn.getAttribute('data-id');
-                const res = await fetchWithAuth('getter.php?user_id=' + id);
+                const res = await fetchWithAuth('php/getter.php?user_id=' + id);
                 const data = await res.json();
                 const pd = data.personalData || {};
                 document.getElementById('viewFullName').textContent = pd.fullName || '';
@@ -1447,7 +1447,7 @@
                 new bootstrap.Modal(document.getElementById('viewUserModal')).show();
             } else if (editBtn) {
                 const id = editBtn.getAttribute('data-id');
-                const res = await fetchWithAuth('getter.php?user_id=' + id);
+                const res = await fetchWithAuth('php/getter.php?user_id=' + id);
                 const data = await res.json();
                 const pd = data.personalData || {};
                 const bw = data.bankWithdrawInfo || {};
@@ -1487,7 +1487,7 @@
             } else if (delBtn) {
                 const id = delBtn.getAttribute('data-id');
                 if (confirm('Supprimer cet utilisateur ?')) {
-                    await fetchWithAuth('admin_setter.php', {
+                    await fetchWithAuth('php/admin_setter.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ action: 'delete_user', user_id: id })
@@ -1527,7 +1527,7 @@
                 payload.bankWithdrawInfo = bankInfo;
             }
             payload.cryptoAddresses = gatherCryptoAddresses('editCryptoAddresses');
-            const res = await fetchWithAuth('admin_setter.php', {
+            const res = await fetchWithAuth('php/admin_setter.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -1553,7 +1553,7 @@
         if (finalBtn) finalBtn.addEventListener('click', async function() {
             const id = this.getAttribute('data-id');
             if (!id) return;
-            await fetchWithAuth('admin_setter.php', {
+            await fetchWithAuth('php/admin_setter.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'set_revision_finale', user_id: id })
@@ -1581,7 +1581,7 @@
                 } else if (delBtn) {
                     const id = delBtn.getAttribute('data-id');
                     if (confirm('Supprimer cet agent ?')) {
-                        await fetchWithAuth('admin_setter.php', {
+                        await fetchWithAuth('php/admin_setter.php', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ action: 'delete_admin', id: id })
@@ -1612,7 +1612,7 @@
                 payload.old_password = md5(oldPwd);
                 payload.password = md5(newPwd);
             }
-            const res = await fetchWithAuth('admin_setter.php', {
+            const res = await fetchWithAuth('php/admin_setter.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -1628,7 +1628,7 @@
 
         document.getElementById('logoutLink').addEventListener('click', async function(e) {
             e.preventDefault();
-            await fetchWithAuth('admin_logout.php', { method: 'POST' });
+            await fetchWithAuth('php/admin_logout.php', { method: 'POST' });
             ADMIN_ID = null;
             ADMIN_EMAIL = '';
             document.getElementById('dashboardContainer').style.display = 'none';
@@ -1657,7 +1657,7 @@
                 payload.old_password = md5(oldPwd);
                 payload.password = md5(newPwd);
             }
-            const res = await fetchWithAuth('admin_setter.php', {
+            const res = await fetchWithAuth('php/admin_setter.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -1753,7 +1753,7 @@
                     page_size: TX_PAGE_SIZE
                 });
                 if (search) params.append('search', search);
-                const res = await fetchWithAuth(`admin_transactions_getter.php?${params.toString()}`);
+                const res = await fetchWithAuth(`php/admin_transactions_getter.php?${params.toString()}`);
                 const data = await res.json();
                 ALL_TXS = data.transactions || [];
                 TX_TOTAL_PAGES = Math.ceil((data.total || 0) / TX_PAGE_SIZE) || 1;
@@ -1765,7 +1765,7 @@
 
         async function loadKYCRequests() {
             try {
-                const res = await fetchWithAuth('kyc_admin.php');
+                const res = await fetchWithAuth('php/kyc_admin.php');
                 const data = await res.json();
                 const tbody = document.getElementById('kycRequestsTable');
                 tbody.innerHTML = '';
@@ -1794,7 +1794,7 @@
 
         async function loadAllKyc() {
             try {
-                const res = await fetchWithAuth('kyc_admin.php?all=1');
+                const res = await fetchWithAuth('php/kyc_admin.php?all=1');
                 const data = await res.json();
                 const tbody = document.getElementById('kycRequestsTable');
                 tbody.innerHTML = '';
@@ -1828,7 +1828,7 @@
                 payload.status = status;
                 payload.statusClass = statusClass;
             }
-            await fetchWithAuth('admin_setter.php', {
+            await fetchWithAuth('php/admin_setter.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -1881,7 +1881,7 @@
             const id = (view||approve||reject)?.getAttribute('data-id');
             if(!id) return;
             if(view){
-                const res = await fetchWithAuth('kyc_admin.php?id='+id);
+                const res = await fetchWithAuth('php/kyc_admin.php?id='+id);
                 const data = await res.json();
                 if(data.file){
                     document.getElementById('kycUserName').textContent = data.file.fullName || '';
@@ -1894,7 +1894,7 @@
                 }
             } else if(approve || reject){
                 const status = approve ? 'approved' : 'rejected';
-                await fetchWithAuth('kyc_admin.php', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({file_id:id,status:status})});
+                await fetchWithAuth('php/kyc_admin.php', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({file_id:id,status:status})});
                 loadKYCRequests();
             }
         });
@@ -1902,7 +1902,7 @@
         document.getElementById('kycApproveBtn').addEventListener('click', async function(){
             const id = this.getAttribute('data-id');
             if(id){
-                await fetchWithAuth('kyc_admin.php', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({file_id:id,status:'approved'})});
+                await fetchWithAuth('php/kyc_admin.php', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({file_id:id,status:'approved'})});
                 loadKYCRequests();
             }
             bootstrap.Modal.getInstance(document.getElementById('kycModal')).hide();
@@ -1911,7 +1911,7 @@
         document.getElementById('kycRejectBtn').addEventListener('click', async function(){
             const id = this.getAttribute('data-id');
             if(id){
-                await fetchWithAuth('kyc_admin.php', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({file_id:id,status:'rejected'})});
+                await fetchWithAuth('php/kyc_admin.php', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({file_id:id,status:'rejected'})});
                 loadKYCRequests();
             }
             bootstrap.Modal.getInstance(document.getElementById('kycModal')).hide();
@@ -1925,7 +1925,7 @@
                 return;
             }
             try {
-                const res = await fetchWithAuth('admin_setter.php', {
+            const res = await fetchWithAuth('php/admin_setter.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'broadcast_update', date: date })
