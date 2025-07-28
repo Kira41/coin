@@ -24,52 +24,10 @@ try {
         exit;
     }
 
-    $dsn = 'mysql:host=localhost;dbname=coin_db;charset=utf8mb4';
-    $pdo = new PDO($dsn, 'root', '', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+    require_once __DIR__.'/../config/db_connection.php';
+    require_once __DIR__.'/../utils/helpers.php';
 
-    function getLivePrice(string $pair): float {
-        $symbol = str_replace('/', '', strtoupper($pair));
-        // Binance pairs use USDT instead of USD
-        $symbol = str_replace('USD', 'USDT', $symbol);
-        $url = "https://api.binance.com/api/v3/ticker/price?symbol={$symbol}";
-        $data = @json_decode(file_get_contents($url), true);
-        return isset($data['price']) ? (float)$data['price'] : 0.0;
-    }
-
-    function addToWallet(PDO $pdo, int $userId, string $currency, float $amount, float $price): void {
-        $currency = strtolower($currency);
-        $stmt = $pdo->prepare('SELECT amount,purchase_price FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
-        $stmt->execute([$userId, $currency]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if ($row) {
-            $newAmount = $row['amount'] + $amount;
-            $avg = ($row['amount'] * $row['purchase_price'] + $amount * $price) / $newAmount;
-            $pdo->prepare('UPDATE wallets SET amount=?, purchase_price=? WHERE user_id=? AND currency=?')
-                ->execute([$newAmount, $avg, $userId, $currency]);
-        } else {
-            $pdo->prepare('INSERT INTO wallets (user_id,currency,amount,address,label,purchase_price) VALUES (?,?,?,?,?,?)')
-                ->execute([$userId, $currency, $amount, 'local address', $currency, $price]);
-        }
-    }
-
-    function deductFromWallet(PDO $pdo, int $userId, string $currency, float $amount) {
-        $currency = strtolower($currency);
-        $stmt = $pdo->prepare('SELECT amount,purchase_price FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
-        $stmt->execute([$userId, $currency]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-        if (!$row || $row['amount'] < $amount) {
-            return false;
-        }
-        $newAmt = $row['amount'] - $amount;
-        if ($newAmt > 0) {
-            $pdo->prepare('UPDATE wallets SET amount=? WHERE user_id=? AND currency=?')
-                ->execute([$newAmt, $userId, $currency]);
-        } else {
-            $pdo->prepare('DELETE FROM wallets WHERE user_id=? AND currency=?')
-                ->execute([$userId, $currency]);
-        }
-        return (float)$row['purchase_price'];
-    }
+    $pdo = db();
 
     [$base, $quote] = explode('/', strtoupper($pair));
     $price = getLivePrice($pair);

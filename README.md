@@ -1,19 +1,19 @@
 # Coin Dashboard
 
-This project uses small PHP helpers (`getter.php` and `setter.php`) to read and update user data stored in a MySQL database. The schema is defined in `createtable.sql` and example data is provided in `insertdata.sql`.
+This project uses small PHP helpers (`getter.php` and `setter.php`) to read and update user data stored in a MySQL database. The schema is defined in `sql/createtable.sql` and example data is provided in `sql/insertdata.sql`.
 
 ## Database setup
 
 1. Make sure the PHP MySQL PDO extension is installed and a MySQL server is running.
 2. Create a database named `coin_db` and load the schema and sample data:
    ```sh
-   mysql -u root coin_db < createtable.sql
-   mysql -u root coin_db < insertdata.sql
+   mysql -u root coin_db < sql/createtable.sql
+   mysql -u root coin_db < sql/insertdata.sql
    ```
 3. The PHP scripts connect to `coin_db` on `localhost` using the `root` user with an empty password. Update the connection settings in `getter.php` and `setter.php` if your environment differs.
 
-The dashboard pages (`dashbord_user.html` and `script.js`) request data from `getter.php` and send updates to `setter.php`.
-`script.js` now fetches wallet addresses from `get_wallets.php`, which returns `SELECT * FROM wallets WHERE user_id = ?` in JSON. The `wallets` table stores
+The dashboard pages (`dashbord_user.html` and `js/updatePrices.js`) request data from `php/getter.php` and send updates to `php/setter.php`.
+`js/updatePrices.js` now fetches wallet addresses from `php/get_wallets.php`, which returns `SELECT * FROM wallets WHERE user_id = ?` in JSON. The `wallets` table stores
 crypto addresses with a `BIGINT` `id` so each entry keeps the unique identifier
 generated in JavaScript with `Date.now()`. User accounts use the same approach:
 the `personal_data.user_id` column is also a `BIGINT` so IDs created with
