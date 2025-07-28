@@ -78,6 +78,18 @@ try {
     );
     $stmt->execute([$userId, $pair, $side, $quantity, $price, $total, $profit]);
     $pdo->commit();
+
+    require_once __DIR__.'/../utils/socket.php';
+    emitEvent('balance_updated', ['newBalance' => $newBalance], $userId);
+    emitEvent('wallet_updated', [], $userId);
+    emitEvent('new_trade', [
+        'pair' => $pair,
+        'side' => $side,
+        'quantity' => $quantity,
+        'price' => $price,
+        'profit_loss' => $profit
+    ], $userId);
+
     $actionMsg = $side === 'buy'
         ? "Achat de {$quantity} {$base} au prix du march\xC3\xA9 pour {$total} {$quote}"
         : "Vente de {$quantity} {$base} au prix du march\xC3\xA9 pour {$total} {$quote}";
