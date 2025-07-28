@@ -33,6 +33,22 @@ try {
     $livePrice = getLivePrice($pair);
     if($livePrice<=0) $livePrice = 0.0;
 
+    // prevent overselling by checking pending sell orders
+    if($type!=='market' && $side==='sell'){
+        [$base] = explode('/', strtoupper($pair));
+        $st=$pdo->prepare("SELECT COALESCE(SUM(quantity),0) FROM orders WHERE user_id=? AND side='sell' AND status IN ('open','triggered') AND pair LIKE ?");
+        $st->execute([$userId,$base.'/%']);
+        $pending=(float)$st->fetchColumn();
+        $st=$pdo->prepare('SELECT amount FROM wallets WHERE user_id=? AND currency=?');
+        $st->execute([$userId,strtolower($base)]);
+        $available=(float)$st->fetchColumn();
+        if($available-$pending<$qty){
+            http_response_code(400);
+            echo json_encode(['status'=>'error','message'=>'Solde insuffisant']);
+            return;
+        }
+    }
+
     if($type==='market'){
         $pdo->beginTransaction();
         $order=['id'=>0,'user_id'=>$userId,'pair'=>$pair,'side'=>$side,'quantity'=>$qty];
@@ -48,6 +64,8 @@ try {
             'quantity' => $qty,
             'price' => $result['price']
         ], $userId);
+        require_once __DIR__.'/../cron/cron_process_orders.php';
+        require_once __DIR__.'/../cron/cron_wallet_usd.php';
         echo json_encode(['status'=>'ok','price'=>$result['price'],'new_balance'=>$result['balance']]);
         return;
     }
@@ -76,6 +94,9 @@ try {
         $secondId=$pdo->lastInsertId();
         $pdo->prepare('UPDATE orders SET related_order_id=? WHERE id=?')->execute([$secondId,$id]);
     }
+
+    require_once __DIR__.'/../cron/cron_process_orders.php';
+    require_once __DIR__.'/../cron/cron_wallet_usd.php';
 
     echo json_encode(['status'=>'ok','order_id'=>$id]);
 } catch(Throwable $e){
