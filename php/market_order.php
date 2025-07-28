@@ -79,10 +79,10 @@ try {
     $stmt->execute([$userId, $pair, $side, $quantity, $price, $total, $profit]);
     $pdo->commit();
 
-    require_once __DIR__.'/../utils/socket.php';
-    emitEvent('balance_updated', ['newBalance' => $newBalance], $userId);
-    emitEvent('wallet_updated', [], $userId);
-    emitEvent('new_trade', [
+    require_once __DIR__.'/../utils/poll.php';
+    pushEvent('balance_updated', ['newBalance' => $newBalance], $userId);
+    pushEvent('wallet_updated', [], $userId);
+    pushEvent('new_trade', [
         'pair' => $pair,
         'side' => $side,
         'quantity' => $quantity,

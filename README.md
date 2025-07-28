@@ -126,3 +126,10 @@ if ($side === 'buy') {
 }
 recordTrade($userId, $pair, $side, $quantity, $price);
 ```
+
+## Real-time updates
+
+The old WebSocket server has been removed. The dashboard now relies on a
+long polling endpoint (`php/long_poll.php`). Client-side JavaScript keeps
+sending background requests and immediately processes any returned events to
+update balances, wallets or orders without reloading the page.

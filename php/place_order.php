@@ -39,10 +39,10 @@ try {
         $result = executeTrade($pdo,$order,$livePrice);
         if(!$result['ok']){ $pdo->rollBack(); http_response_code(400); echo json_encode(['status'=>'error','message'=>$result['msg']]); return; }
         $pdo->commit();
-        require_once __DIR__.'/../utils/socket.php';
-        emitEvent('balance_updated', ['newBalance' => $result['balance']], $userId);
-        emitEvent('wallet_updated', [], $userId);
-        emitEvent('order_filled', [
+        require_once __DIR__.'/../utils/poll.php';
+        pushEvent('balance_updated', ['newBalance' => $result['balance']], $userId);
+        pushEvent('wallet_updated', [], $userId);
+        pushEvent('order_filled', [
             'pair' => $pair,
             'side' => $side,
             'quantity' => $qty,
@@ -58,8 +58,8 @@ try {
     $stmt->execute([$userId,$pair,$type,$side,$qty,$limit,$stop,$trailPerc,$trailPrice]);
     $id=$pdo->lastInsertId();
 
-    require_once __DIR__.'/../utils/socket.php';
-    emitEvent('new_order', [
+    require_once __DIR__.'/../utils/poll.php';
+    pushEvent('new_order', [
         'order_id' => $id,
         'pair' => $pair,
         'type' => $type,
