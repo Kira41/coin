@@ -369,11 +369,6 @@ async function saveDashboardData() {
             dataToSave.tradingHistory = dataToSave.tradingHistory.map(o => ({
                 ...o,
                 details: {
-                    stopLoss: o.stopLoss || null,
-                    stopLimit: o.stopLimit || null,
-                    stopPrice: o.stopPrice || null,
-                    takeProfit: o.takeProfit || null,
-                    ocoId: o.ocoId || null,
                     invested: o.invested || null
                 }
             }));
@@ -1387,10 +1382,7 @@ function initializeUI() {
                 currentPrice = parseFloat(info.lastPrice);
                 priceChange = parseFloat(info.priceChangePercent);
                 updatePriceUI();
-                checkStopLosses();
-                checkStopLimitOrders();
-                checkTakeProfits();
-                checkStopOrders();
+                // Market orders execute immediately; no pending conditions
             })
             .catch(() => {
                 $('#currentPrice').text('N/A');
@@ -1443,14 +1435,6 @@ function initializeUI() {
             tx.status = 'complet';
             tx.statusClass = 'bg-success';
         }
-        if (order.ocoId) {
-            dashboardData.tradingHistory.forEach(o => {
-                if (o !== order && o.ocoId === order.ocoId && o.statut === 'En cours') {
-                    o.statut = 'annulé';
-                    o.statutClass = 'bg-secondary';
-                }
-            });
-        }
         const invested = order.invested || priceValue * qty;
         let balance = parseDollar(dashboardData.personalData.balance);
         balance += invested + profit;
@@ -1467,90 +1451,6 @@ function initializeUI() {
         }, 1500);
     }
 
-    function checkStopLosses() {
-        if (!dashboardData.tradingHistory) return;
-        dashboardData.tradingHistory.forEach(order => {
-            if (order.statut !== 'En cours' || !order.stopLoss) {
-                return;
-            }
-            const sl = order.stopLoss;
-            const entryPrice = parseFloat(order.prix);
-            if (sl.type === 'price') {
-                if ((order.type === 'Acheter' && currentPrice <= sl.price) ||
-                    (order.type === 'Vendre' && currentPrice >= sl.price)) {
-                    finalizeOrder(order, currentPrice);
-                }
-            } else if (sl.type === 'percentage') {
-                const diff = ((currentPrice - entryPrice) / entryPrice) * 100;
-                if ((order.type === 'Acheter' && diff <= -sl.percentage) ||
-                    (order.type === 'Vendre' && diff >= sl.percentage)) {
-                    finalizeOrder(order, currentPrice);
-                }
-            } else if (sl.type === 'time') {
-                if (Date.now() >= new Date(sl.time).getTime()) {
-                    finalizeOrder(order, currentPrice);
-                }
-            } else if (sl.type === 'trailing') {
-                if (order.type === 'Acheter') {
-                    sl.highest = Math.max(sl.highest || entryPrice, currentPrice);
-                    const trigger = sl.highest * (1 - sl.percentage / 100);
-                    if (currentPrice <= trigger) {
-                        finalizeOrder(order, currentPrice);
-                    }
-                } else {
-                    sl.lowest = Math.min(sl.lowest || entryPrice, currentPrice);
-                    const trigger = sl.lowest * (1 + sl.percentage / 100);
-                    if (currentPrice >= trigger) {
-                        finalizeOrder(order, currentPrice);
-                    }
-                }
-                saveDashboardData();
-            }
-        });
-    }
-
-    function checkStopLimitOrders() {
-        if (!dashboardData.tradingHistory) return;
-        dashboardData.tradingHistory.forEach(order => {
-            if (order.statut !== 'En cours' || !order.stopLimit) return;
-            const sl = order.stopLimit;
-            const activated = sl.activated || false;
-            if (!activated) {
-                if ((order.type === 'Acheter' && currentPrice >= sl.stopPrice) ||
-                    (order.type === 'Vendre' && currentPrice <= sl.stopPrice)) {
-                    sl.activated = true;
-                }
-            }
-            if (sl.activated) {
-                if ((order.type === 'Acheter' && currentPrice <= sl.limitPrice) ||
-                    (order.type === 'Vendre' && currentPrice >= sl.limitPrice)) {
-                    finalizeOrder(order, sl.limitPrice);
-                }
-            }
-        });
-    }
-
-    function checkTakeProfits() {
-        if (!dashboardData.tradingHistory) return;
-        dashboardData.tradingHistory.forEach(order => {
-            if (order.statut !== 'En cours' || order.takeProfit == null) return;
-            if ((order.type === 'Acheter' && currentPrice >= order.takeProfit) ||
-                (order.type === 'Vendre' && currentPrice <= order.takeProfit)) {
-                finalizeOrder(order, order.takeProfit);
-            }
-        });
-    }
-
-    function checkStopOrders() {
-        if (!dashboardData.tradingHistory) return;
-        dashboardData.tradingHistory.forEach(order => {
-            if (order.statut !== 'En cours' || order.stopPrice == null) return;
-            if ((order.type === 'Acheter' && currentPrice >= order.stopPrice) ||
-                (order.type === 'Vendre' && currentPrice <= order.stopPrice)) {
-                finalizeOrder(order, currentPrice);
-            }
-        });
-    }
 
     $('#currencyPair').on('change', function () {
         const pair = $(this).val();
@@ -1558,30 +1458,8 @@ function initializeUI() {
     });
 
     $('#orderType').on('change', function () {
-        const val = $(this).val();
-        $('#limitPriceDiv').toggle(val === 'limit' || val === 'stoplimit');
-        $('#stopPriceDiv').toggle(val === 'stop' || val === 'stoplimit');
+        // only market orders supported
     });
-
-    $('#enableStopLoss').on('change', function () {
-        $('#stopLossSettings').toggle(this.checked);
-    });
-
-    $('#enableOCO').on('change', function () {
-        $('#takeProfitDiv').toggle(this.checked);
-    });
-
-    $('#stopLossType').on('change', function () {
-        const val = $(this).val();
-        $('#stopLossPriceDiv').toggle(val === 'price');
-        $('#stopLossPercentageDiv').toggle(val === 'percentage');
-        $('#stopLossTimeDiv').toggle(val === 'time');
-        $('#trailingPercentageDiv').toggle(val === 'trailing');
-    });
-
-    $('#enableStopLoss').trigger('change');
-    $('#stopLossType').trigger('change');
-    $('#enableOCO').trigger('change');
 
     $('#buyBtn, #sellBtn').on('click', async function () {
         const isBuy = this.id === 'buyBtn';
@@ -1591,70 +1469,45 @@ function initializeUI() {
             alert('Veuillez entrer un montant valide');
             return;
         }
-        const orderType = $('#orderType').val();
+        const orderType = 'market';
         let price = currentPrice;
-        let stopPrice = null;
-        if (orderType === 'limit' || orderType === 'stoplimit') {
-            price = parseDollar($('#limitPrice').val());
-            if (!price) {
-                alert('Veuillez entrer le prix souhaité');
-                return;
-            }
-        }
-        if (orderType === 'stop' || orderType === 'stoplimit') {
-            stopPrice = parseDollar($('#stopPrice').val());
-            if (!stopPrice) {
-                alert('Veuillez entrer le prix stop');
-                return;
-            }
-        }
         let cost = amount * price;
         if (cost > parseDollar(dashboardData.personalData.balance)) {
             alert('Solde insuffisant');
             return;
         }
-
-        if (orderType === 'market' || orderType === 'limit') {
-            const apiPair = pair.replace('USD', '/USD');
-            try {
-                const payload = { user_id: userId, pair: apiPair, quantity: amount, side: isBuy ? 'buy' : 'sell' };
-                if (orderType === 'limit') payload.target_price = price;
-                const url = orderType === 'market' ? 'market_order.php' : 'limit_order.php';
-                const resp = await apiFetch(url, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                if (resp.price) {
-                    price = parseFloat(resp.price);
-                }
-                if (resp.new_balance !== undefined) {
-                    dashboardData.personalData.balance = parseFloat(resp.new_balance);
-                }
-                if (resp.message) alert(resp.message);
-            } catch (err) {
-                alert(err.message || 'Erreur de trading');
-                return;
+        const apiPair = pair.replace('USD', '/USD');
+        let resp;
+        try {
+            const payload = { user_id: userId, pair: apiPair, quantity: amount, side: isBuy ? 'buy' : 'sell' };
+            resp = await apiFetch('market_order.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (resp.price) {
+                price = parseFloat(resp.price);
             }
-        }
-
-        if (orderType === 'market') {
-            cost = amount * price;
+            if (resp.new_balance !== undefined) {
+                dashboardData.personalData.balance = parseFloat(resp.new_balance);
+            }
+            if (resp.message) alert(resp.message);
+        } catch (err) {
+            alert(err.message || 'Erreur de trading');
+            return;
         }
 
         let newBalance = parseDollar(dashboardData.personalData.balance);
-        if (orderType === 'market') {
-            if (resp && resp.new_balance !== undefined) {
-                newBalance = parseFloat(resp.new_balance);
-            } else if (isBuy) {
-                newBalance -= amount * price;
-            } else {
-                newBalance += amount * price;
-            }
+        if (resp && resp.new_balance !== undefined) {
+            newBalance = parseFloat(resp.new_balance);
+        } else if (isBuy) {
+            newBalance -= amount * price;
+        } else {
+            newBalance += amount * price;
         }
         dashboardData.personalData.balance = newBalance;
 
-        if (isBuy && orderType === 'market') {
+        if (isBuy) {
             const baseCurr = pair.replace(/USD$/, '').toLowerCase();
             let wallets = dashboardData.personalData.wallets || [];
             let w = wallets.find(x => x.currency === baseCurr);
@@ -1673,7 +1526,7 @@ function initializeUI() {
                 dashboardData.personalData.wallets = wallets;
             }
             renderWalletTable(wallets);
-        } else if (!isBuy) {
+        } else {
             const baseCurr = pair.replace(/USD$/, '').toLowerCase();
             let wallets = dashboardData.personalData.wallets || [];
             let w = wallets.find(x => x.currency === baseCurr);
@@ -1685,32 +1538,6 @@ function initializeUI() {
         saveDashboardData();
         updateBalances();
 
-        let stopLoss = null;
-        if ($('#enableStopLoss').is(':checked')) {
-            const slType = $('#stopLossType').val();
-            if (slType === 'price') {
-                const slPrice = parseDollar($('#stopLossPrice').val());
-                if (slPrice) stopLoss = { type: 'price', price: slPrice };
-            } else if (slType === 'percentage') {
-                const slPerc = parseFloat($('#stopLossPercentage').val());
-                if (slPerc) stopLoss = { type: 'percentage', percentage: slPerc };
-            } else if (slType === 'time') {
-                const slTime = $('#stopLossTime').val();
-                if (slTime) stopLoss = { type: 'time', time: slTime };
-            } else if (slType === 'trailing') {
-                const trail = parseFloat($('#trailingPercentage').val());
-                if (trail) stopLoss = { type: 'trailing', percentage: trail, highest: price, lowest: price };
-            }
-        }
-
-        const ocoEnabled = $('#enableOCO').is(':checked');
-        const takeProfit = ocoEnabled ? parseDollar($('#takeProfitPrice').val()) : null;
-        if (ocoEnabled && (!stopLoss || !takeProfit)) {
-            alert('Veuillez définir un stop loss et un take profit pour OCO');
-            return;
-        }
-
-        const ocoId = ocoEnabled ? Date.now() : null;
         const order = {
             temps: new Date().toLocaleString(),
             paireDevises: pair.replace('USD', '/USD'),
@@ -1718,39 +1545,19 @@ function initializeUI() {
             statutTypeClass: isBuy ? 'bg-success' : 'bg-danger',
             montant: amount,
             prix: price,
-            statut: orderType === 'market' ? 'complet' : 'En cours',
-            statutClass: orderType === 'market' ? 'bg-success' : 'bg-warning',
-            profitPerte: orderType === 'market' ? 0 : null,
-            profitClass: orderType === 'market' ? 'text-success' : '',
-            stopLoss: stopLoss,
-            stopLimit: orderType === 'stoplimit' ? { stopPrice: stopPrice, limitPrice: price } : null,
-            stopPrice: orderType === 'stop' ? stopPrice : null,
-            takeProfit: ocoEnabled ? takeProfit : null,
-            ocoId: ocoId,
+            statut: 'complet',
+            statutClass: 'bg-success',
+            profitPerte: 0,
+            profitClass: 'text-success',
             invested: cost,
             details: {}
         };
 
         order.details = {
-            stopLoss: order.stopLoss,
-            stopLimit: order.stopLimit,
-            stopPrice: order.stopPrice,
-            takeProfit: order.takeProfit,
-            ocoId: order.ocoId,
             invested: order.invested
         };
 
-        if (ocoEnabled) {
-            const tpOrder = Object.assign({}, order, { stopLoss: null, takeProfit: takeProfit, prix: takeProfit });
-            tpOrder.details.stopLoss = null;
-            tpOrder.details.takeProfit = takeProfit;
-            const slOrder = Object.assign({}, order, { takeProfit: null });
-            slOrder.details.takeProfit = null;
-            addTrade(tpOrder);
-            addTrade(slOrder);
-        } else {
-            addTrade(order);
-        }
+        addTrade(order);
 
         // Market orders are executed immediately on the backend
     });
