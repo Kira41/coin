@@ -276,7 +276,7 @@ function renderWalletTable(wallets = dashboardData.personalData.wallets || []) {
 
 async function fetchWallets() {
     try {
-        const data = await apiFetch('get_wallets.php?user_id=' + encodeURIComponent(userId));
+        const data = await apiFetch('php/get_wallets.php?user_id=' + encodeURIComponent(userId));
         dashboardData.personalData.wallets = data.wallets || [];
         renderWalletTable();
     } catch (err) {
@@ -296,7 +296,7 @@ function updatePlatformBankDetails() {
 
 async function fetchDashboardData() {
     try {
-        dashboardData = await apiFetch('getter.php?user_id=' + encodeURIComponent(userId));
+        dashboardData = await apiFetch('php/getter.php?user_id=' + encodeURIComponent(userId));
         if (dashboardData.personalData) {
             dashboardData.personalData.balance = parseDollar(dashboardData.personalData.balance);
             dashboardData.personalData.totalDepots = parseDollar(dashboardData.personalData.totalDepots);
@@ -373,7 +373,7 @@ async function saveDashboardData() {
                 }
             }));
         }
-        const result = await apiFetch('setter.php', {
+        const result = await apiFetch('php/setter.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...dataToSave, user_id: userId })
@@ -404,7 +404,7 @@ $("#userLoginForm").on("submit", async function(e){
     const formData = new FormData();
     formData.append("email", email);
     formData.append("password", md5(pwd));
-    const res = await fetch("user_login.php", { method: "POST", body: formData });
+    const res = await fetch("php/user_login.php", { method: "POST", body: formData });
     const result = await res.json();
     if(result.status === "ok") {
         userId = result.user_id;
@@ -741,7 +741,7 @@ function initializeUI() {
 
     async function loadTransactions() {
         try {
-            const data = await apiFetch(`user_transactions_getter.php?user_id=${encodeURIComponent(userId)}&page=${TX_PAGE}&page_size=${TX_PAGE_SIZE}`);
+            const data = await apiFetch(`php/user_transactions_getter.php?user_id=${encodeURIComponent(userId)}&page=${TX_PAGE}&page_size=${TX_PAGE_SIZE}`);
             ALL_TXS = data.transactions || [];
             TX_TOTAL_PAGES = Math.ceil((data.total || 0) / TX_PAGE_SIZE) || 1;
             renderTransactions();
@@ -912,7 +912,7 @@ function initializeUI() {
         const fd = new FormData();
         fd.append('user_id', userId);
         fd.append('file', file, file.name);
-        const res = await fetch('profile_pic_upload.php', { method: 'POST', body: fd });
+        const res = await fetch('php/profile_pic_upload.php', { method: 'POST', body: fd });
         const result = await res.json();
         if (result.status === 'ok') {
             const url = 'data:image/*;base64,' + result.data;
@@ -1102,7 +1102,7 @@ function initializeUI() {
             const f = $(s)[0]?.files[0];
             if (f) fd.append('files[]', f, f.name);
         });
-        const res = await fetch('kyc_upload.php', { method: 'POST', body: fd });
+        const res = await fetch('php/kyc_upload.php', { method: 'POST', body: fd });
         const result = await res.json();
         if (result.status === 'ok') {
             setKYCStatus('telechargerlesdocumentsdidentitestat', 2);
@@ -1197,7 +1197,7 @@ function initializeUI() {
         const id = $(this).data('id');
         if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
             try {
-                await apiFetch('get_wallets.php', {
+                await apiFetch('php/get_wallets.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'delete', id, user_id: userId })
@@ -1237,7 +1237,7 @@ function initializeUI() {
             return;
         }
         try {
-            await apiFetch('get_wallets.php', {
+            await apiFetch('php/get_wallets.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'edit', id: currentEditWalletId, address, label, network, user_id: userId })
@@ -1499,7 +1499,7 @@ function initializeUI() {
         }
 
         try {
-            const url = orderType === 'market' ? 'market_order.php' : 'place_order.php';
+            const url = orderType === 'market' ? 'php/market_order.php' : 'php/place_order.php';
             resp = await apiFetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
