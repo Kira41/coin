@@ -223,11 +223,28 @@
 </div>
 </div>
 <div class="mb-3">
-  <label class="form-label" for="orderType">Type d’ordre</label>
-  <select class="form-select" id="orderType">
-  <option value="market">Ordre au marché</option>
-  </select>
-  </div>
+<label class="form-label" for="orderType">Type d’ordre</label>
+<select class="form-select" id="orderType">
+<option value="market">Ordre au marché</option>
+<option value="limit">Ordre à cours limité</option>
+<option value="stop">Ordre stop</option>
+<option value="stoplimit">Stop-limit</option>
+</select>
+</div>
+<div class="mb-3" id="stopPriceDiv" style="display: none;">
+<label class="form-label" for="stopPrice">Prix stop</label>
+<div class="input-group">
+<input class="form-control" name="stopPrice" id="stopPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
+<span class="input-group-text">USD</span>
+</div>
+</div>
+<div class="mb-3" id="limitPriceDiv" style="display: none;">
+<label class="form-label" for="limitPrice">Prix limite</label>
+<div class="input-group">
+<input class="form-control" name="limitPrice" id="limitPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
+<span class="input-group-text">USD</span>
+</div>
+</div>
 <div class="row g-2 mb-3">
 <div class="col-6">
 <button class="btn btn-success w-100" id="buyBtn" type="button">
@@ -241,7 +258,69 @@
 </form>
 </div>
 </div>
-
+<!-- Stop Loss Settings -->
+<div class="card">
+<div class="card-header">
+<i class="fas fa-shield-alt me-2"></i> Paramètres du stop loss
+                    </div>
+<div class="card-body">
+<div class="form-check mb-3">
+<input class="form-check-input" id="enableStopLoss" type="checkbox"/>
+<label class="form-check-label" for="enableStopLoss"> Activer le stop loss </label>
+</div>
+<div id="stopLossSettings" style="display: none;">
+<div class="mb-3">
+<label class="form-label" for="stopLossType">Type de stop loss</label>
+<select class="form-select" id="stopLossType">
+<option value="price">À l’atteinte d’un prix spécifique</option>
+<option value="percentage">Lors d’un pourcentage de perte spécifié</option>
+<option value="time">À un moment précis</option>
+<option value="trailing">Trailing stop</option>
+</select>
+</div>
+<div class="mb-3" id="stopLossPriceDiv">
+<label class="form-label" for="stopLossPrice">Prix du stop loss</label>
+<div class="input-group">
+<input class="form-control" name="stopLossPrice" id="stopLossPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
+<span class="input-group-text">USD</span>
+</div>
+</div>
+<div class="mb-3" id="stopLossPercentageDiv" style="display: none;">
+<label class="form-label" for="stopLossPercentage">Pourcentage de perte autorisé</label>
+<div class="input-group">
+<input class="form-control" name="stopLossPercentage" id="stopLossPercentage" max="100" min="0.1" placeholder="Entrez le pourcentage" step="0.1" type="number"/>
+<span class="input-group-text">%</span>
+</div>
+</div>
+<div class="mb-3" id="trailingPercentageDiv" style="display: none;">
+<label class="form-label" for="trailingPercentage">Pourcentage du trailing stop</label>
+<div class="input-group">
+<input class="form-control" name="trailingPercentage" id="trailingPercentage" max="100" min="0.1" placeholder="Entrez le pourcentage" step="0.1" type="number"/>
+<span class="input-group-text">%</span>
+</div>
+</div>
+<div class="mb-3" id="stopLossTimeDiv" style="display: none;">
+<label class="form-label" for="stopLossTime">Heure d'arrêt du trading</label>
+<input class="form-control" id="stopLossTime" type="datetime-local"/>
+</div>
+<div class="form-check mb-3">
+<input class="form-check-input" id="enableOCO" type="checkbox"/>
+<label class="form-check-label" for="enableOCO"> Activer OCO (take profit + stop loss)</label>
+</div>
+<div class="mb-3" id="takeProfitDiv" style="display: none;">
+<label class="form-label" for="takeProfitPrice">Prix take profit</label>
+<div class="input-group">
+<input class="form-control" name="takeProfitPrice" id="takeProfitPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
+<span class="input-group-text">USD</span>
+</div>
+</div>
+<button class="btn btn-warning btn-sm w-100" id="setStopLoss" type="button">
+<i class="fas fa-save me-2"></i>Enregistrer les paramètres du stop loss </button>
+</div>
+</div>
+</div>
+</div>
+</div>
 <!-- Trading History -->
 <div class="row mt-4">
 <div class="col-12">
