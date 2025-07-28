@@ -102,16 +102,6 @@ try {
         $stmt = $pdo->prepare($sql);
         $stmt->execute(array_values($user));
 
-        $pdo->prepare('INSERT INTO verification_status (user_id,enregistrementducompte,confirmationdeladresseemail,telechargerlesdocumentsdidentite,verificationdeladresse,revisionfinale) VALUES (?,?,?,?,?,?)')
-            ->execute([
-                $user['user_id'],
-                1,
-                1,
-                0,
-                0,
-                2
-            ]);
-
         if (!empty($data['bankWithdrawInfo']) && is_array($data['bankWithdrawInfo'])) {
             $bw = $data['bankWithdrawInfo'];
             $bwCols = ['user_id','widhrawBankName','widhrawAccountName','widhrawAccountNumber','widhrawIban','widhrawSwiftCode'];
@@ -281,23 +271,7 @@ try {
                 }
                 $pdo->prepare("DELETE FROM transactions WHERE operationNumber = ?")->execute([$op]);
                 if ($oldStatus === 'complet') {
-                    if ($prefix === 'D') {
-                        $pdo->prepare(
-                            'UPDATE personal_data SET '
-                            . 'balance = COALESCE(balance,0)-?, '
-                            . 'totalDepots = COALESCE(totalDepots,0)-?, '
-                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '
-                            . 'WHERE user_id = ?'
-                        )->execute([$amount, $amount, $userId]);
-                    } elseif ($prefix === 'R') {
-                        $pdo->prepare(
-                            'UPDATE personal_data SET '
-                            . 'balance = COALESCE(balance,0)+?, '
-                            . 'totalRetraits = COALESCE(totalRetraits,0)-?, '
-                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '
-                            . 'WHERE user_id = ?'
-                        )->execute([$amount, $amount, $userId]);
-                    }
+                    // balance adjustments now handled by database triggers
                 }
             } else {
                 $status = $data['status'] ?? null;
@@ -313,13 +287,7 @@ try {
                     ->execute([$status, $class, $op]);
                 if ($prefix === 'D') {
                     if ($oldStatus !== 'complet' && $status === 'complet') {
-                        $pdo->prepare(
-                            'UPDATE personal_data SET '
-                            . 'balance = COALESCE(balance,0)+?, '
-                            . 'totalDepots = COALESCE(totalDepots,0)+?, '
-                            . 'nbTransactions = COALESCE(nbTransactions,0)+1 '
-                            . 'WHERE user_id = ?'
-                        )->execute([$amount, $amount, $userId]);
+                        // deposit completion adjustments handled by triggers
 
                         $timeAgo = formatTimeAgoFromDate($row['date']);
                         $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
@@ -333,23 +301,11 @@ try {
                                 'alert-success'
                             ]);
                     } elseif ($oldStatus === 'complet' && $status !== 'complet') {
-                        $pdo->prepare(
-                            'UPDATE personal_data SET '
-                            . 'balance = COALESCE(balance,0)-?, '
-                            . 'totalDepots = COALESCE(totalDepots,0)-?, '
-                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '
-                            . 'WHERE user_id = ?'
-                        )->execute([$amount, $amount, $userId]);
+                        // revert handled by trigger trg_deposits_after_update
                     }
                 } elseif ($prefix === 'R') {
                     if ($oldStatus !== 'complet' && $status === 'complet') {
-                        $pdo->prepare(
-                            'UPDATE personal_data SET '
-                            . 'balance = COALESCE(balance,0)-?, '
-                            . 'totalRetraits = COALESCE(totalRetraits,0)+?, '
-                            . 'nbTransactions = COALESCE(nbTransactions,0)+1 '
-                            . 'WHERE user_id = ?'
-                        )->execute([$amount, $amount, $userId]);
+                        // withdrawal completion handled by trigger trg_retraits_after_update
 
                         $timeAgo = formatTimeAgoFromDate($row['date']);
                         $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
@@ -363,13 +319,7 @@ try {
                                 'alert-success'
                             ]);
                     } elseif ($oldStatus === 'complet' && $status !== 'complet') {
-                        $pdo->prepare(
-                            'UPDATE personal_data SET '
-                            . 'balance = COALESCE(balance,0)+?, '
-                            . 'totalRetraits = COALESCE(totalRetraits,0)-?, '
-                            . 'nbTransactions = COALESCE(nbTransactions,0)-1 '
-                            . 'WHERE user_id = ?'
-                        )->execute([$amount, $amount, $userId]);
+                        // revert handled by trigger trg_retraits_after_update
                     }
                 }
         }
