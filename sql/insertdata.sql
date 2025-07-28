@@ -55,8 +55,8 @@ INSERT INTO bank_withdrawl_info (user_id, widhrawBankName, widhrawAccountName, w
 VALUES (1, 'My Bank', 'Company Ltd', '987654321', 'IBAN987654', 'SWIFT987');
 
 -- example pending order
-INSERT INTO orders (user_id, pair, type, side, quantity, target_price, stop_price)
-VALUES (1, 'BTC/USDT', 'limit', 'buy', 0.1, 30000, NULL);
+INSERT INTO orders (user_id, pair, type, side, quantity, target_price, stop_price, related_order_id)
+VALUES (1, 'BTC/USDT', 'limit', 'buy', 0.1, 30000, NULL, NULL);
 
 -- example executed trade for that order
 INSERT INTO trades (user_id, order_id, pair, side, quantity, price, total_value, fee, profit_loss)
