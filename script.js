@@ -1458,7 +1458,11 @@ function initializeUI() {
     });
 
     $('#orderType').on('change', function () {
-        // only market orders supported
+        const t = $(this).val();
+        $('#limitPriceDiv').toggle(t === 'limit' || t === 'stoplimit' || t === 'oco');
+        $('#stopPriceDiv').toggle(t === 'stop' || t === 'stoplimit' || t === 'oco');
+        $('#stopLimitPriceDiv').toggle(t === 'oco');
+        $('#trailingPercentageDiv').toggle(t === 'trailing_stop');
     });
 
     $('#buyBtn, #sellBtn').on('click', async function () {
@@ -1469,25 +1473,39 @@ function initializeUI() {
             alert('Veuillez entrer un montant valide');
             return;
         }
-        const orderType = 'market';
+        const orderType = $('#orderType').val();
         let price = currentPrice;
         let cost = amount * price;
-        if (cost > parseDollar(dashboardData.personalData.balance)) {
+        const apiPair = pair.replace('USD', '/USD');
+        let resp;
+        const payload = { user_id: userId, pair: apiPair, quantity: amount, side: isBuy ? 'buy' : 'sell', type: orderType };
+        if (orderType === 'limit' || orderType === 'stoplimit' || orderType === 'oco') {
+            payload.limit_price = parseFloat($('#limitPrice').val());
+            if (orderType === 'limit') cost = amount * payload.limit_price;
+        }
+        if (orderType === 'stop' || orderType === 'stoplimit' || orderType === 'oco') {
+            payload.stop_price = parseFloat($('#stopPrice').val());
+        }
+        if (orderType === 'stoplimit' || orderType === 'oco') {
+            payload.stop_limit_price = parseFloat($('#stopLimitPrice').val());
+        }
+        if (orderType === 'trailing_stop') {
+            payload.trailing_percentage = parseFloat($('#trailingPercentage').val());
+        }
+
+        if (orderType === 'market' && cost > parseDollar(dashboardData.personalData.balance)) {
             alert('Solde insuffisant');
             return;
         }
-        const apiPair = pair.replace('USD', '/USD');
-        let resp;
+
         try {
-            const payload = { user_id: userId, pair: apiPair, quantity: amount, side: isBuy ? 'buy' : 'sell' };
-            resp = await apiFetch('market_order.php', {
+            const url = orderType === 'market' ? 'market_order.php' : 'place_order.php';
+            resp = await apiFetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
             });
-            if (resp.price) {
-                price = parseFloat(resp.price);
-            }
+            if (resp.price) price = parseFloat(resp.price);
             if (resp.new_balance !== undefined) {
                 dashboardData.personalData.balance = parseFloat(resp.new_balance);
             }
@@ -1497,46 +1515,48 @@ function initializeUI() {
             return;
         }
 
-        let newBalance = parseDollar(dashboardData.personalData.balance);
-        if (resp && resp.new_balance !== undefined) {
-            newBalance = parseFloat(resp.new_balance);
-        } else if (isBuy) {
-            newBalance -= amount * price;
-        } else {
-            newBalance += amount * price;
-        }
-        dashboardData.personalData.balance = newBalance;
-
-        if (isBuy) {
-            const baseCurr = pair.replace(/USD$/, '').toLowerCase();
-            let wallets = dashboardData.personalData.wallets || [];
-            let w = wallets.find(x => x.currency === baseCurr);
-            if (w) {
-                w.amount = parseFloat(w.amount || 0) + amount;
+        if (orderType === 'market') {
+            let newBalance = parseDollar(dashboardData.personalData.balance);
+            if (resp && resp.new_balance !== undefined) {
+                newBalance = parseFloat(resp.new_balance);
+            } else if (isBuy) {
+                newBalance -= amount * price;
             } else {
-                w = {
-                    id: Date.now(),
-                    currency: baseCurr,
-                    amount: amount,
-                    network: '',
-                    address: 'local address',
-                    label: baseCurr.toUpperCase()
-                };
-                wallets.push(w);
-                dashboardData.personalData.wallets = wallets;
+                newBalance += amount * price;
             }
-            renderWalletTable(wallets);
-        } else {
-            const baseCurr = pair.replace(/USD$/, '').toLowerCase();
-            let wallets = dashboardData.personalData.wallets || [];
-            let w = wallets.find(x => x.currency === baseCurr);
-            if (w) {
-                w.amount = Math.max(0, parseFloat(w.amount || 0) - amount);
+            dashboardData.personalData.balance = newBalance;
+
+            if (isBuy) {
+                const baseCurr = pair.replace(/USD$/, '').toLowerCase();
+                let wallets = dashboardData.personalData.wallets || [];
+                let w = wallets.find(x => x.currency === baseCurr);
+                if (w) {
+                    w.amount = parseFloat(w.amount || 0) + amount;
+                } else {
+                    w = {
+                        id: Date.now(),
+                        currency: baseCurr,
+                        amount: amount,
+                        network: '',
+                        address: 'local address',
+                        label: baseCurr.toUpperCase()
+                    };
+                    wallets.push(w);
+                    dashboardData.personalData.wallets = wallets;
+                }
+                renderWalletTable(wallets);
+            } else {
+                const baseCurr = pair.replace(/USD$/, '').toLowerCase();
+                let wallets = dashboardData.personalData.wallets || [];
+                let w = wallets.find(x => x.currency === baseCurr);
+                if (w) {
+                    w.amount = Math.max(0, parseFloat(w.amount || 0) - amount);
+                }
+                renderWalletTable(wallets);
             }
-            renderWalletTable(wallets);
+            saveDashboardData();
+            updateBalances();
         }
-        saveDashboardData();
-        updateBalances();
 
         const order = {
             temps: new Date().toLocaleString(),

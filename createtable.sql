@@ -186,6 +186,24 @@ CREATE TABLE verification_status (
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
+CREATE TABLE orders (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    pair VARCHAR(20),
+    type ENUM('market','limit','stop','stop_limit','trailing_stop','oco'),
+    side ENUM('buy','sell'),
+    quantity DECIMAL(20,10),
+    target_price DECIMAL(20,10),
+    stop_price DECIMAL(20,10),
+    trailing_percentage DECIMAL(10,4),
+    trail_price DECIMAL(20,10),
+    status ENUM('open','triggered','filled','cancelled') DEFAULT 'open',
+    price_at_execution DECIMAL(20,10),
+    executed_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 
 
 CREATE TABLE trades (
@@ -194,10 +212,12 @@ CREATE TABLE trades (
     pair VARCHAR(20),
     side ENUM('buy','sell'),
     quantity DECIMAL(20,10),
+    order_id BIGINT,
     price DECIMAL(20,10),
     total_value DECIMAL(20,10),
     fee DECIMAL(20,10) DEFAULT 0,
     profit_loss DECIMAL(20,10),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL,
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE,
 ) ENGINE=InnoDB;

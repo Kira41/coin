@@ -229,6 +229,8 @@
 <option value="limit">Ordre à cours limité</option>
 <option value="stop">Ordre stop</option>
 <option value="stoplimit">Stop-limit</option>
+<option value="trailing_stop">Trailing stop</option>
+<option value="oco">OCO</option>
 </select>
 </div>
 <div class="mb-3" id="stopPriceDiv" style="display: none;">
@@ -243,6 +245,13 @@
 <div class="input-group">
 <input class="form-control" name="limitPrice" id="limitPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
 <span class="input-group-text">USD</span>
+</div>
+<div class="mb-3" id="stopLimitPriceDiv" style="display: none;">
+<label class="form-label" for="stopLimitPrice">Prix limite du stop</label>
+<div class="input-group">
+<input class="form-control" name="stopLimitPrice" id="stopLimitPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
+<span class="input-group-text">USD</span>
+</div>
 </div>
 </div>
 <div class="row g-2 mb-3">
