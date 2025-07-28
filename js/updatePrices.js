@@ -11,6 +11,16 @@ userId = userId ? parseInt(userId) : null;
 let dashboardInitialized = false;
 let autoRefreshHandle = null;
 
+// Trigger immediate refresh on user interactions
+function triggerTurboRefresh() {
+    if (!userId) return;
+    fetchDashboardData();
+    fetchWallets();
+}
+['click', 'input', 'change', 'drop'].forEach(evt => {
+    document.addEventListener(evt, triggerTurboRefresh, true);
+});
+
 // Utility functions
 function parseDollar(str) {
     return parseFloat(String(str).replace(/[^0-9.-]+/g, '')) || 0;
@@ -352,7 +362,7 @@ function startAutoRefresh() {
         if (document.hidden || !userId) return;
         await fetchDashboardData();
         await fetchWallets();
-    }, 30000);
+    }, 1000);
 }
 
 function stopAutoRefresh() {
