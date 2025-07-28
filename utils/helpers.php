@@ -1,7 +1,9 @@
 <?php
 function getLivePrice(string $pair): float {
     $symbol = str_replace('/', '', strtoupper($pair));
-    $symbol = str_replace('USD', 'USDT', $symbol);
+    if (!preg_match('/USDT$/', $symbol) && preg_match('/USD$/', $symbol)) {
+        $symbol = substr($symbol, 0, -3) . 'USDT';
+    }
     $url = 'https://api.binance.com/api/v3/ticker/price?symbol=' . $symbol;
     $data = @json_decode(file_get_contents($url), true);
     return isset($data['price']) ? (float)$data['price'] : 0.0;
