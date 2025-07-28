@@ -69,12 +69,9 @@ function deductFromWallet(PDO $pdo, int $userId, string $currency, float $amount
         return false;
     }
     $newAmount = $row['amount'] - $amount;
-    if ($newAmount > 0) {
-        $upd = $pdo->prepare('UPDATE wallets SET amount=? WHERE user_id=? AND currency=?');
-        $upd->execute([$newAmount, $userId, $currency]);
-    } else {
-        $pdo->prepare('DELETE FROM wallets WHERE user_id=? AND currency=?')->execute([$userId, $currency]);
-    }
+    if ($newAmount < 0) $newAmount = 0;
+    $upd = $pdo->prepare('UPDATE wallets SET amount=? WHERE user_id=? AND currency=?');
+    $upd->execute([$newAmount, $userId, $currency]);
     return (float)$row['purchase_price'];
 }
 

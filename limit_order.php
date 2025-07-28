@@ -44,7 +44,11 @@ try {
         $stmt = $pdo->prepare('SELECT amount FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
         $stmt->execute([$userId, $base]);
         $bal = $stmt->fetchColumn();
-        if ($bal === false || $bal < $quantity) {
+        $pending = $pdo->prepare("SELECT SUM(quantity) FROM orders WHERE user_id=? AND side='sell' AND status='open' AND pair LIKE ?");
+        $pending->execute([$userId, $base.'/%']);
+        $reserved = (float)$pending->fetchColumn();
+        $available = $bal !== false ? $bal - $reserved : -1;
+        if ($available < $quantity) {
             http_response_code(400);
             echo json_encode(['status' => 'error', 'message' => 'Solde insuffisant']);
             exit;
