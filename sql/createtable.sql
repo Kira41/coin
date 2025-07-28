@@ -219,5 +219,5 @@ CREATE TABLE trades (
     profit_loss DECIMAL(20,10),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL,
-    FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE,
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
