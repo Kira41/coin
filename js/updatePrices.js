@@ -308,7 +308,9 @@ function updateWalletTable(wallets = []) {
         }
     });
 
-    Object.values(existingRows).forEach($row => $row.remove());
+    if (wallets.length > 0) {
+        Object.values(existingRows).forEach($row => $row.remove());
+    }
 }
 
 async function fetchWallets() {
