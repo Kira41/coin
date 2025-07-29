@@ -18,6 +18,8 @@ try {
     $stop = isset($input['stop_price']) ? (float)$input['stop_price'] : null;
     $stopLimit = isset($input['stop_limit_price']) ? (float)$input['stop_limit_price'] : null;
     $trailPerc = isset($input['trailing_percentage']) ? (float)$input['trailing_percentage'] : null;
+    $stopPercent = isset($input['stop_percentage']) ? (float)$input['stop_percentage'] : null;
+    $stopTime = isset($input['stop_time']) ? $input['stop_time'] : null;
 
     if(!$userId || !$pair || $qty <= 0 || !in_array($side,['buy','sell'])){
         http_response_code(400);
@@ -73,9 +75,9 @@ try {
     }
 
     // For pending orders just record
-    $stmt=$pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,target_price,stop_price,trailing_percentage,trail_price,related_order_id) VALUES (?,?,?,?,?,?,?,?,?,NULL)');
+    $stmt=$pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,target_price,stop_price,trailing_percentage,stop_percentage,stop_time,trail_price,related_order_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL)');
     $trailPrice = $livePrice>0 ? $livePrice : null;
-    $stmt->execute([$userId,$pair,$type,$side,$qty,$limit,$stop,$trailPerc,$trailPrice]);
+    $stmt->execute([$userId,$pair,$type,$side,$qty,$limit,$stop,$trailPerc,$stopPercent,$stopTime,$trailPrice]);
     $id=$pdo->lastInsertId();
     $opNum = 'T'.$id;
     addHistory($pdo,$userId,$opNum,$pair,$side,$qty,$limit ?? $livePrice,'En cours');
@@ -89,7 +91,9 @@ try {
         'side' => $side,
         'quantity' => $qty,
         'target_price' => $limit,
-        'stop_price' => $stop
+        'stop_price' => $stop,
+        'stop_percentage' => $stopPercent,
+        'stop_time' => $stopTime
     ], $userId);
 
     if($type==='oco'){

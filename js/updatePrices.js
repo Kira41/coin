@@ -1721,4 +1721,33 @@ function initializeUI() {
             TX_PAGE = page;
             loadTransactions();
         }
-    });};
+    });
+
+    $('#enableStopLoss').on('change', function(){
+        $('#stopLossSettings').toggle(this.checked);
+    });
+
+    $('#stopLossType').on('change', function(){
+        const t = $(this).val();
+        $('#stopLossPriceDiv').toggle(t === 'price');
+        $('#stopLossPercentageDiv').toggle(t === 'percentage');
+        $('#stopLossTimeDiv').toggle(t === 'time');
+        $('#trailingPercentageDiv').toggle(t === 'trailing');
+    });
+
+    $('#setStopLoss').on('click', async function(){
+        if(!userId) return;
+        const pair = $('#currencyPair').val();
+        const qty = parseFloat($('#tradeAmount').val()) || 0;
+        const typeMap = { price:'stop', percentage:'percentage_stop', time:'time_stop', trailing:'trailing_stop' };
+        const slType = $('#stopLossType').val();
+        const payload = { user_id:userId, pair:pair.replace('USD','/USD'), side:'sell', quantity: qty, type:typeMap[slType] };
+        if(slType==='price') payload.stop_price=parseFloat($('#stopLossPrice').val());
+        if(slType==='percentage') payload.stop_percentage=parseFloat($('#stopLossPercentage').val());
+        if(slType==='time') payload.stop_time=$('#stopLossTime').val();
+        if(slType==='trailing') payload.trailing_percentage=parseFloat($('#trailingPercentage').val());
+        try{
+            await apiFetch('php/place_order.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        }catch(e){alert(e.message||'Erreur');}
+    });
+};
