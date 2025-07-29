@@ -1637,7 +1637,8 @@ function initializeUI() {
             payload.trailing_percentage = parseFloat($('#trailingPercentage').val());
         }
 
-        if (orderType === 'market' && cost > parseDollar(dashboardData.personalData.balance)) {
+        if (isBuy && orderType === 'market' &&
+            cost > parseDollar(dashboardData.personalData.balance)) {
             alert('Solde insuffisant');
             resetTradeButtons();
             return;
