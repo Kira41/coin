@@ -53,6 +53,21 @@ try {
         }
     }
 
+    // ensure sufficient balance for pending buy orders
+    if($type!=='market' && $side==='buy'){
+        $orderPrice = $limit ?? $stop ?? $stopLimit ?? $livePrice;
+        if($orderPrice <= 0) $orderPrice = $livePrice;
+        $st=$pdo->prepare('SELECT balance FROM personal_data WHERE user_id=?');
+        $st->execute([$userId]);
+        $balance=$st->fetchColumn();
+        $balance=$balance!==false?$balance:0;
+        if(bccomp((string)$balance, bcmul((string)$orderPrice, (string)$qty, 8), 8) === -1){
+            http_response_code(400);
+            echo json_encode(['status'=>'error','message'=>'Solde insuffisant']);
+            return;
+        }
+    }
+
     if($type==='market'){
         $pdo->beginTransaction();
         $order=['id'=>0,'user_id'=>$userId,'pair'=>$pair,'side'=>$side,'quantity'=>$qty];
