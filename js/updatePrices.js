@@ -1370,15 +1370,16 @@ function initializeUI() {
     renderWithdrawHistory();
     loadTransactions();
 
-    const apiPairs = {
-        BTCUSD: 'BTCUSDT',
-        ETHUSD: 'ETHUSDT',
-        ADAUSD: 'ADAUSDT',
-        DOTUSD: 'DOTUSDT',
-        LINKUSD: 'LINKUSDT',
-        LTCUSD: 'LTCUSDT',
-        XRPUSD: 'XRPUSDT'
-    };
+    // Map a currency pair like "BTC/USD" or "BTCUSD" to the Binance symbol
+    // format used by the API. Pairs quoted in USD are converted to USDT so
+    // "LTC/USD" becomes "LTCUSDT".
+    function getBinanceSymbol(pair) {
+        let symbol = String(pair).toUpperCase().replace('/', '');
+        if (!symbol.endsWith('USDT') && symbol.endsWith('USD')) {
+            symbol = symbol.slice(0, -3) + 'USDT';
+        }
+        return symbol;
+    }
 
     let currentPrice = 0;
     let priceChange = 0;
@@ -1422,7 +1423,7 @@ function initializeUI() {
     }
 
     function fetchPrice(pair) {
-        const symbol = apiPairs[pair] || 'BTCUSDT';
+        const symbol = getBinanceSymbol(pair);
         fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`)
             .then(r => r.json())
             .then(info => {
@@ -1438,7 +1439,7 @@ function initializeUI() {
     }
 
     async function fetchCurrentPrice(pair) {
-        const symbol = apiPairs[pair] || 'BTCUSDT';
+        const symbol = getBinanceSymbol(pair);
         try {
             const resp = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
             const info = await resp.json();
