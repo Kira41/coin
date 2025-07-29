@@ -41,6 +41,32 @@ try {
 
     $pdo->beginTransaction();
 
+    // Prevent duplicate trades in case the same request is sent twice
+    $dupStmt = $pdo->prepare(
+        'SELECT id, price, created_at FROM trades
+         WHERE user_id = ? AND pair = ? AND side = ? AND quantity = ?
+         ORDER BY id DESC LIMIT 1 FOR UPDATE'
+    );
+    $dupStmt->execute([$userId, $pair, $side, $quantity]);
+    $existing = $dupStmt->fetch(PDO::FETCH_ASSOC);
+    if ($existing && bccomp((string)$existing['price'], (string)$price, 8) === 0
+        && strtotime($existing['created_at']) >= time() - 5) {
+        // A matching trade was recently recorded; return current data
+        $pdo->commit();
+        $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id=?');
+        $stmt->execute([$userId]);
+        $newBalance = $stmt->fetchColumn();
+        $wallets = getUserWallets($pdo, $userId);
+        echo json_encode([
+            'status' => 'ok',
+            'message' => 'Trade already recorded',
+            'price' => $existing['price'],
+            'new_balance' => $newBalance,
+            'wallets' => $wallets
+        ]);
+        return;
+    }
+
     if ($side === 'buy') {
         $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id = ? FOR UPDATE');
         $stmt->execute([$userId]);

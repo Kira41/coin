@@ -83,6 +83,15 @@ function addHistory(PDO $pdo, int $uid, string $opNum, string $pair, string $sid
 
 function executeTrade(PDO $pdo, array $order, float $price) {
     [$base] = explode('/', strtoupper($order['pair']));
+
+    // Avoid executing the same order twice
+    if (!empty($order['id'])) {
+        $check = $pdo->prepare('SELECT 1 FROM trades WHERE order_id = ?');
+        $check->execute([$order['id']]);
+        if ($check->fetchColumn()) {
+            return ['ok' => false, 'msg' => 'Order already filled'];
+        }
+    }
     $total = $price * $order['quantity'];
     if ($order['side'] === 'buy') {
         $st = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id=? FOR UPDATE');
