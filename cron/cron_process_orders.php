@@ -16,14 +16,30 @@ foreach ($orders as $o) {
             if (($o['side']=='buy' && $price <= $o['target_price']) || ($o['side']=='sell' && $price >= $o['target_price'])) {
                 $pdo->beginTransaction();
                 $res = executeTrade($pdo, $o, $o['target_price']);
-                if ($res['ok']) $pdo->commit(); else $pdo->rollBack();
-            }
+                if ($res['ok']) {
+                    $pdo->commit();
+                    require_once __DIR__.'/../utils/poll.php';
+                    pushEvent('balance_updated',['newBalance'=>$res['balance']],$o['user_id']);
+                    pushEvent('wallet_updated',[],$o['user_id']);
+                    pushEvent('order_filled',['order_id'=>$o['id'],'price'=>$o['target_price']],$o['user_id']);
+                } else {
+                    $pdo->rollBack();
+                }
+                }
             break;
         case 'stop':
             if (($o['side']=='buy' && $price >= $o['stop_price']) || ($o['side']=='sell' && $price <= $o['stop_price'])) {
                 $pdo->beginTransaction();
                 $res = executeTrade($pdo, $o, $price);
-                if ($res['ok']) $pdo->commit(); else $pdo->rollBack();
+                if ($res['ok']) {
+                    $pdo->commit();
+                    require_once __DIR__.'/../utils/poll.php';
+                    pushEvent('balance_updated',['newBalance'=>$res['balance']],$o['user_id']);
+                    pushEvent('wallet_updated',[],$o['user_id']);
+                    pushEvent('order_filled',['order_id'=>$o['id'],'price'=>$price],$o['user_id']);
+                } else {
+                    $pdo->rollBack();
+                }
             }
             break;
         case 'stop_limit':
@@ -37,7 +53,15 @@ foreach ($orders as $o) {
                 if (($o['side']=='buy' && $price <= $o['target_price']) || ($o['side']=='sell' && $price >= $o['target_price'])) {
                     $pdo->beginTransaction();
                     $res = executeTrade($pdo,$o,$o['target_price']);
-                    if ($res['ok']) $pdo->commit(); else $pdo->rollBack();
+                    if ($res['ok']) {
+                        $pdo->commit();
+                        require_once __DIR__.'/../utils/poll.php';
+                        pushEvent('balance_updated',['newBalance'=>$res['balance']],$o['user_id']);
+                        pushEvent('wallet_updated',[],$o['user_id']);
+                        pushEvent('order_filled',['order_id'=>$o['id'],'price'=>$o['target_price']],$o['user_id']);
+                    } else {
+                        $pdo->rollBack();
+                    }
                 }
             }
             break;
@@ -49,7 +73,15 @@ foreach ($orders as $o) {
                 } elseif ($price <= $o['trail_price']*(1-$o['trailing_percentage']/100)) {
                     $pdo->beginTransaction();
                     $res=executeTrade($pdo,$o,$price);
-                    if($res['ok']) $pdo->commit(); else $pdo->rollBack();
+                    if($res['ok']) {
+                        $pdo->commit();
+                        require_once __DIR__.'/../utils/poll.php';
+                        pushEvent('balance_updated',['newBalance'=>$res['balance']],$o['user_id']);
+                        pushEvent('wallet_updated',[],$o['user_id']);
+                        pushEvent('order_filled',['order_id'=>$o['id'],'price'=>$price],$o['user_id']);
+                    } else {
+                        $pdo->rollBack();
+                    }
                 }
             } else {
                 if ($price < $o['trail_price']) {
@@ -58,7 +90,15 @@ foreach ($orders as $o) {
                 } elseif ($price >= $o['trail_price']*(1+$o['trailing_percentage']/100)) {
                     $pdo->beginTransaction();
                     $res=executeTrade($pdo,$o,$price);
-                    if($res['ok']) $pdo->commit(); else $pdo->rollBack();
+                    if($res['ok']) {
+                        $pdo->commit();
+                        require_once __DIR__.'/../utils/poll.php';
+                        pushEvent('balance_updated',['newBalance'=>$res['balance']],$o['user_id']);
+                        pushEvent('wallet_updated',[],$o['user_id']);
+                        pushEvent('order_filled',['order_id'=>$o['id'],'price'=>$price],$o['user_id']);
+                    } else {
+                        $pdo->rollBack();
+                    }
                 }
             }
             break;
