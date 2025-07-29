@@ -129,10 +129,27 @@ function executeTrade(PDO $pdo, array $order, float $price) {
         $newBal = $bal + $total;
         $profit = ($price - $purchase) * $order['quantity'];
     }
-    $stmt = $pdo->prepare('INSERT INTO trades (user_id,order_id,pair,side,quantity,price,total_value,fee,profit_loss) VALUES (?,?,?,?,?,?,?,0,?)');
-    $stmt->execute([$order['user_id'], $order['id'], $order['pair'], $order['side'], $order['quantity'], $price, $total, $profit]);
+    // allow market orders which have no corresponding entry in the orders table
+    $orderId = empty($order['id']) ? null : $order['id'];
+    $stmt = $pdo->prepare(
+        'INSERT INTO trades (user_id,order_id,pair,side,quantity,price,total_value,fee,profit_loss) '
+        . 'VALUES (?,?,?,?,?,?,?,0,?)'
+    );
+    $stmt->execute([
+        $order['user_id'],
+        $orderId,
+        $order['pair'],
+        $order['side'],
+        $order['quantity'],
+        $price,
+        $total,
+        $profit
+    ]);
     $tradeId = $pdo->lastInsertId();
-    $pdo->prepare('UPDATE orders SET status="filled",price_at_execution=?,executed_at=NOW() WHERE id=?')->execute([$price, $order['id']]);
+    if ($orderId !== null) {
+        $pdo->prepare('UPDATE orders SET status="filled",price_at_execution=?,executed_at=NOW() WHERE id=?')
+            ->execute([$price, $orderId]);
+    }
     $opNum = 'T' . ($order['id'] ?: $tradeId);
     addHistory($pdo, $order['user_id'], $opNum, $order['pair'], $order['side'], $order['quantity'], $price, 'complet', $profit);
     if (!empty($order['related_order_id'])) {
