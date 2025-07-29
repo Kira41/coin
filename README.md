@@ -137,3 +137,30 @@ The old WebSocket server has been removed. The dashboard now relies on a
 long polling endpoint (`php/long_poll.php`). Client-side JavaScript keeps
 sending background requests and immediately processes any returned events to
 update balances, wallets or orders without reloading the page.
+
+## Profit/Loss calculation
+
+Use the executed trade price, not the candle price, to determine profit or loss.
+The basic formula for closing a long position is:
+
+```
+(sell price - average buy price) * quantity sold
+```
+
+For short selling the logic is reversed:
+
+```
+(sell price - buy price) * quantity
+```
+
+`utils/pnl.php` contains helper functions implementing these rules. The
+`calculate_average_buy_price()` function builds the weighted average from a list
+of prior buy trades, while `profit_loss_long()` and `profit_loss_short()` return
+the resulting PnL. A small JavaScript version lives in `js/pnl.js` for client
+side use. Example usage in PHP:
+
+```php
+$avg = calculate_average_buy_price($previousBuys);
+$profit = profit_loss_long($executedSellPrice, $avg, $soldQty);
+```
+
