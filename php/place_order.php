@@ -70,7 +70,13 @@ try {
         ], $userId);
         require_once __DIR__.'/../cron/cron_process_orders.php';
         require_once __DIR__.'/../cron/cron_wallet_usd.php';
-        echo json_encode(['status'=>'ok','price'=>$result['price'],'new_balance'=>$result['balance']]);
+        $wallets = getUserWallets($pdo, $userId);
+        echo json_encode([
+            'status'=>'ok',
+            'price'=>$result['price'],
+            'new_balance'=>$result['balance'],
+            'wallets'=>$wallets
+        ]);
         return;
     }
 

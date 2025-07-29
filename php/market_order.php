@@ -97,11 +97,13 @@ try {
     $actionMsg = $side === 'buy'
         ? "Achat de {$quantity} {$base} au prix du march\xC3\xA9 pour {$total} {$quote}"
         : "Vente de {$quantity} {$base} au prix du march\xC3\xA9 pour {$total} {$quote}";
+    $wallets = getUserWallets($pdo, $userId);
     echo json_encode([
         'status' => 'ok',
         'message' => $actionMsg,
         'price' => $price,
-        'new_balance' => $newBalance
+        'new_balance' => $newBalance,
+        'wallets' => $wallets
     ]);
 } catch (Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();

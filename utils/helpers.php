@@ -42,6 +42,12 @@ function deductFromWallet(PDO $pdo, int $uid, string $cur, float $amt) {
     return (float)$row['purchase_price'];
 }
 
+function getUserWallets(PDO $pdo, int $uid): array {
+    $st = $pdo->prepare('SELECT * FROM wallets WHERE user_id=?');
+    $st->execute([$uid]);
+    return $st->fetchAll(PDO::FETCH_ASSOC);
+}
+
 function addHistory(PDO $pdo, int $uid, string $opNum, string $pair, string $side,
     float $qty, float $price, string $status, ?float $profit = null): void {
     $typeTxt = $side === 'buy' ? 'Acheter' : 'Vendre';
