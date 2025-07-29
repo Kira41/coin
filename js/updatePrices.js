@@ -1620,7 +1620,9 @@ function initializeUI() {
         const orderType = $('#orderType').val();
         let price = currentPrice;
         let cost = amount * price;
-        const apiPair = pair.replace('USD', '/USD');
+        const apiPair = pair.includes('/')
+            ? pair
+            : pair.replace(/(USDT|USD)$/, '/$1');
         let resp;
         const payload = { user_id: userId, pair: apiPair, quantity: amount, side: isBuy ? 'buy' : 'sell', type: orderType };
         if (orderType === 'limit' || orderType === 'stoplimit' || orderType === 'oco') {
@@ -1781,7 +1783,9 @@ function initializeUI() {
         const qty = parseFloat($('#tradeAmount').val()) || 0;
         const typeMap = { price:'stop', percentage:'percentage_stop', time:'time_stop', trailing:'trailing_stop' };
         const slType = $('#stopLossType').val();
-        const payload = { user_id:userId, pair:pair.replace('USD','/USD'), side:'sell', quantity: qty, type:typeMap[slType] };
+        const payload = { user_id:userId,
+            pair: pair.includes('/') ? pair : pair.replace(/(USDT|USD)$/, '/$1'),
+            side:'sell', quantity: qty, type:typeMap[slType] };
         if(slType==='price') payload.stop_price=parseFloat($('#stopLossPrice').val());
         if(slType==='percentage') payload.stop_percentage=parseFloat($('#stopLossPercentage').val());
         if(slType==='time') payload.stop_time=$('#stopLossTime').val();
