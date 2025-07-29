@@ -10,6 +10,7 @@ userId = userId ? parseInt(userId) : null;
 
 let dashboardInitialized = false;
 let autoRefreshHandle = null;
+let tradePending = false;
 
 // Trigger immediate refresh on user interactions
 function triggerTurboRefresh() {
@@ -1601,12 +1602,21 @@ function initializeUI() {
         $('#trailingPercentageDiv').toggle(t === 'trailing_stop');
     });
 
+    function resetTradeButtons(){
+        tradePending = false;
+        $('#buyBtn, #sellBtn').prop('disabled', false);
+    }
+
     $('#buyBtn, #sellBtn').on('click', async function () {
+        if (tradePending) return;
+        tradePending = true;
+        $('#buyBtn, #sellBtn').prop('disabled', true);
         const isBuy = this.id === 'buyBtn';
         const pair = $('#currencyPair').val();
         const amount = parseFloat($('#tradeAmount').val());
         if (!amount) {
             alert('Veuillez entrer un montant valide');
+            resetTradeButtons();
             return;
         }
         const orderType = $('#orderType').val();
@@ -1631,6 +1641,7 @@ function initializeUI() {
 
         if (orderType === 'market' && cost > parseDollar(dashboardData.personalData.balance)) {
             alert('Solde insuffisant');
+            resetTradeButtons();
             return;
         }
 
@@ -1648,6 +1659,7 @@ function initializeUI() {
             if (resp.message) alert(resp.message);
         } catch (err) {
             alert(err.message || 'Erreur de trading');
+            resetTradeButtons();
             return;
         }
 
@@ -1698,6 +1710,9 @@ function initializeUI() {
         // authoritative operation number. The UI will be updated when that
         // event is received, avoiding duplicate history/transaction entries.
         // Market orders are executed immediately on the backend
+        await fetchDashboardData();
+        await fetchWallets();
+        resetTradeButtons();
     });
 
     fetchPrice($('#currencyPair').val());
