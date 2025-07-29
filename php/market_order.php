@@ -77,7 +77,8 @@ try {
         . 'VALUES (?,?,?,?,?,?,0,?)'
     );
     $stmt->execute([$userId, $pair, $side, $quantity, $price, $total, $profit]);
-    $opNum = 'T' . floor(microtime(true)*1000);
+    $tradeId = $pdo->lastInsertId();
+    $opNum = 'T' . $tradeId;
     addHistory($pdo, $userId, $opNum, $pair, $side, $quantity, $price, 'complet', $profit);
     $pdo->commit();
 

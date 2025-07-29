@@ -1450,7 +1450,8 @@ function initializeUI() {
         // Record the dollar value of the trade rather than just the quantity
         const tradeValue = order.montant * order.prix;
         addTransactionRecord('Trading', tradeValue, order.statut, order.statutClass, order.operationNumber);
-        saveDashboardData();
+        // Trades are already persisted by the backend; avoid re-saving to
+        // prevent duplicate records.
         renderTradingHistory();
         loadTransactions();
     }
@@ -1656,27 +1657,9 @@ function initializeUI() {
             updateBalances();
         }
 
-        const order = {
-            temps: new Date().toLocaleString(),
-            paireDevises: pair.replace('USD', '/USD'),
-            type: isBuy ? 'Acheter' : 'Vendre',
-            statutTypeClass: isBuy ? 'bg-success' : 'bg-danger',
-            montant: amount,
-            prix: price,
-            statut: 'complet',
-            statutClass: 'bg-success',
-            profitPerte: 0,
-            profitClass: 'text-success',
-            invested: cost,
-            details: {}
-        };
-
-        order.details = {
-            invested: order.invested
-        };
-
-        addTrade(order);
-
+        // For trades, the backend sends a 'new_trade' event with the
+        // authoritative operation number. The UI will be updated when that
+        // event is received, avoiding duplicate history/transaction entries.
         // Market orders are executed immediately on the backend
     });
 
