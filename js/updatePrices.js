@@ -1604,13 +1604,11 @@ function initializeUI() {
 
     function resetTradeButtons(){
         tradePending = false;
-        $('#buyBtn, #sellBtn').prop('disabled', false);
     }
 
     $('#buyBtn, #sellBtn').on('click', async function () {
         if (tradePending) return;
         tradePending = true;
-        $('#buyBtn, #sellBtn').prop('disabled', true);
         const isBuy = this.id === 'buyBtn';
         const pair = $('#currencyPair').val();
         const amount = parseFloat($('#tradeAmount').val());
@@ -1656,6 +1654,10 @@ function initializeUI() {
             if (resp.new_balance !== undefined) {
                 dashboardData.personalData.balance = parseFloat(resp.new_balance);
             }
+            if (resp.wallets) {
+                dashboardData.personalData.wallets = resp.wallets;
+                updateWalletTable(resp.wallets);
+            }
             if (resp.message) alert(resp.message);
         } catch (err) {
             alert(err.message || 'Erreur de trading');
@@ -1674,33 +1676,35 @@ function initializeUI() {
             }
             dashboardData.personalData.balance = newBalance;
 
-            if (isBuy) {
-                const baseCurr = pair.replace(/USD$/, '').toLowerCase();
-                let wallets = dashboardData.personalData.wallets || [];
-                let w = wallets.find(x => x.currency === baseCurr);
-                if (w) {
-                    w.amount = parseFloat(w.amount || 0) + amount;
+            if (!resp.wallets) {
+                if (isBuy) {
+                    const baseCurr = pair.replace(/USD$/, '').toLowerCase();
+                    let wallets = dashboardData.personalData.wallets || [];
+                    let w = wallets.find(x => x.currency === baseCurr);
+                    if (w) {
+                        w.amount = parseFloat(w.amount || 0) + amount;
+                    } else {
+                        w = {
+                            id: Date.now(),
+                            currency: baseCurr,
+                            amount: amount,
+                            network: '',
+                            address: 'local address',
+                            label: baseCurr.toUpperCase()
+                        };
+                        wallets.push(w);
+                        dashboardData.personalData.wallets = wallets;
+                    }
+                    updateWalletTable(wallets);
                 } else {
-                    w = {
-                        id: Date.now(),
-                        currency: baseCurr,
-                        amount: amount,
-                        network: '',
-                        address: 'local address',
-                        label: baseCurr.toUpperCase()
-                    };
-                    wallets.push(w);
-                    dashboardData.personalData.wallets = wallets;
+                    const baseCurr = pair.replace(/USD$/, '').toLowerCase();
+                    let wallets = dashboardData.personalData.wallets || [];
+                    let w = wallets.find(x => x.currency === baseCurr);
+                    if (w) {
+                        w.amount = Math.max(0, parseFloat(w.amount || 0) - amount);
+                    }
+                    updateWalletTable(wallets);
                 }
-                updateWalletTable(wallets);
-            } else {
-                const baseCurr = pair.replace(/USD$/, '').toLowerCase();
-                let wallets = dashboardData.personalData.wallets || [];
-                let w = wallets.find(x => x.currency === baseCurr);
-                if (w) {
-                    w.amount = Math.max(0, parseFloat(w.amount || 0) - amount);
-                }
-                updateWalletTable(wallets);
             }
             saveDashboardData();
             updateBalances();
