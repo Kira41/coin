@@ -1404,7 +1404,7 @@ function initializeUI() {
                         <td>${formatDollar(trade.prix)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutClass)}">${escapeHtml(trade.statut)}</span></td>
                         <td class="${escapeHtml(profitCls)}" data-profit>${profitText}</td>
-                        <td>${trade.statut==='En cours'?`<button class="btn btn-sm btn-danger stop-trade" data-op="${escapeHtml(trade.operationNumber)}"><i class="fas fa-stop"></i></button>`:'-'}</td>
+                        <td>${trade.statut==='En cours'?`<button class="btn btn-sm btn-danger cancel-order-btn" data-op="${escapeHtml(trade.operationNumber)}" title="Annuler"><i class="fas fa-ban"></i></button>`:'-'}</td>
                     </tr>`);
             });
             if (openTrades.length) updateOpenTradeProfits(openTrades);
@@ -1744,8 +1744,10 @@ function initializeUI() {
         $loginHistoryBody.html('<tr><td colspan="3" class="text-center">Aucune donnée disponible</td></tr>');
     }
 
-    $('#tradingHistory').on('click', '.stop-trade', async function() {
-        const op = $(this).data('op');
+    $('#tradingHistory').on('click', '.cancel-order-btn', async function() {
+        const $btn = $(this);
+        $btn.prop('disabled', true);
+        const op = $btn.data('op');
         const trade = (dashboardData.tradingHistory || []).find(t => t.operationNumber === op);
         if (trade && trade.statut === 'En cours' && trade.details?.order_id) {
             try {
@@ -1754,10 +1756,14 @@ function initializeUI() {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ user_id: userId, order_id: trade.details.order_id })
                 });
+                showBootstrapAlert('cancelOrderAlert', 'Ordre annulé.', 'success');
             } catch (e) {
-                alert(e.message || 'Erreur lors de l\'annulation');
+                showBootstrapAlert('cancelOrderAlert', e.message || 'Erreur lors de l\'annulation', 'danger');
             }
+        } else {
+            showBootstrapAlert('cancelOrderAlert', 'Cet ordre ne peut pas être annulé.', 'warning');
         }
+        $btn.prop('disabled', false);
     });
 
     $('#transactionsPagination').on('click', 'a', function(e) {
