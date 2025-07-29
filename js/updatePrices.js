@@ -1538,7 +1538,9 @@ function initializeUI() {
             };
             dashboardData.tradingHistory.unshift(order);
         }
-        saveDashboardData();
+        // The backend already saved the completed trade and pushed the
+        // updated data. Simply refresh the UI without re-saving to avoid
+        // duplicate records.
         renderTradingHistory();
     };
 
@@ -1549,7 +1551,8 @@ function initializeUI() {
             const order = dashboardData.tradingHistory[idx];
             order.statut = 'annule';
             order.statutClass = 'bg-danger';
-            saveDashboardData();
+            // Avoid persisting the same order twice; the backend already
+            // recorded the cancellation.
             renderTradingHistory();
         }
     };
