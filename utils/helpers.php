@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/pnl.php';
 function getLivePrice(string $pair): float {
     $symbol = str_replace('/', '', strtoupper($pair));
     if (!preg_match('/USDT$/', $symbol) && preg_match('/USD$/', $symbol)) {
@@ -127,7 +128,7 @@ function executeTrade(PDO $pdo, array $order, float $price) {
         if ($purchase === false) return ['ok' => false, 'msg' => 'Solde insuffisant'];
         $pdo->prepare('UPDATE personal_data SET balance=balance+? WHERE user_id=?')->execute([$total, $order['user_id']]);
         $newBal = $bal + $total;
-        $profit = ($price - $purchase) * $order['quantity'];
+        $profit = profit_loss_long($price, $purchase, $order['quantity']);
     }
     // allow market orders which have no corresponding entry in the orders table
     $orderId = empty($order['id']) ? null : $order['id'];

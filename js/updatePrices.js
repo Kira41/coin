@@ -1,3 +1,5 @@
+import { profitLossLong, profitLossShort } from './pnl.js';
+
 let dashboardData = null;
 // Retrieve the current user ID from localStorage if available.
 let userId;
@@ -1465,9 +1467,9 @@ function initializeUI() {
             const qty = parseFloat(t.montant);
             let profit = 0;
             if (t.type === 'Acheter') {
-                profit = (curPrice - entry) * qty;
+                profit = profitLossLong(curPrice, entry, qty);
             } else {
-                profit = (entry - curPrice) * qty;
+                profit = profitLossShort(curPrice, entry, qty);
             }
             const cls = profit >= 0 ? 'text-success' : 'text-danger';
             const $row = $(`#tradingHistory tr[data-op="${escapeHtml(t.operationNumber)}"]`);
@@ -1563,9 +1565,9 @@ function initializeUI() {
         const qty = parseFloat(order.montant);
         let profit = 0;
         if (order.type === 'Acheter') {
-            profit = (exitPrice - priceValue) * qty;
+            profit = profitLossLong(exitPrice, priceValue, qty);
         } else {
-            profit = (priceValue - exitPrice) * qty;
+            profit = profitLossShort(exitPrice, priceValue, qty);
         }
         order.profitPerte = profit;
         order.profitClass = profit >= 0 ? 'text-success' : 'text-danger';
