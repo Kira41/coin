@@ -1749,12 +1749,13 @@ function initializeUI() {
         $btn.prop('disabled', true);
         const op = $btn.data('op');
         const trade = (dashboardData.tradingHistory || []).find(t => t.operationNumber === op);
-        if (trade && trade.statut === 'En cours' && trade.details?.order_id) {
+        const orderId = trade?.details?.order_id ?? trade?.order_id;
+        if (trade && trade.statut === 'En cours' && orderId) {
             try {
                 await apiFetch('php/cancel_order.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId, order_id: trade.details.order_id })
+                    body: JSON.stringify({ user_id: userId, order_id: orderId })
                 });
                 showBootstrapAlert('cancelOrderAlert', 'Ordre annulé.', 'success');
             } catch (e) {
