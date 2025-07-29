@@ -27,6 +27,70 @@ foreach ($orders as $o) {
                 }
                 }
             break;
+        case 'percentage_stop':
+            $threshold = $o['trail_price'];
+            if ($o['side']=='sell') {
+                $threshold *= (1 - $o['stop_percentage']/100);
+                if ($price <= $threshold) {
+                    $pdo->beginTransaction();
+                    $res=executeTrade($pdo,$o,$price);
+                    if($res['ok']) {
+                        $pdo->commit();
+                        require_once __DIR__.'/../utils/poll.php';
+                        pushEvent('balance_updated',[ 'newBalance'=>$res['balance'] ],$o['user_id']);
+                        pushEvent('wallet_updated',[],$o['user_id']);
+                        pushEvent('order_filled',[ 'order_id'=>$o['id'],'price'=>$price ],$o['user_id']);
+                    } else {
+                        $pdo->rollBack();
+                    }
+                }
+            } else {
+                $threshold *= (1 + $o['stop_percentage']/100);
+                if ($price >= $threshold) {
+                    $pdo->beginTransaction();
+                    $res=executeTrade($pdo,$o,$price);
+                    if($res['ok']) {
+                        $pdo->commit();
+                        require_once __DIR__.'/../utils/poll.php';
+                        pushEvent('balance_updated',[ 'newBalance'=>$res['balance'] ],$o['user_id']);
+                        pushEvent('wallet_updated',[],$o['user_id']);
+                        pushEvent('order_filled',[ 'order_id'=>$o['id'],'price'=>$price ],$o['user_id']);
+                    } else {
+                        $pdo->rollBack();
+                    }
+                }
+            }
+            break;
+        case 'time_stop':
+            if (strtotime($o['stop_time']) <= time()) {
+                $pdo->beginTransaction();
+                $res=executeTrade($pdo,$o,$price);
+                if($res['ok']) {
+                    $pdo->commit();
+                    require_once __DIR__.'/../utils/poll.php';
+                    pushEvent('balance_updated',[ 'newBalance'=>$res['balance'] ],$o['user_id']);
+                    pushEvent('wallet_updated',[],$o['user_id']);
+                    pushEvent('order_filled',[ 'order_id'=>$o['id'],'price'=>$price ],$o['user_id']);
+                } else {
+                    $pdo->rollBack();
+                }
+            }
+            break;
+        case 'oco':
+            if (($o['side']=='buy' && $price <= $o['target_price']) || ($o['side']=='sell' && $price >= $o['target_price'])) {
+                $pdo->beginTransaction();
+                $res = executeTrade($pdo, $o, $o['target_price']);
+                if ($res['ok']) {
+                    $pdo->commit();
+                    require_once __DIR__.'/../utils/poll.php';
+                    pushEvent('balance_updated',['newBalance'=>$res['balance']],$o['user_id']);
+                    pushEvent('wallet_updated',[],$o['user_id']);
+                    pushEvent('order_filled',['order_id'=>$o['id'],'price'=>$o['target_price']],$o['user_id']);
+                } else {
+                    $pdo->rollBack();
+                }
+            }
+            break;
         case 'stop':
             if (($o['side']=='buy' && $price >= $o['stop_price']) || ($o['side']=='sell' && $price <= $o['stop_price'])) {
                 $pdo->beginTransaction();
