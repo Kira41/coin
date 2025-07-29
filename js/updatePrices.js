@@ -1389,7 +1389,7 @@ function initializeUI() {
         $tbodyTrading.empty();
         if (dashboardData.tradingHistory?.length > 0) {
             const openTrades = [];
-            dashboardData.tradingHistory.slice(0, 5).forEach(trade => {
+            dashboardData.tradingHistory.forEach(trade => {
                 const profitText = trade.profitPerte==null?'-':formatDollar(trade.profitPerte);
                 const profitCls = trade.profitClass || '';
                 const isOpen = trade.statut === 'En cours' && trade.profitPerte == null;
@@ -1485,7 +1485,6 @@ function initializeUI() {
         }
         order.admin_id = dashboardData.personalData?.linked_to_id || null;
         dashboardData.tradingHistory.unshift(order);
-        dashboardData.tradingHistory = dashboardData.tradingHistory.slice(0, 5);
         // Record the dollar value of the trade rather than just the quantity
         const tradeValue = order.montant * order.prix;
         addTransactionRecord('Trading', tradeValue, order.statut, order.statutClass, order.operationNumber);

@@ -47,7 +47,7 @@ $data = [
         }
         unset($r['details']);
         return $r;
-    }, fetchAll($pdo, 'SELECT operationNumber,temps,paireDevises,type,statutTypeClass,montant,prix,statut,statutClass,profitPerte,profitClass,details FROM tradingHistory WHERE user_id = ? ORDER BY id DESC LIMIT 5', [$userId])),
+    }, fetchAll($pdo, 'SELECT operationNumber,temps,paireDevises,type,statutTypeClass,montant,prix,statut,statutClass,profitPerte,profitClass,details FROM tradingHistory WHERE user_id = ? ORDER BY id DESC', [$userId])),
     'loginHistory' => fetchAll($pdo, 'SELECT date,ip,device FROM loginHistory WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC LIMIT 100', [$userId]),
     'bankWithdrawInfo' => $bankWithdraw,
     'cryptoDepositAddresses' => fetchAll($pdo, 'SELECT id,crypto_name,wallet_info FROM deposit_crypto_address WHERE user_id = ?', [$userId]),
