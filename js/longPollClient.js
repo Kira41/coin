@@ -45,6 +45,9 @@ function handleEvents(response) {
       case 'new_order':
         if (window.handleNewOrder) window.handleNewOrder(ev.data);
         break;
+      case 'order_cancelled':
+        if (window.handleOrderCancelled) window.handleOrderCancelled(ev.data);
+        break;
       default:
         break;
     }

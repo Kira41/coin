@@ -1455,6 +1455,66 @@ function initializeUI() {
         loadTransactions();
     }
 
+    window.handleNewOrder = function(data) {
+        const order = {
+            operationNumber: data.operation_number || 'T' + Date.now(),
+            temps: new Date().toLocaleString(),
+            paireDevises: data.pair,
+            type: data.side === 'buy' ? 'Acheter' : 'Vendre',
+            statutTypeClass: data.side === 'buy' ? 'bg-success' : 'bg-danger',
+            montant: parseFloat(data.quantity),
+            prix: parseFloat(data.target_price || currentPrice),
+            statut: 'En cours',
+            statutClass: 'bg-warning',
+            profitPerte: null,
+            profitClass: '',
+            details: { order_id: data.order_id }
+        };
+        addTrade(order);
+    };
+
+    window.handleOrderFilled = function(data) {
+        const op = 'T' + data.order_id;
+        let order = (dashboardData.tradingHistory || []).find(t => t.operationNumber === op);
+        if (order) {
+            order.prix = parseFloat(data.price);
+            order.statut = 'complet';
+            order.statutClass = 'bg-success';
+            order.profitPerte = data.profit_loss || 0;
+            order.profitClass = order.profitPerte >= 0 ? 'text-success' : 'text-danger';
+        } else {
+            order = {
+                operationNumber: op,
+                temps: new Date().toLocaleString(),
+                paireDevises: data.pair,
+                type: data.side === 'buy' ? 'Acheter' : 'Vendre',
+                statutTypeClass: data.side === 'buy' ? 'bg-success' : 'bg-danger',
+                montant: parseFloat(data.quantity),
+                prix: parseFloat(data.price),
+                statut: 'complet',
+                statutClass: 'bg-success',
+                profitPerte: data.profit_loss || 0,
+                profitClass: (data.profit_loss || 0) >= 0 ? 'text-success' : 'text-danger',
+                details: { order_id: data.order_id }
+            };
+            dashboardData.tradingHistory.unshift(order);
+        }
+        saveDashboardData();
+        renderTradingHistory();
+    };
+
+    window.handleOrderCancelled = function(data) {
+        const op = 'T' + data.order_id;
+        const idx = (dashboardData.tradingHistory || []).findIndex(t => t.operationNumber === op);
+        if (idx !== -1) {
+            const order = dashboardData.tradingHistory[idx];
+            order.statut = 'annule';
+            order.statutClass = 'bg-danger';
+            saveDashboardData();
+            renderTradingHistory();
+        }
+    };
+
     function finalizeOrder(order, exitPrice) {
         const priceValue = parseFloat(order.prix);
         const qty = parseFloat(order.montant);
@@ -1641,13 +1701,15 @@ function initializeUI() {
     $('#tradingHistory').on('click', '.stop-trade', async function() {
         const op = $(this).data('op');
         const trade = (dashboardData.tradingHistory || []).find(t => t.operationNumber === op);
-        if (trade && trade.statut === 'En cours') {
-            const pairKey = trade.paireDevises.replace('/', '');
-            const price = await fetchCurrentPrice(pairKey);
-            if (!isNaN(price)) {
-                finalizeOrder(trade, price);
-            } else {
-                alert('Impossible de récupérer le prix pour ' + trade.paireDevises);
+        if (trade && trade.statut === 'En cours' && trade.details?.order_id) {
+            try {
+                await apiFetch('php/cancel_order.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ user_id: userId, order_id: trade.details.order_id })
+                });
+            } catch (e) {
+                alert(e.message || 'Erreur lors de l\'annulation');
             }
         }
     });

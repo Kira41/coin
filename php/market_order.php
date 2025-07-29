@@ -77,12 +77,15 @@ try {
         . 'VALUES (?,?,?,?,?,?,0,?)'
     );
     $stmt->execute([$userId, $pair, $side, $quantity, $price, $total, $profit]);
+    $opNum = 'T' . floor(microtime(true)*1000);
+    addHistory($pdo, $userId, $opNum, $pair, $side, $quantity, $price, 'complet', $profit);
     $pdo->commit();
 
     require_once __DIR__.'/../utils/poll.php';
     pushEvent('balance_updated', ['newBalance' => $newBalance], $userId);
     pushEvent('wallet_updated', [], $userId);
     pushEvent('new_trade', [
+        'operation_number' => $opNum,
         'pair' => $pair,
         'side' => $side,
         'quantity' => $quantity,

@@ -42,6 +42,38 @@ function deductFromWallet(PDO $pdo, int $uid, string $cur, float $amt) {
     return (float)$row['purchase_price'];
 }
 
+function addHistory(PDO $pdo, int $uid, string $opNum, string $pair, string $side,
+    float $qty, float $price, string $status, ?float $profit = null): void {
+    $typeTxt = $side === 'buy' ? 'Acheter' : 'Vendre';
+    $typeClass = $side === 'buy' ? 'bg-success' : 'bg-danger';
+    $statutClass = $status === 'complet' ? 'bg-success'
+        : ($status === 'annule' ? 'bg-danger' : 'bg-warning');
+    $profitClass = $profit === null ? '' : ($profit >= 0 ? 'text-success' : 'text-danger');
+    $details = json_encode(['order_id' => ltrim($opNum, 'T')]);
+    $stmt = $pdo->prepare('INSERT INTO tradingHistory '
+        . '(user_id, operationNumber, temps, paireDevises, type, statutTypeClass,'
+        . ' montant, prix, statut, statutClass, profitPerte, profitClass, details) '
+        . 'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)'
+        . ' ON DUPLICATE KEY UPDATE statut=VALUES(statut), statutClass=VALUES(statutClass),'
+        . ' prix=VALUES(prix), profitPerte=VALUES(profitPerte), profitClass=VALUES(profitClass),'
+        . ' details=VALUES(details)');
+    $stmt->execute([
+        $uid,
+        $opNum,
+        date('Y/m/d H:i'),
+        $pair,
+        $typeTxt,
+        $typeClass,
+        $qty,
+        $price,
+        $status,
+        $statutClass,
+        $profit,
+        $profitClass,
+        $details
+    ]);
+}
+
 function executeTrade(PDO $pdo, array $order, float $price) {
     [$base] = explode('/', strtoupper($order['pair']));
     $total = $price * $order['quantity'];
@@ -67,6 +99,8 @@ function executeTrade(PDO $pdo, array $order, float $price) {
     $stmt = $pdo->prepare('INSERT INTO trades (user_id,order_id,pair,side,quantity,price,total_value,fee,profit_loss) VALUES (?,?,?,?,?,?,?,0,?)');
     $stmt->execute([$order['user_id'], $order['id'], $order['pair'], $order['side'], $order['quantity'], $price, $total, $profit]);
     $pdo->prepare('UPDATE orders SET status="filled",price_at_execution=?,executed_at=NOW() WHERE id=?')->execute([$price, $order['id']]);
+    $opNum = 'T' . $order['id'];
+    addHistory($pdo, $order['user_id'], $opNum, $order['pair'], $order['side'], $order['quantity'], $price, 'complet', $profit);
     if (!empty($order['related_order_id'])) {
         $pdo->prepare("UPDATE orders SET status='cancelled' WHERE id=? AND status IN ('open','triggered')")->execute([$order['related_order_id']]);
     }

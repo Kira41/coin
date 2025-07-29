@@ -38,11 +38,13 @@ try {
         [$base] = explode('/', strtoupper($pair));
         $st=$pdo->prepare("SELECT COALESCE(SUM(quantity),0) FROM orders WHERE user_id=? AND side='sell' AND status IN ('open','triggered') AND pair LIKE ?");
         $st->execute([$userId,$base.'/%']);
-        $pending=(float)$st->fetchColumn();
+        $pending=$st->fetchColumn();
+        $pending=$pending!==false?$pending:0;
         $st=$pdo->prepare('SELECT amount FROM wallets WHERE user_id=? AND currency=?');
         $st->execute([$userId,strtolower($base)]);
-        $available=(float)$st->fetchColumn();
-        if($available-$pending<$qty){
+        $available=$st->fetchColumn();
+        $available=$available!==false?$available:0;
+        if(bccomp(bcsub((string)$available,(string)$pending,8),(string)$qty,8)==-1){
             http_response_code(400);
             echo json_encode(['status'=>'error','message'=>'Solde insuffisant']);
             return;
@@ -75,10 +77,13 @@ try {
     $trailPrice = $livePrice>0 ? $livePrice : null;
     $stmt->execute([$userId,$pair,$type,$side,$qty,$limit,$stop,$trailPerc,$trailPrice]);
     $id=$pdo->lastInsertId();
+    $opNum = 'T'.$id;
+    addHistory($pdo,$userId,$opNum,$pair,$side,$qty,$limit ?? $livePrice,'En cours');
 
     require_once __DIR__.'/../utils/poll.php';
     pushEvent('new_order', [
         'order_id' => $id,
+        'operation_number' => $opNum,
         'pair' => $pair,
         'type' => $type,
         'side' => $side,
