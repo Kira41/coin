@@ -107,9 +107,9 @@ occurs:
 ```
 For Windows users, double-click `run_cron_jobs.bat` in the project root to execute all cron tasks manually.
 
-### Order type
+### Order types
 
-Only market orders are supported. Trades are executed immediately at the current market price and recorded in the `trades` table.
+The platform supports a variety of order types. Market orders are executed immediately using the current price returned by Binance. Pending orders (limit, stop, stop‑limit, trailing stop, percentage based stop, time based stop and OCO) are stored in the `orders` table until the `cron_process_orders.php` task evaluates them.
 
 When querying Binance for live prices remember that pairs use the `USDT` quote currency. A pair like `ADA/USD` should be converted to `ADAUSDT` before requesting the price.
 

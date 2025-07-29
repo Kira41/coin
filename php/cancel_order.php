@@ -30,6 +30,10 @@ try{
         exit;
     }
     $pdo->prepare('UPDATE orders SET status="cancelled" WHERE id=?')->execute([$orderId]);
+    if (!empty($order['related_order_id'])) {
+        $pdo->prepare("UPDATE orders SET status='cancelled' WHERE id=? AND status IN ('open','triggered')")
+            ->execute([$order['related_order_id']]);
+    }
     $price = isset($order['target_price']) ? $order['target_price'] : 0;
     addHistory($pdo,$userId,'T'.$orderId,$order['pair'],$order['side'],$order['quantity'],$price,'annule');
     $pdo->commit();
