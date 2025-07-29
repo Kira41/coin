@@ -1386,9 +1386,14 @@ function initializeUI() {
         const $tbodyTrading = $('#tradingHistory');
         $tbodyTrading.empty();
         if (dashboardData.tradingHistory?.length > 0) {
+            const openTrades = [];
             dashboardData.tradingHistory.slice(0, 5).forEach(trade => {
+                const profitText = trade.profitPerte==null?'-':formatDollar(trade.profitPerte);
+                const profitCls = trade.profitClass || '';
+                const isOpen = trade.statut === 'En cours' && trade.profitPerte == null;
+                if (isOpen) openTrades.push(trade);
                 $tbodyTrading.append(`
-                    <tr>
+                    <tr data-op="${escapeHtml(trade.operationNumber)}">
                         <td>${escapeHtml(trade.operationNumber)}</td>
                         <td>${escapeHtml(trade.temps)}</td>
                         <td>${escapeHtml(trade.paireDevises)}</td>
@@ -1396,10 +1401,11 @@ function initializeUI() {
                         <td>${formatCrypto(trade.montant)} ${escapeHtml((trade.paireDevises||'').split('/')[0])}</td>
                         <td>${formatDollar(trade.prix)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutClass)}">${escapeHtml(trade.statut)}</span></td>
-                        <td class="${escapeHtml(trade.profitClass || '')}">${trade.profitPerte==null?'-':formatDollar(trade.profitPerte)}</td>
+                        <td class="${escapeHtml(profitCls)}" data-profit>${profitText}</td>
                         <td>${trade.statut==='En cours'?`<button class="btn btn-sm btn-danger stop-trade" data-op="${escapeHtml(trade.operationNumber)}"><i class="fas fa-stop"></i></button>`:'-'}</td>
                     </tr>`);
             });
+            if (openTrades.length) updateOpenTradeProfits(openTrades);
         } else {
             $tbodyTrading.html('<tr><td colspan="9" class="text-center">Aucune donnée disponible</td></tr>');
         }
@@ -1439,6 +1445,35 @@ function initializeUI() {
         } catch (e) {
             return NaN;
         }
+    }
+
+    async function updateOpenTradeProfits(trades) {
+        const uniquePairs = {};
+        for (const t of trades) {
+            uniquePairs[t.paireDevises] = null;
+        }
+        // Fetch prices for each unique pair
+        await Promise.all(Object.keys(uniquePairs).map(async p => {
+            uniquePairs[p] = await fetchCurrentPrice(p);
+        }));
+        trades.forEach(t => {
+            const curPrice = uniquePairs[t.paireDevises];
+            if (isNaN(curPrice)) return;
+            const entry = parseFloat(t.prix);
+            const qty = parseFloat(t.montant);
+            let profit = 0;
+            if (t.type === 'Acheter') {
+                profit = (curPrice - entry) * qty;
+            } else {
+                profit = (entry - curPrice) * qty;
+            }
+            const cls = profit >= 0 ? 'text-success' : 'text-danger';
+            const $row = $(`#tradingHistory tr[data-op="${escapeHtml(t.operationNumber)}"]`);
+            $row.find('[data-profit]')
+                .text(formatDollar(profit))
+                .removeClass('text-success text-danger')
+                .addClass(cls);
+        });
     }
 
     function addTrade(order) {
