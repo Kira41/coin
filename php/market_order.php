@@ -36,77 +36,28 @@ try {
         echo json_encode(['status' => 'error', 'message' => 'Failed to fetch price']);
         exit;
     }
-
     $total = $price * $quantity;
 
     $pdo->beginTransaction();
-
-    // Prevent duplicate trades in case the same request is sent twice
-    $dupStmt = $pdo->prepare(
-        'SELECT id, price, created_at FROM trades
-         WHERE user_id = ? AND pair = ? AND side = ? AND quantity = ?
-         ORDER BY id DESC LIMIT 1 FOR UPDATE'
-    );
-    $dupStmt->execute([$userId, $pair, $side, $quantity]);
-    $existing = $dupStmt->fetch(PDO::FETCH_ASSOC);
-    if ($existing && bccomp((string)$existing['price'], (string)$price, 8) === 0
-        && strtotime($existing['created_at']) >= time() - 5) {
-        // A matching trade was recently recorded; return current data
-        $pdo->commit();
-        $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id=?');
-        $stmt->execute([$userId]);
-        $newBalance = $stmt->fetchColumn();
-        $wallets = getUserWallets($pdo, $userId);
-        echo json_encode([
-            'status' => 'ok',
-            'message' => 'Trade already recorded',
-            'price' => $existing['price'],
-            'new_balance' => $newBalance,
-            'wallets' => $wallets
-        ]);
+    $order = [
+        'id' => 0,
+        'user_id' => $userId,
+        'pair' => $pair,
+        'side' => $side,
+        'quantity' => $quantity
+    ];
+    $result = executeTrade($pdo, $order, $price);
+    if (!$result['ok']) {
+        $pdo->rollBack();
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => $result['msg']]);
         return;
     }
-
-    if ($side === 'buy') {
-        $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id = ? FOR UPDATE');
-        $stmt->execute([$userId]);
-        $balance = $stmt->fetchColumn();
-        if ($balance === false || $balance < $total) {
-            $pdo->rollBack();
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Solde insuffisant']);
-            exit;
-        }
-        $pdo->prepare('UPDATE personal_data SET balance = balance - ? WHERE user_id = ?')
-            ->execute([$total, $userId]);
-        $newBalance = $balance - $total;
-        addToWallet($pdo, $userId, $base, $quantity, $price);
-        $profit = 0;
-    } else {
-        $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id = ? FOR UPDATE');
-        $stmt->execute([$userId]);
-        $balance = $stmt->fetchColumn();
-        $purchase = deductFromWallet($pdo, $userId, $base, $quantity, $price);
-        if ($purchase === false) {
-            $pdo->rollBack();
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Solde insuffisant']);
-            exit;
-        }
-        $pdo->prepare('UPDATE personal_data SET balance = balance + ? WHERE user_id = ?')
-            ->execute([$total, $userId]);
-        $newBalance = $balance + $total;
-        $profit = ($price - $purchase) * $quantity;
-    }
-    $stmt = $pdo->prepare(
-        'INSERT INTO trades (user_id, pair, side, quantity, price, total_value, fee, profit_loss) '
-        . 'VALUES (?,?,?,?,?,?,0,?)'
-    );
-    $stmt->execute([$userId, $pair, $side, $quantity, $price, $total, $profit]);
-    $tradeId = $pdo->lastInsertId();
-    $opNum = 'T' . $tradeId;
-    addHistory($pdo, $userId, $opNum, $pair, $side, $quantity, $price, 'complet', $profit);
     $pdo->commit();
+    $newBalance = $result['balance'];
+    $opNum = $result['operation'];
+    $profit = $result['profit'];
+    $price = $result['price'];
 
     require_once __DIR__.'/../utils/poll.php';
     pushEvent('balance_updated', ['newBalance' => $newBalance], $userId);

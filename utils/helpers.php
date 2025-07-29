@@ -91,6 +91,23 @@ function executeTrade(PDO $pdo, array $order, float $price) {
         if ($check->fetchColumn()) {
             return ['ok' => false, 'msg' => 'Order already filled'];
         }
+    } else {
+        $dup = $pdo->prepare(
+            'SELECT price, created_at FROM trades
+             WHERE user_id=? AND pair=? AND side=? AND quantity=?
+             ORDER BY id DESC LIMIT 1'
+        );
+        $dup->execute([
+            $order['user_id'],
+            $order['pair'],
+            $order['side'],
+            $order['quantity']
+        ]);
+        $ex = $dup->fetch(PDO::FETCH_ASSOC);
+        if ($ex && bccomp((string)$ex['price'], (string)$price, 8) === 0 &&
+            strtotime($ex['created_at']) >= time() - 5) {
+            return ['ok' => false, 'msg' => 'Trade already recorded'];
+        }
     }
     $total = $price * $order['quantity'];
     if ($order['side'] === 'buy') {
@@ -114,12 +131,19 @@ function executeTrade(PDO $pdo, array $order, float $price) {
     }
     $stmt = $pdo->prepare('INSERT INTO trades (user_id,order_id,pair,side,quantity,price,total_value,fee,profit_loss) VALUES (?,?,?,?,?,?,?,0,?)');
     $stmt->execute([$order['user_id'], $order['id'], $order['pair'], $order['side'], $order['quantity'], $price, $total, $profit]);
+    $tradeId = $pdo->lastInsertId();
     $pdo->prepare('UPDATE orders SET status="filled",price_at_execution=?,executed_at=NOW() WHERE id=?')->execute([$price, $order['id']]);
-    $opNum = 'T' . $order['id'];
+    $opNum = 'T' . ($order['id'] ?: $tradeId);
     addHistory($pdo, $order['user_id'], $opNum, $order['pair'], $order['side'], $order['quantity'], $price, 'complet', $profit);
     if (!empty($order['related_order_id'])) {
         $pdo->prepare("UPDATE orders SET status='cancelled' WHERE id=? AND status IN ('open','triggered')")->execute([$order['related_order_id']]);
     }
-    return ['ok' => true, 'balance' => $newBal, 'price' => $price];
+    return [
+        'ok' => true,
+        'balance' => $newBal,
+        'price' => $price,
+        'profit' => $profit,
+        'operation' => $opNum
+    ];
 }
 ?>
