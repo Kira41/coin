@@ -265,30 +265,58 @@ const currencyNames = {
     usdc: 'USD Coin'
 };
 
-function renderWalletTable(wallets = dashboardData.personalData.wallets || []) {
-    const $tbody = $('#walletTableBody');
-    $tbody.empty();
-    wallets.forEach(w => {
-        const row = `<tr data-id="${escapeHtml(w.id)}">
-                <td>${escapeHtml(currencyNames[w.currency] || w.currency)}</td>
-                <td>${escapeHtml(w.network)}</td>
+function buildWalletRow(w) {
+    return `<tr data-id="${escapeHtml(w.id)}">
+                <td class="wallet-currency">${escapeHtml(currencyNames[w.currency] || w.currency)}</td>
+                <td class="wallet-network">${escapeHtml(w.network)}</td>
                 <td class="wallet-address">${escapeHtml(w.address || '---')}</td>
-                <td>${formatCrypto(w.amount)} ${escapeHtml((w.currency || '').toUpperCase())}</td>
-                <td>${formatDollar(w.usd_value || 0)}</td>
+                <td class="wallet-amount">${formatCrypto(w.amount)} ${escapeHtml((w.currency || '').toUpperCase())}</td>
+                <td class="wallet-usd">${formatDollar(w.usd_value || 0)}</td>
                 <td>
                     <button class="btn btn-sm btn-outline-primary me-1 wallet-edit" data-id="${escapeHtml(w.id)}"><i class="fas fa-edit"></i></button>
                     <button class="btn btn-sm btn-outline-danger wallet-delete" data-id="${escapeHtml(w.id)}"><i class="fas fa-trash"></i></button>
                 </td>
             </tr>`;
-        $tbody.append(row);
+}
+
+function renderWalletTable(wallets = dashboardData.personalData.wallets || []) {
+    const $tbody = $('#walletTableBody');
+    $tbody.empty();
+    wallets.forEach(w => {
+        $tbody.append(buildWalletRow(w));
     });
+}
+
+function updateWalletTable(wallets = []) {
+    const $tbody = $('#walletTableBody');
+    const existingRows = {};
+    $tbody.find('tr[data-id]').each(function () {
+        existingRows[$(this).data('id')] = $(this);
+    });
+
+    wallets.forEach(w => {
+        const id = String(w.id);
+        const $row = existingRows[id];
+        if ($row && $row.length) {
+            $row.find('.wallet-network').text(w.network);
+            $row.find('.wallet-address').text(w.address || '---');
+            $row.find('.wallet-amount').text(`${formatCrypto(w.amount)} ${ (w.currency || '').toUpperCase()}`);
+            $row.find('.wallet-usd').text(formatDollar(w.usd_value || 0));
+            delete existingRows[id];
+        } else {
+            $tbody.append(buildWalletRow(w));
+        }
+    });
+
+    Object.values(existingRows).forEach($row => $row.remove());
 }
 
 async function fetchWallets() {
     try {
         const data = await apiFetch('php/get_wallets.php?user_id=' + encodeURIComponent(userId));
-        dashboardData.personalData.wallets = data.wallets || [];
-        renderWalletTable();
+        const wallets = data.wallets || [];
+        dashboardData.personalData.wallets = wallets;
+        updateWalletTable(wallets);
     } catch (err) {
         console.error('Failed to fetch wallet addresses', err.message || err);
     }
@@ -562,7 +590,7 @@ function initializeUI() {
         renderDepositHistory();
         renderWithdrawHistory();
         renderTradingHistory();
-        renderWalletTable();
+        updateWalletTable(dashboardData.personalData.wallets);
         loadTransactions();
         updatePlatformBankDetails();
     };
@@ -1554,7 +1582,7 @@ function initializeUI() {
                     wallets.push(w);
                     dashboardData.personalData.wallets = wallets;
                 }
-                renderWalletTable(wallets);
+                updateWalletTable(wallets);
             } else {
                 const baseCurr = pair.replace(/USD$/, '').toLowerCase();
                 let wallets = dashboardData.personalData.wallets || [];
@@ -1562,7 +1590,7 @@ function initializeUI() {
                 if (w) {
                     w.amount = Math.max(0, parseFloat(w.amount || 0) - amount);
                 }
-                renderWalletTable(wallets);
+                updateWalletTable(wallets);
             }
             saveDashboardData();
             updateBalances();
