@@ -60,7 +60,7 @@ try {
         $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id = ? FOR UPDATE');
         $stmt->execute([$userId]);
         $balance = $stmt->fetchColumn();
-        $purchase = deductFromWallet($pdo, $userId, $base, $quantity);
+        $purchase = deductFromWallet($pdo, $userId, $base, $quantity, $price);
         if ($purchase === false) {
             $pdo->rollBack();
             http_response_code(400);

@@ -17,15 +17,15 @@ function addToWallet(PDO $pdo, int $uid, string $cur, float $amt, float $price):
     if ($row) {
         $new = $row['amount'] + $amt;
         $avg = ($row['amount'] * $row['purchase_price'] + $amt * $price) / $new;
-        $pdo->prepare('UPDATE wallets SET amount=?, purchase_price=? WHERE user_id=? AND currency=?')
-            ->execute([$new, $avg, $uid, $cur]);
+        $pdo->prepare('UPDATE wallets SET amount=?, purchase_price=?, usd_value=? WHERE user_id=? AND currency=?')
+            ->execute([$new, $avg, $new * $price, $uid, $cur]);
     } else {
-        $pdo->prepare('INSERT INTO wallets (user_id,currency,amount,address,label,purchase_price) VALUES (?,?,?,?,?,?)')
-            ->execute([$uid, $cur, $amt, 'local address', strtoupper($cur), $price]);
+        $pdo->prepare('INSERT INTO wallets (user_id,currency,amount,address,label,purchase_price,usd_value) VALUES (?,?,?,?,?,?,?)')
+            ->execute([$uid, $cur, $amt, 'local address', strtoupper($cur), $price, $amt * $price]);
     }
 }
 
-function deductFromWallet(PDO $pdo, int $uid, string $cur, float $amt) {
+function deductFromWallet(PDO $pdo, int $uid, string $cur, float $amt, float $price) {
     $cur = strtolower($cur);
     $st = $pdo->prepare('SELECT amount,purchase_price FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
     $st->execute([$uid, $cur]);
@@ -35,7 +35,8 @@ function deductFromWallet(PDO $pdo, int $uid, string $cur, float $amt) {
     }
     $new = $row['amount'] - $amt;
     if ($new > 0) {
-        $pdo->prepare('UPDATE wallets SET amount=? WHERE user_id=? AND currency=?')->execute([$new, $uid, $cur]);
+        $pdo->prepare('UPDATE wallets SET amount=?, usd_value=? WHERE user_id=? AND currency=?')
+            ->execute([$new, $new * $price, $uid, $cur]);
     } else {
         $pdo->prepare('DELETE FROM wallets WHERE user_id=? AND currency=?')->execute([$uid, $cur]);
     }
@@ -96,7 +97,7 @@ function executeTrade(PDO $pdo, array $order, float $price) {
         $st = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id=? FOR UPDATE');
         $st->execute([$order['user_id']]);
         $bal = $st->fetchColumn();
-        $purchase = deductFromWallet($pdo, $order['user_id'], $base, $order['quantity']);
+        $purchase = deductFromWallet($pdo, $order['user_id'], $base, $order['quantity'], $price);
         if ($purchase === false) return ['ok' => false, 'msg' => 'Solde insuffisant'];
         $pdo->prepare('UPDATE personal_data SET balance=balance+? WHERE user_id=?')->execute([$total, $order['user_id']]);
         $newBal = $bal + $total;

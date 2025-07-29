@@ -60,10 +60,11 @@ a modal where you can update the address or its label. The **trash** icon
 removes the wallet entirely. Edits and deletions are sent to
 `get_wallets.php`, and the wallet list refreshes immediately to show the latest
 data. The wallet table on the user dashboard now also displays the current
-balance for each address. A separate cron task `cron_wallet_usd.php` updates the
-`usd_value` column of every wallet by fetching live prices from Binance. This
-value is shown in the wallet table so users can see the approximate amount in
-USD for each of their crypto holdings.
+balance for each address. Wallet entries track their value in USD and this field
+is updated whenever a trade executes. The optional `cron_wallet_usd.php` task can
+refresh the value periodically for inactive accounts. This value is shown in the
+wallet table so users can see the approximate amount in USD for each of their
+crypto holdings.
 
 The trading history table was updated as well. Amounts are shown with the
 traded coin symbol instead of dollars, e.g. `100 XRP`.
@@ -97,7 +98,9 @@ Use `admin_login.php` to sign in. POST `email` and `password`; a successful logi
 
 ## Automated trade closing
 
-To keep wallet values in sync with the market, schedule `cron_wallet_usd.php` as well:
+Wallet USD amounts are updated immediately whenever a trade executes. You can still
+schedule `cron_wallet_usd.php` for periodic refreshes if no trading activity
+occurs:
 
 ```cron
 * * * * * php /path/to/cron_wallet_usd.php
@@ -119,9 +122,9 @@ $total = $price * $quantity;
 if ($side === 'buy') {
     // deduct dollars from the user's account balance
     deductFromAccount($userId, $total);
-    addOrUpdateWallet($userId, $base, $quantity, 'local address');
+    addToWallet($userId, $base, $quantity, $price);
 } else {
-    deductFromWallet($userId, $base, $quantity);
+    deductFromWallet($userId, $base, $quantity, $price);
     // credit dollars back to the account
     addToAccount($userId, $total);
 }
