@@ -261,7 +261,11 @@ const currencyNames = {
     btc: 'Bitcoin',
     bch: 'Bitcoin Cash',
     eth: 'Ethereum',
+    ada: 'Cardano',
+    dot: 'Polkadot',
+    link: 'Chainlink',
     ltc: 'Litecoin',
+    xrp: 'Ripple',
     usdt: 'Tether',
     usdc: 'USD Coin'
 };
@@ -1165,7 +1169,11 @@ function initializeUI() {
         btc: ['Bitcoin'],
         bch: ['BCH'],
         eth: ['ERC20', 'BEP20', 'TRC20'],
+        ada: ['Cardano'],
+        dot: ['Polkadot'],
+        link: ['ERC20'],
         ltc: ['Litecoin'],
+        xrp: ['Ripple'],
         usdt: ['ERC20', 'BEP20', 'TRC20'],
         usdc: ['ERC20', 'BEP20', 'TRC20']
     };
@@ -1294,6 +1302,7 @@ function initializeUI() {
             $row.children().eq(1).text(network);
             $row.find('.wallet-address').text(address);
             $('#editWalletModal').modal('hide');
+            await fetchWallets();
         } catch (err) {
             console.error('Failed to update wallet', err.message || err);
             alert(err.message || 'Erreur lors de la mise \u00e0 jour');
