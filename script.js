@@ -79,9 +79,12 @@ $(function() {
     $('#tradeAmount').on('input', updateTradeAmountEquivalent);
 
     $('#useCurrentLimitPrice').on('click', function() {
-        const priceNum = parseFloat(currentPrice);
-        if (!isNaN(priceNum)) {
-            $('#limitPrice').val(priceNum.toFixed(2));
+        const changeText = $('#priceChange').text();
+        const changeNum = parseFloat(changeText);
+        if (!isNaN(changeNum)) {
+            $('#limitPrice').val(changeNum);
+        } else {
+            $('#limitPrice').val(changeText);
         }
     });
 
