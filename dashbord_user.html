@@ -217,7 +217,7 @@
 <label class="form-label" for="tradeAmount">Montant</label>
 <div class="input-group">
 <input class="form-control" name="tradeAmount" id="tradeAmount" min="0.01" placeholder="Entrez le montant" required="" step="0.01" type="number"/>
-<span class="input-group-text">USD</span>
+<span class="input-group-text" id="tradeAmountCurrency">USD</span>
 </div>
 <div class="form-text">Solde disponible : <span class="fw-bold" id="soldeintrade">---</span>
 </div>
@@ -236,15 +236,21 @@
 <div class="mb-3" id="stopPriceDiv" style="display: none;">
 <label class="form-label" for="stopPrice">Prix stop</label>
 <div class="input-group">
-<input class="form-control" name="stopPrice" id="stopPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
-<span class="input-group-text">USD</span>
+  <input class="form-control" name="stopPrice" id="stopPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
+  <span class="input-group-text">USD</span>
+  <button class="btn btn-outline-secondary" id="useCurrentStopPrice" type="button">
+    <i class="fas fa-bolt"></i>
+  </button>
 </div>
 </div>
 <div class="mb-3" id="limitPriceDiv" style="display: none;">
 <label class="form-label" for="limitPrice">Prix limite</label>
 <div class="input-group">
-<input class="form-control" name="limitPrice" id="limitPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
-<span class="input-group-text">USD</span>
+  <input class="form-control" name="limitPrice" id="limitPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
+  <span class="input-group-text">USD</span>
+  <button class="btn btn-outline-secondary" id="useCurrentLimitPrice" type="button">
+    <i class="fas fa-bolt"></i>
+  </button>
 </div>
 <div class="mb-3" id="stopLimitPriceDiv" style="display: none;">
 <label class="form-label" for="stopLimitPrice">Prix limite du stop</label>
