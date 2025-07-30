@@ -1637,7 +1637,13 @@ function initializeUI() {
             resetTradeButtons();
             return;
         }
-        const amount = parseFloat($('#tradeAmount').val());
+        let amount = parseFloat($('#tradeAmount').val());
+        if ($('#tradeAmountCurrency').data('show') === 'quote') {
+            const p = parseFloat(currentPrice);
+            if (!isNaN(p)) {
+                amount = amount / p;
+            }
+        }
         if (!amount) {
             alert('Veuillez entrer un montant valide');
             resetTradeButtons();
