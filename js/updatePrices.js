@@ -42,6 +42,13 @@ function formatCrypto(num) {
     });
 }
 
+function formatCryptoFixed(num, digits = 5) {
+    return Number(num).toLocaleString('en-US', {
+        minimumFractionDigits: digits,
+        maximumFractionDigits: digits
+    });
+}
+
 function escapeHtml(str) {
     return String(str)
         .replace(/&/g, '&amp;')
@@ -1410,7 +1417,7 @@ function initializeUI() {
                         <td>${escapeHtml(trade.temps)}</td>
                         <td>${escapeHtml(trade.paireDevises)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutTypeClass)}">${escapeHtml(trade.type)}</span></td>
-                        <td>${formatCrypto(trade.montant)} ${escapeHtml((trade.paireDevises||'').split('/')[0])}</td>
+                        <td>${formatCryptoFixed(trade.montant)} ${escapeHtml((trade.paireDevises||'').split('/')[0])}</td>
                         <td>${formatDollar(trade.prix)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutClass)}">${escapeHtml(trade.statut)}</span></td>
                         <td class="${escapeHtml(profitCls)}" data-profit>${profitText}</td>
