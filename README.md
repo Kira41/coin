@@ -67,7 +67,9 @@ wallet table so users can see the approximate amount in USD for each of their
 crypto holdings.
 
 The trading history table was updated as well. Amounts are shown with the
-traded coin symbol instead of dollars, e.g. `100 XRP`.
+traded coin symbol instead of dollars, e.g. `100 XRP`. The database now stores
+trade quantities and prices with up to ten decimal places so small orders such
+as `0.005 BTC` are recorded accurately.
 
 ## Admin dashboard
 
