@@ -11,6 +11,8 @@ userId = userId ? parseInt(userId) : null;
 let dashboardInitialized = false;
 let autoRefreshHandle = null;
 let tradePending = false;
+// Expose the latest fetched price globally for other scripts
+var currentPrice = 0;
 
 // Trigger immediate refresh on user interactions
 function triggerTurboRefresh() {
@@ -1397,7 +1399,7 @@ function initializeUI() {
         return symbol;
     }
 
-    let currentPrice = 0;
+    currentPrice = 0;
     let currentPricePair = '';
     let priceChange = 0;
 
