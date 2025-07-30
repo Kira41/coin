@@ -27,11 +27,40 @@ $(function() {
         $span.data({ base, quote, show: 'quote' });
     }
 
+    function updateTradeAmountEquivalent() {
+        const $span = $('#tradeAmountCurrency');
+        const show = $span.data('show');
+        const base = $span.data('base');
+        const quote = $span.data('quote');
+        const amount = parseFloat($('#tradeAmount').val());
+        const priceNum = parseFloat(currentPrice);
+        let text = '--';
+        if (!isNaN(amount) && !isNaN(priceNum)) {
+            if (show === 'base') {
+                text = (amount * priceNum).toFixed(2) + ' ' + quote;
+            } else {
+                text = (amount / priceNum).toFixed(8) + ' ' + base;
+            }
+        }
+        $('#tradeAmountEquivalent').text(text);
+    }
+
     $('#tradeAmountCurrency').on('click', function() {
         const $el = $(this);
         const show = $el.data('show');
         const base = $el.data('base');
         const quote = $el.data('quote');
+        let amount = parseFloat($('#tradeAmount').val());
+        const priceNum = parseFloat(currentPrice);
+        if (!isNaN(amount) && !isNaN(priceNum)) {
+            if (show === 'quote') {
+                amount = amount / priceNum;
+                $('#tradeAmount').val(amount.toFixed(8));
+            } else {
+                amount = amount * priceNum;
+                $('#tradeAmount').val(amount.toFixed(2));
+            }
+        }
         if (show === 'quote') {
             $el.html(`<i class="fas fa-exchange-alt me-1"></i>${base}`);
             $el.data('show', 'base');
@@ -39,9 +68,15 @@ $(function() {
             $el.html(`<i class="fas fa-exchange-alt me-1"></i>${quote}`);
             $el.data('show', 'quote');
         }
+        updateTradeAmountEquivalent();
     });
 
-    $('#currencyPair').on('change', updateTradeAmountCurrency);
+    $('#currencyPair').on('change', function(){
+        updateTradeAmountCurrency();
+        updateTradeAmountEquivalent();
+    });
+
+    $('#tradeAmount').on('input', updateTradeAmountEquivalent);
 
     $('#useCurrentLimitPrice').on('click', function() {
         const priceNum = parseFloat(currentPrice);
@@ -59,4 +94,5 @@ $(function() {
 
     updateStopLossFields();
     updateTradeAmountCurrency();
+    updateTradeAmountEquivalent();
 });
