@@ -35,6 +35,16 @@ try {
     $livePrice = getLivePrice($pair);
     if($livePrice<=0) $livePrice = 0.0;
 
+    // Verify the live price using a historical quote to ensure the pair refers
+    // to the intended cryptocurrency. Reject the order if prices differ greatly
+    // or the historical lookup fails.
+    $hist = getHistoricalPrice($pair, time());
+    if($hist<=0 || ($livePrice>0 && abs($hist-$livePrice)/$livePrice>0.1)){
+        http_response_code(400);
+        echo json_encode(['status'=>'error','message'=>'Price verification failed']);
+        exit;
+    }
+
     // prevent overselling by checking pending sell orders
     if($type!=='market' && $side==='sell'){
         [$base] = explode('/', strtoupper($pair));

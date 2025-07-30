@@ -36,6 +36,15 @@ try {
         echo json_encode(['status' => 'error', 'message' => 'Failed to fetch price']);
         exit;
     }
+
+    // Verify the returned price using a historical quote to ensure the pair
+    // matches the expected cryptocurrency.
+    $hist = getHistoricalPrice($pair, time());
+    if ($hist <= 0 || abs($hist - $price) / $price > 0.1) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => 'Price verification failed']);
+        exit;
+    }
     $total = $price * $quantity;
 
     $pdo->beginTransaction();
