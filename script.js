@@ -76,7 +76,8 @@ $(function() {
         updateTradeAmountEquivalent();
     });
 
-    $('#tradeAmount').on('input', updateTradeAmountEquivalent);
+    // Update the equivalent value whenever the amount is changed or typed
+    $('#tradeAmount').on('input keyup change', updateTradeAmountEquivalent);
 
     $('#useCurrentLimitPrice').on('click', function() {
         const priceText = $('#currentPrice').text().replace(/[^0-9.-]/g, '');
