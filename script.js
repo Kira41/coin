@@ -79,17 +79,16 @@ $(function() {
     $('#tradeAmount').on('input', updateTradeAmountEquivalent);
 
     $('#useCurrentLimitPrice').on('click', function() {
-        const changeText = $('#priceChange').text();
-        const changeNum = parseFloat(changeText);
-        if (!isNaN(changeNum)) {
-            $('#limitPrice').val(changeNum);
-        } else {
-            $('#limitPrice').val(changeText);
+        const priceText = $('#currentPrice').text().replace(/[^0-9.-]/g, '');
+        const priceNum = parseFloat(priceText);
+        if (!isNaN(priceNum)) {
+            $('#limitPrice').val(priceNum.toFixed(2));
         }
     });
 
     $('#useCurrentStopPrice').on('click', function() {
-        const priceNum = parseFloat(currentPrice);
+        const priceText = $('#currentPrice').text().replace(/[^0-9.-]/g, '');
+        const priceNum = parseFloat(priceText);
         if (!isNaN(priceNum)) {
             $('#stopPrice').val(priceNum.toFixed(2));
         }
