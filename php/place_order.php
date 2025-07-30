@@ -128,7 +128,13 @@ try {
     require_once __DIR__.'/../cron/cron_process_orders.php';
     require_once __DIR__.'/../cron/cron_wallet_usd.php';
 
-    echo json_encode(['status'=>'ok','order_id'=>$id]);
+    [$base] = explode('/', strtoupper($pair));
+    $typeLabel = str_replace('_', ' ', $type);
+    $actionMsg = $side === 'buy'
+        ? "Ordre {$typeLabel} d'achat de {$qty} {$base} enregist\xC3\xA9"
+        : "Ordre {$typeLabel} de vente de {$qty} {$base} enregist\xC3\xA9";
+
+    echo json_encode(['status' => 'ok', 'order_id' => $id, 'message' => $actionMsg]);
 } catch(Throwable $e){
     if(isset($pdo)&&$pdo->inTransaction()) $pdo->rollBack();
     http_response_code(500);
