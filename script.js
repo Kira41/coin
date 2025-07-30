@@ -23,7 +23,7 @@ $(function() {
         const base = parts[0] || 'BTC';
         const quote = parts[1] || 'USD';
         const $span = $('#tradeAmountCurrency');
-        $span.text(quote);
+        $span.html(`<i class="fas fa-exchange-alt me-1"></i>${quote}`);
         $span.data({ base, quote, show: 'quote' });
     }
 
@@ -33,10 +33,10 @@ $(function() {
         const base = $el.data('base');
         const quote = $el.data('quote');
         if (show === 'quote') {
-            $el.text(base);
+            $el.html(`<i class="fas fa-exchange-alt me-1"></i>${base}`);
             $el.data('show', 'base');
         } else {
-            $el.text(quote);
+            $el.html(`<i class="fas fa-exchange-alt me-1"></i>${quote}`);
             $el.data('show', 'quote');
         }
     });
@@ -44,14 +44,16 @@ $(function() {
     $('#currencyPair').on('change', updateTradeAmountCurrency);
 
     $('#useCurrentLimitPrice').on('click', function() {
-        if (typeof currentPrice !== 'undefined') {
-            $('#limitPrice').val(currentPrice.toFixed(2));
+        const priceNum = parseFloat(currentPrice);
+        if (!isNaN(priceNum)) {
+            $('#limitPrice').val(priceNum.toFixed(2));
         }
     });
 
     $('#useCurrentStopPrice').on('click', function() {
-        if (typeof currentPrice !== 'undefined') {
-            $('#stopPrice').val(currentPrice.toFixed(2));
+        const priceNum = parseFloat(currentPrice);
+        if (!isNaN(priceNum)) {
+            $('#stopPrice').val(priceNum.toFixed(2));
         }
     });
 
