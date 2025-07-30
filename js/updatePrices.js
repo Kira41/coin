@@ -1391,6 +1391,7 @@ function initializeUI() {
     }
 
     let currentPrice = 0;
+    let currentPricePair = '';
     let priceChange = 0;
 
     function renderTradingHistory() {
@@ -1432,6 +1433,7 @@ function initializeUI() {
     }
 
     function fetchPrice(pair) {
+        currentPricePair = pair;
         const symbol = getBinanceSymbol(pair);
         fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`)
             .then(r => r.json())
@@ -1623,6 +1625,11 @@ function initializeUI() {
         tradePending = true;
         const isBuy = this.id === 'buyBtn';
         const pair = $('#currencyPair').val();
+        if (pair !== currentPricePair) {
+            alert('Le prix affiché ne correspond pas à la paire sélectionnée. Veuillez patienter pour la mise à jour du prix.');
+            resetTradeButtons();
+            return;
+        }
         const amount = parseFloat($('#tradeAmount').val());
         if (!amount) {
             alert('Veuillez entrer un montant valide');

@@ -9,6 +9,27 @@ function getLivePrice(string $pair): float {
     return isset($data['price']) ? (float)$data['price'] : 0.0;
 }
 
+/**
+ * Fetch the historical closing price for a currency pair from CryptoCompare.
+ * The timestamp should be a Unix epoch (seconds).
+ * Returns 0 on failure.
+ */
+function getHistoricalPrice(string $pair, int $timestamp): float {
+    [$base, $quote] = explode('/', strtoupper($pair));
+    // CryptoCompare expects USD rather than USDT
+    if ($quote === 'USDT') {
+        $quote = 'USD';
+    }
+    $url = sprintf(
+        'https://min-api.cryptocompare.com/data/pricehistorical?fsym=%s&tsyms=%s&ts=%d',
+        urlencode($base), urlencode($quote), $timestamp
+    );
+    $json = @file_get_contents($url);
+    if ($json === false) return 0.0;
+    $data = json_decode($json, true);
+    return isset($data[$base][$quote]) ? (float)$data[$base][$quote] : 0.0;
+}
+
 function addToWallet(PDO $pdo, int $uid, string $cur, float $amt, float $price): void {
     $cur = strtolower($cur);
     $st = $pdo->prepare('SELECT amount,purchase_price FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
