@@ -13,6 +13,9 @@ let autoRefreshHandle = null;
 let tradePending = false;
 // Expose the latest fetched price globally for other scripts
 var currentPrice = 0;
+// Track the currently selected trading pair
+let selectedPairVal = $('#currencyPair').val();
+let selectedPairText = $('#currencyPair option:selected').text();
 
 // Trigger immediate refresh on user interactions
 function triggerTurboRefresh() {
@@ -1518,7 +1521,7 @@ function initializeUI() {
     }
 
     window.handleNewOrder = function(data) {
-        let pair = data.pair || $('#currencyPair option:selected').text();
+        let pair = data.pair || selectedPairText;
         if (pair && !pair.includes('/')) {
             pair = pair.replace(/(USDT|USD)$/, '/$1');
         }
@@ -1624,8 +1627,9 @@ function initializeUI() {
 
 
     $('#currencyPair').on('change', function () {
-        const pair = $(this).val();
-        fetchPrice(pair);
+        selectedPairVal = $(this).val();
+        selectedPairText = $('#currencyPair option:selected').text();
+        fetchPrice(selectedPairVal);
     });
 
     $('#orderType').on('change', function () {
@@ -1644,8 +1648,8 @@ function initializeUI() {
         if (tradePending) return;
         tradePending = true;
         const isBuy = this.id === 'buyBtn';
-        const pairVal = $('#currencyPair').val();
-        const pairText = $('#currencyPair option:selected').text();
+        const pairVal = selectedPairVal;
+        const pairText = selectedPairText;
         if (pairVal !== currentPricePair) {
             alert('Le prix affiché ne correspond pas à la paire sélectionnée. Veuillez patienter pour la mise à jour du prix.');
             resetTradeButtons();
@@ -1725,7 +1729,7 @@ function initializeUI() {
 
             if (!resp.wallets) {
                 if (isBuy) {
-                    const baseCurr = pairVal.replace(/USD$/, '').toLowerCase();
+                    const baseCurr = selectedPairVal.replace(/USD$/, '').toLowerCase();
                     let wallets = dashboardData.personalData.wallets || [];
                     let w = wallets.find(x => x.currency === baseCurr);
                     if (w) {
@@ -1744,7 +1748,7 @@ function initializeUI() {
                     }
                     updateWalletTable(wallets);
                 } else {
-                    const baseCurr = pairVal.replace(/USD$/, '').toLowerCase();
+                    const baseCurr = selectedPairVal.replace(/USD$/, '').toLowerCase();
                     let wallets = dashboardData.personalData.wallets || [];
                     let w = wallets.find(x => x.currency === baseCurr);
                     if (w) {
@@ -1766,8 +1770,8 @@ function initializeUI() {
         resetTradeButtons();
     });
 
-    fetchPrice($('#currencyPair').val());
-    setInterval(() => fetchPrice($('#currencyPair').val()), 1000);
+    fetchPrice(selectedPairVal);
+    setInterval(() => fetchPrice(selectedPairVal), 1000);
     renderTradingHistory();
 
     const $loginHistoryBody = $('#loginHistoryBody');
@@ -1830,8 +1834,8 @@ function initializeUI() {
 
     $('#setStopLoss').on('click', async function(){
         if(!userId) return;
-        const pairVal = $('#currencyPair').val();
-        const pairText = $('#currencyPair option:selected').text();
+        const pairVal = selectedPairVal;
+        const pairText = selectedPairText;
         const qty = parseFloat($('#tradeAmount').val()) || 0;
         const typeMap = { price:'stop', percentage:'percentage_stop', time:'time_stop', trailing:'trailing_stop' };
         const slType = $('#stopLossType').val();
