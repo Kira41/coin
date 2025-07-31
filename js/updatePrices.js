@@ -1515,10 +1515,14 @@ function initializeUI() {
     }
 
     window.handleNewOrder = function(data) {
+        let pair = data.pair || $('#currencyPair option:selected').text();
+        if (pair && !pair.includes('/')) {
+            pair = pair.replace(/(USDT|USD)$/, '/$1');
+        }
         const order = {
             operationNumber: data.operation_number || 'T' + Date.now(),
             temps: new Date().toLocaleString(),
-            paireDevises: data.pair,
+            paireDevises: pair,
             type: data.side === 'buy' ? 'Acheter' : 'Vendre',
             statutTypeClass: data.side === 'buy' ? 'bg-success' : 'bg-danger',
             montant: parseFloat(data.quantity),
@@ -1542,10 +1546,14 @@ function initializeUI() {
             order.profitPerte = data.profit_loss || 0;
             order.profitClass = order.profitPerte >= 0 ? 'text-success' : 'text-danger';
         } else {
+            let pair = data.pair;
+            if (pair && !pair.includes('/')) {
+                pair = pair.replace(/(USDT|USD)$/, '/$1');
+            }
             order = {
                 operationNumber: op,
                 temps: new Date().toLocaleString(),
-                paireDevises: data.pair,
+                paireDevises: pair,
                 type: data.side === 'buy' ? 'Acheter' : 'Vendre',
                 statutTypeClass: data.side === 'buy' ? 'bg-success' : 'bg-danger',
                 montant: parseFloat(data.quantity),
@@ -1633,8 +1641,9 @@ function initializeUI() {
         if (tradePending) return;
         tradePending = true;
         const isBuy = this.id === 'buyBtn';
-        const pair = $('#currencyPair').val();
-        if (pair !== currentPricePair) {
+        const pairVal = $('#currencyPair').val();
+        const pairText = $('#currencyPair option:selected').text();
+        if (pairVal !== currentPricePair) {
             alert('Le prix affiché ne correspond pas à la paire sélectionnée. Veuillez patienter pour la mise à jour du prix.');
             resetTradeButtons();
             return;
@@ -1654,9 +1663,7 @@ function initializeUI() {
         const orderType = $('#orderType').val();
         let price = currentPrice;
         let cost = amount * price;
-        const apiPair = pair.includes('/')
-            ? pair
-            : pair.replace(/(USDT|USD)$/, '/$1');
+        const apiPair = pairText.includes('/') ? pairText : pairText.replace(/(USDT|USD)$/, '/$1');
         let resp;
         const payload = { user_id: userId, pair: apiPair, quantity: amount, side: isBuy ? 'buy' : 'sell', type: orderType };
         if (orderType === 'limit' || orderType === 'stoplimit' || orderType === 'oco') {
@@ -1715,7 +1722,7 @@ function initializeUI() {
 
             if (!resp.wallets) {
                 if (isBuy) {
-                    const baseCurr = pair.replace(/USD$/, '').toLowerCase();
+                    const baseCurr = pairVal.replace(/USD$/, '').toLowerCase();
                     let wallets = dashboardData.personalData.wallets || [];
                     let w = wallets.find(x => x.currency === baseCurr);
                     if (w) {
@@ -1734,7 +1741,7 @@ function initializeUI() {
                     }
                     updateWalletTable(wallets);
                 } else {
-                    const baseCurr = pair.replace(/USD$/, '').toLowerCase();
+                    const baseCurr = pairVal.replace(/USD$/, '').toLowerCase();
                     let wallets = dashboardData.personalData.wallets || [];
                     let w = wallets.find(x => x.currency === baseCurr);
                     if (w) {
@@ -1820,12 +1827,13 @@ function initializeUI() {
 
     $('#setStopLoss').on('click', async function(){
         if(!userId) return;
-        const pair = $('#currencyPair').val();
+        const pairVal = $('#currencyPair').val();
+        const pairText = $('#currencyPair option:selected').text();
         const qty = parseFloat($('#tradeAmount').val()) || 0;
         const typeMap = { price:'stop', percentage:'percentage_stop', time:'time_stop', trailing:'trailing_stop' };
         const slType = $('#stopLossType').val();
         const payload = { user_id:userId,
-            pair: pair.includes('/') ? pair : pair.replace(/(USDT|USD)$/, '/$1'),
+            pair: pairText.includes('/') ? pairText : pairText.replace(/(USDT|USD)$/, '/$1'),
             side:'sell', quantity: qty, type:typeMap[slType] };
         if(slType==='price') payload.stop_price=parseFloat($('#stopLossPrice').val());
         if(slType==='percentage') payload.stop_percentage=parseFloat($('#stopLossPercentage').val());
