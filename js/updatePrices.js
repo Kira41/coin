@@ -1442,17 +1442,20 @@ function initializeUI() {
     }
 
     function fetchPrice(pair) {
+        const fetchFor = pair;
         currentPricePair = pair;
         const symbol = getBinanceSymbol(pair);
         fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`)
             .then(r => r.json())
             .then(info => {
+                if (currentPricePair !== fetchFor) return; // ignore stale response
                 currentPrice = parseFloat(info.lastPrice);
                 priceChange = parseFloat(info.priceChangePercent);
                 updatePriceUI();
                 // Market orders execute immediately; no pending conditions
             })
             .catch(() => {
+                if (currentPricePair !== fetchFor) return;
                 $('#currentPrice').text('N/A');
                 $('#priceChange').text('-');
             });
