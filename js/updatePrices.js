@@ -1655,6 +1655,11 @@ function initializeUI() {
             resetTradeButtons();
             return;
         }
+        if ($('#currencyPair').val() !== pairVal) {
+            alert("La paire sélectionnée a changé. Veuillez vérifier avant d'envoyer l'ordre.");
+            resetTradeButtons();
+            return;
+        }
         let amount = parseFloat($('#tradeAmount').val());
         if ($('#tradeAmountCurrency').data('show') === 'quote') {
             const p = parseFloat(currentPrice);
@@ -1836,6 +1841,10 @@ function initializeUI() {
         if(!userId) return;
         const pairVal = selectedPairVal;
         const pairText = selectedPairText;
+        if ($('#currencyPair').val() !== pairVal) {
+            alert("La paire sélectionnée a changé. Veuillez vérifier avant d'envoyer l'ordre.");
+            return;
+        }
         const qty = parseFloat($('#tradeAmount').val()) || 0;
         const typeMap = { price:'stop', percentage:'percentage_stop', time:'time_stop', trailing:'trailing_stop' };
         const slType = $('#stopLossType').val();
