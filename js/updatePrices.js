@@ -1673,23 +1673,55 @@ function initializeUI() {
             return;
         }
         const orderType = $('#orderType').val();
+        const allowedTypes = ['market', 'limit', 'stop', 'stoplimit', 'trailing_stop', 'oco'];
+        if (!allowedTypes.includes(orderType)) {
+            alert("Type d'ordre invalide");
+            resetTradeButtons();
+            return;
+        }
         let price = currentPrice;
         let cost = amount * price;
         const apiPair = pairText.includes('/') ? pairText : pairText.replace(/(USDT|USD)$/, '/$1');
         let resp;
-        const payload = { user_id: userId, pair: apiPair, quantity: amount, side: isBuy ? 'buy' : 'sell', type: orderType };
+        const serverOrderType = orderType === 'stoplimit' ? 'stop_limit' : orderType;
+        const payload = { user_id: userId, pair: apiPair, quantity: amount, side: isBuy ? 'buy' : 'sell', type: serverOrderType };
+
         if (orderType === 'limit' || orderType === 'stoplimit' || orderType === 'oco') {
-            payload.limit_price = parseFloat($('#limitPrice').val());
-            if (orderType === 'limit') cost = amount * payload.limit_price;
+            const limitPrice = parseFloat($('#limitPrice').val());
+            if (!limitPrice || limitPrice <= 0) {
+                alert('Veuillez entrer un prix limite valide');
+                resetTradeButtons();
+                return;
+            }
+            payload.limit_price = limitPrice;
+            if (orderType === 'limit') cost = amount * limitPrice;
         }
         if (orderType === 'stop' || orderType === 'stoplimit' || orderType === 'oco') {
-            payload.stop_price = parseFloat($('#stopPrice').val());
+            const stopPrice = parseFloat($('#stopPrice').val());
+            if (!stopPrice || stopPrice <= 0) {
+                alert('Veuillez entrer un prix stop valide');
+                resetTradeButtons();
+                return;
+            }
+            payload.stop_price = stopPrice;
         }
-        if (orderType === 'stoplimit' || orderType === 'oco') {
-            payload.stop_limit_price = parseFloat($('#stopLimitPrice').val());
+        if (orderType === 'oco') {
+            const stopLimitPrice = parseFloat($('#stopLimitPrice').val());
+            if (!stopLimitPrice || stopLimitPrice <= 0) {
+                alert('Veuillez entrer un prix limite du stop valide');
+                resetTradeButtons();
+                return;
+            }
+            payload.stop_limit_price = stopLimitPrice;
         }
         if (orderType === 'trailing_stop') {
-            payload.trailing_percentage = parseFloat($('#trailingPercentage').val());
+            const trailingPerc = parseFloat($('#trailingPercentage').val());
+            if (!trailingPerc || trailingPerc <= 0) {
+                alert('Veuillez entrer un pourcentage de trailing valide');
+                resetTradeButtons();
+                return;
+            }
+            payload.trailing_percentage = trailingPerc;
         }
 
         if (isBuy && orderType === 'market' &&
