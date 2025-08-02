@@ -53,7 +53,7 @@ try{
             exit;
         }
         if(isset($_GET['all'])){
-            if($isAdmin===1){
+            if($isAdmin===2){
                 $stmt=$pdo->query('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id ORDER BY k.created_at DESC');
             }else{
                 $stmt=$pdo->prepare('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id=? ORDER BY k.created_at DESC');
@@ -62,9 +62,13 @@ try{
             $rows=$stmt->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode(['status'=>'ok','kyc'=>$rows]);
         }else{
-            $sql='SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id=? AND k.status="pending"';
-            $stmt=$pdo->prepare($sql);
-            $stmt->execute([$adminId]);
+            if($isAdmin===2){
+                $stmt=$pdo->query('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE k.status="pending"');
+            }else{
+                $sql='SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id=? AND k.status="pending"';
+                $stmt=$pdo->prepare($sql);
+                $stmt->execute([$adminId]);
+            }
             $rows=$stmt->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode(['status'=>'ok','kyc'=>$rows]);
         }

@@ -17,13 +17,20 @@ if (isset($_SESSION['admin_id'])) {
     $adminId = (int)$m[1];
 }
 
-    $targetId = isset($_GET['admin_id']) ? (int)$_GET['admin_id'] : $adminId;
-
 if (!$adminId) {
     http_response_code(401);
     echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
     exit;
 }
+
+    $stmt = $pdo->prepare('SELECT is_admin FROM admins_agents WHERE id = ?');
+    $stmt->execute([$adminId]);
+    $isAdmin = (int)$stmt->fetchColumn();
+
+    $targetId = $adminId;
+    if ($isAdmin === 2 && isset($_GET['admin_id'])) {
+        $targetId = (int)$_GET['admin_id'];
+    }
 
 $page = isset($_GET['page']) ? max(1, (int)$_GET['page']) : 1;
 $pageSize = isset($_GET['page_size']) ? (int)$_GET['page_size'] : 10;
@@ -31,25 +38,36 @@ $pageSize = $pageSize > 0 ? min($pageSize, 100) : 10;
 $offset = ($page - 1) * $pageSize;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-$placeholders = [];
-$linkedIds = [$targetId];
-$agentsStmt = $pdo->prepare('SELECT id FROM admins_agents WHERE created_by = ?');
-$agentsStmt->execute([$targetId]);
-$agentIds = $agentsStmt->fetchAll(PDO::FETCH_COLUMN);
-if ($agentIds) {
-    $linkedIds = array_merge($linkedIds, $agentIds);
-}
-$placeholders = implode(',', array_fill(0, count($linkedIds), '?'));
+    $filterAll = ($isAdmin === 2 && !isset($_GET['admin_id']));
 
+if ($filterAll) {
+    $baseSql = "FROM transactions AS t
+        JOIN personal_data AS p ON p.user_id = t.user_id";
+    $params = [];
+    if ($search !== '') {
+        $baseSql .= " WHERE t.operationNumber LIKE ?";
+        $params[] = '%' . $search . '%';
+    }
+} else {
+    $placeholders = [];
+    $linkedIds = [$targetId];
+    $agentsStmt = $pdo->prepare('SELECT id FROM admins_agents WHERE created_by = ?');
+    $agentsStmt->execute([$targetId]);
+    $agentIds = $agentsStmt->fetchAll(PDO::FETCH_COLUMN);
+    if ($agentIds) {
+        $linkedIds = array_merge($linkedIds, $agentIds);
+    }
+    $placeholders = implode(',', array_fill(0, count($linkedIds), '?'));
 
-$baseSql = "FROM transactions AS t
+    $baseSql = "FROM transactions AS t
         JOIN personal_data AS p ON p.user_id = t.user_id
         WHERE p.linked_to_id IN ($placeholders)";
 
-$params = $linkedIds;
-if ($search !== '') {
-    $baseSql .= " AND t.operationNumber LIKE ?";
-    $params[] = '%' . $search . '%';
+    $params = $linkedIds;
+    if ($search !== '') {
+        $baseSql .= " AND t.operationNumber LIKE ?";
+        $params[] = '%' . $search . '%';
+    }
 }
 
 $countStmt = $pdo->prepare("SELECT COUNT(*) $baseSql");

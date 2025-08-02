@@ -626,6 +626,7 @@
                             <select class="form-select" id="agentRole">
                                 <option value="0">Agent</option>
                                 <option value="1">Administrateur</option>
+                                <option value="2">Super Administrateur</option>
                             </select>
                         </div>
                     </form>
@@ -658,6 +659,7 @@
                             <select class="form-select" id="editAgentRole">
                                 <option value="0">Agent</option>
                                 <option value="1">Administrateur</option>
+                                <option value="2">Super Administrateur</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -1211,6 +1213,7 @@
                 if (data.admin_id) ADMIN_ID = data.admin_id;
                 if (data.email) ADMIN_EMAIL = data.email;
                 IS_ADMIN = parseInt(data.is_admin || 0);
+                const IS_SUPER_ADMIN = IS_ADMIN === 2;
 
                 if (data.profile_pic) {
                     document.querySelectorAll('.user-avatar').forEach(img => {
@@ -1233,7 +1236,11 @@
                 const roleContainer = document.getElementById('agentRoleContainer');
                 if (roleContainer) roleContainer.style.display = IS_ADMIN ? 'block' : 'none';
                 const allBtn = document.getElementById('showAllDocsBtn');
-                if (allBtn) allBtn.style.display = IS_ADMIN ? 'inline-block' : 'none';
+                if (allBtn) allBtn.style.display = IS_SUPER_ADMIN ? 'inline-block' : 'none';
+
+                if (!IS_SUPER_ADMIN) {
+                    document.querySelectorAll('#agentRole option[value="2"], #editAgentRole option[value="2"]').forEach(el => el.remove());
+                }
 
                 const tbody = document.getElementById('usersTableBody');
                 tbody.innerHTML = '';
@@ -1268,9 +1275,10 @@
                         agentsBody.innerHTML = '<tr><td colspan="4" class="text-center">Aucune donnée disponible</td></tr>';
                     } else {
                         agents.forEach(a => {
-                            const roleBadge = parseInt(a.is_admin) === 1 ?
-                                '<span class="badge bg-primary">Admin</span>' :
-                                '<span class="badge bg-secondary">Agent</span>';
+                            const level = parseInt(a.is_admin);
+                            const roleBadge = level === 2 ?
+                                '<span class="badge bg-danger">Super Admin</span>' :
+                                (level === 1 ? '<span class="badge bg-primary">Admin</span>' : '<span class="badge bg-secondary">Agent</span>');
                             const row = `<tr data-id="${escapeHtml(a.id)}">
                                 <td>${escapeHtml(a.id)}</td>
                                 <td>${escapeHtml(a.email)}</td>

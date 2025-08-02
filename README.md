@@ -35,11 +35,17 @@ other personal data.
 
 An additional table `admins_agents` stores admin and agent accounts. Each row
 contains an email, hashed password and an `is_admin` flag, plus a `created_by`
-field referencing the admin who created the record. The `personal_data` table
-now includes a `linked_to_id` column storing the `admins_agents.id` of the
-creator. When inserting or updating these records via `admin_setter.php`, make
-sure the password you send is pre-hashed on the client using the provided MD5
-algorithm.
+field referencing the admin who created the record. `is_admin` uses the
+following levels:
+
+* `0` – regular agent
+* `1` – admin who can manage their own agents and users
+* `2` – super admin with full access to all users and agents
+
+The `personal_data` table now includes a `linked_to_id` column storing the
+`admins_agents.id` of the creator. When inserting or updating these records via
+`admin_setter.php`, make sure the password you send is pre-hashed on the client
+using the provided MD5 algorithm.
 Each `email` in `admins_agents` must be unique, enforced by a `UNIQUE(email)`
 constraint in the schema.
 
