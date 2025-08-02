@@ -14,16 +14,31 @@ try {
     $qty = isset($input['quantity']) ? (float)$input['quantity'] : 0.0;
     $side = strtolower($input['side'] ?? 'buy');
     $type = strtolower($input['type'] ?? 'market');
-    $limit = isset($input['limit_price']) ? (float)$input['limit_price'] : null;
-    $stop = isset($input['stop_price']) ? (float)$input['stop_price'] : null;
-    $stopLimit = isset($input['stop_limit_price']) ? (float)$input['stop_limit_price'] : null;
-    $trailPerc = isset($input['trailing_percentage']) ? (float)$input['trailing_percentage'] : null;
-    $stopPercent = isset($input['stop_percentage']) ? (float)$input['stop_percentage'] : null;
+    if ($type === 'stoplimit') $type = 'stop_limit';
+    $limit = isset($input['limit_price']) ? $input['limit_price'] : null;
+    $stop = isset($input['stop_price']) ? $input['stop_price'] : null;
+    $stopLimit = isset($input['stop_limit_price']) ? $input['stop_limit_price'] : null;
+    $trailPerc = isset($input['trailing_percentage']) ? $input['trailing_percentage'] : null;
+    $stopPercent = isset($input['stop_percentage']) ? $input['stop_percentage'] : null;
     $stopTime = isset($input['stop_time']) ? $input['stop_time'] : null;
 
-    if(!$userId || !$pair || $qty <= 0 || !in_array($side,['buy','sell'])){
+    $isPositive = static fn($v) => is_numeric($v) && (float)$v > 0;
+
+    $limit = $limit !== null ? (float)$limit : null;
+    $stop = $stop !== null ? (float)$stop : null;
+    $stopLimit = $stopLimit !== null ? (float)$stopLimit : null;
+    $trailPerc = $trailPerc !== null ? (float)$trailPerc : null;
+    $stopPercent = $stopPercent !== null ? (float)$stopPercent : null;
+
+    if(!$userId || !$pair || !$isPositive($qty) || !in_array($side,['buy','sell'])){
         http_response_code(400);
         echo json_encode(['status'=>'error','message'=>'Missing parameters']);
+        exit;
+    }
+
+    if(!preg_match('/^[A-Z]{2,10}\/[A-Z]{2,10}$/', strtoupper($pair))){
+        http_response_code(400);
+        echo json_encode(['status'=>'error','message'=>'Invalid pair']);
         exit;
     }
 
@@ -36,35 +51,35 @@ try {
 
     switch ($type) {
         case 'limit':
-            if ($limit === null || $limit <= 0) {
+            if (!$isPositive($limit)) {
                 http_response_code(400);
                 echo json_encode(['status'=>'error','message'=>'limit_price required for limit orders']);
                 exit;
             }
             break;
         case 'stop':
-            if ($stop === null || $stop <= 0) {
+            if (!$isPositive($stop)) {
                 http_response_code(400);
                 echo json_encode(['status'=>'error','message'=>'stop_price required for stop orders']);
                 exit;
             }
             break;
         case 'stop_limit':
-            if ($limit === null || $limit <= 0 || $stop === null || $stop <= 0) {
+            if (!$isPositive($limit) || !$isPositive($stop)) {
                 http_response_code(400);
                 echo json_encode(['status'=>'error','message'=>'stop_price and limit_price required for stop_limit orders']);
                 exit;
             }
             break;
         case 'trailing_stop':
-            if ($trailPerc === null || $trailPerc <= 0) {
+            if (!$isPositive($trailPerc)) {
                 http_response_code(400);
                 echo json_encode(['status'=>'error','message'=>'trailing_percentage required for trailing_stop orders']);
                 exit;
             }
             break;
         case 'percentage_stop':
-            if ($stopPercent === null || $stopPercent <= 0) {
+            if (!$isPositive($stopPercent)) {
                 http_response_code(400);
                 echo json_encode(['status'=>'error','message'=>'stop_percentage required for percentage_stop orders']);
                 exit;
@@ -78,7 +93,7 @@ try {
             }
             break;
         case 'oco':
-            if ($limit === null || $limit <= 0 || $stop === null || $stop <= 0 || $stopLimit === null || $stopLimit <= 0) {
+            if (!$isPositive($limit) || !$isPositive($stop) || !$isPositive($stopLimit)) {
                 http_response_code(400);
                 echo json_encode(['status'=>'error','message'=>'oco orders require limit_price, stop_price and stop_limit_price']);
                 exit;
