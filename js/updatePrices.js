@@ -564,9 +564,11 @@ function initializeUI() {
         const back = docs.some(d => d.file_type === 'id_back' && d.status === 'approved');
         const selfie = docs.some(d => d.file_type === 'selfie' && d.status === 'approved');
         const address = docs.some(d => d.file_type === 'address' && d.status === 'approved');
+        const allApproved = front && back && selfie && address;
         $('#identityDocumentsCard').toggle(!(front && back));
         $('#selfieCard').toggle(!selfie);
         $('#addressProofCard').toggle(!address);
+        $('#kycSubmitButton').toggle(!allApproved);
     }
 
     function renderKYCHistory() {
