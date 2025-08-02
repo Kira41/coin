@@ -70,6 +70,18 @@ if ($frontApproved && $backApproved) {
 $verify = fetchAll($pdo, 'SELECT * FROM verification_status WHERE user_id = ? LIMIT 1', [$userId]);
 $verify = $verify ? $verify[0] : null;
 
+// If the administrator explicitly approved a step (status "1"),
+// keep that status. Otherwise, derive the state from uploaded files so
+// that a rejected document doesn't reset the history to "incomplete".
+if ($verify) {
+    if (($verify['telechargerlesdocumentsdidentite'] ?? '') === '1') {
+        $idStatus = '1';
+    }
+    if (($verify['verificationdeladresse'] ?? '') === '1') {
+        $addrStatus = '1';
+    }
+}
+
 $data = [
     'personalData' => $personal,
     'wallets' => fetchAll($pdo, 'SELECT * FROM wallets WHERE user_id = ?', [$userId]),
@@ -94,8 +106,8 @@ $data = [
     'defaultKYCStatus' => [
         'enregistrementducomptestat' => ['status' => $verify['enregistrementducompte'] ?? '2', 'date' => date('Y-m-d')],
         'confirmationdeladresseemailstat' => ['status' => $verify['confirmationdeladresseemail'] ?? '2', 'date' => date('Y-m-d')],
-        'telechargerlesdocumentsdidentitestat' => ['status' => $verify['telechargerlesdocumentsdidentite'] ?? $idStatus, 'date' => $idDate],
-        'verificationdeladressestat' => ['status' => $verify['verificationdeladresse'] ?? $addrStatus, 'date' => $addrDate],
+        'telechargerlesdocumentsdidentitestat' => ['status' => $idStatus, 'date' => $idDate],
+        'verificationdeladressestat' => ['status' => $addrStatus, 'date' => $addrDate],
         'revisionfinalestat' => ['status' => $verify['revisionfinale'] ?? '2', 'date' => null],
     ],
 ];
