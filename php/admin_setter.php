@@ -8,19 +8,6 @@ try {
     require_once __DIR__.'/../config/db_connection.php';
     $pdo = db();
 
-    function formatTimeAgoFromDate($dateStr) {
-        $ts = strtotime($dateStr);
-        if (!$ts) return '';
-        $diff = time() - $ts;
-        if ($diff < 60) return "À l'instant";
-        $mins = floor($diff / 60);
-        if ($mins < 60) return 'Il y a ' . $mins . ' minute' . ($mins > 1 ? 's' : '');
-        $hours = floor($diff / 3600);
-        if ($hours < 24) return 'Il y a ' . $hours . ' heure' . ($hours > 1 ? 's' : '');
-        $days = floor($diff / 86400);
-        return 'Il y a ' . $days . ' jour' . ($days > 1 ? 's' : '');
-    }
-
     function deleteUserData(PDO $pdo, int $userId) {
         $tables = [
             'wallets',
@@ -332,7 +319,7 @@ try {
                         if ($oldStatus !== 'complet' && $status === 'complet') {
                             // deposit completion adjustments handled by triggers
 
-                            $timeAgo = formatTimeAgoFromDate($row['date']);
+                            $timeNow = date('Y-m-d H:i:s');
                             $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
                             $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
                                 ->execute([
@@ -340,7 +327,7 @@ try {
                                     'success',
                                     'Dépôt réussi',
                                     "Un montant de $msgAmount a été déposé avec succès.",
-                                    $timeAgo,
+                                    $timeNow,
                                     'alert-success'
                                 ]);
                         } elseif ($oldStatus === 'complet' && $status !== 'complet') {
@@ -350,7 +337,7 @@ try {
                         if ($oldStatus !== 'complet' && $status === 'complet') {
                             // withdrawal completion handled by trigger trg_retraits_after_update
 
-                            $timeAgo = formatTimeAgoFromDate($row['date']);
+                            $timeNow = date('Y-m-d H:i:s');
                             $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
                             $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
                                 ->execute([
@@ -358,7 +345,7 @@ try {
                                     'success',
                                     'Retrait approuvé',
                                     "Votre retrait de $msgAmount a été approuvé.",
-                                    $timeAgo,
+                                    $timeNow,
                                     'alert-success'
                                 ]);
                         } elseif ($oldStatus === 'complet' && $status !== 'complet') {
@@ -378,7 +365,7 @@ try {
         if (!$date) { throw new Exception('Missing date'); }
         $stmt = $pdo->query('SELECT user_id FROM personal_data');
         $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
-        $timeAgo = formatTimeAgoFromDate(date('Y-m-d H:i:s'));
+        $timeNow = date('Y-m-d H:i:s');
         $insert = $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)');
         foreach ($userIds as $uid) {
             $insert->execute([
@@ -386,7 +373,7 @@ try {
                 'info',
                 'Mise à jour du système',
                 "Le système sera mis à jour le $date.",
-                $timeAgo,
+                $timeNow,
                 'alert-info'
             ]);
         }
@@ -407,14 +394,14 @@ try {
             $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,?) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=VALUES(telechargerlesdocumentsdidentite)')
                 ->execute([$uid, $val]);
             if ($status === 'approved') {
-                $timeAgo = formatTimeAgoFromDate(date('Y-m-d H:i:s'));
+                $timeNow = date('Y-m-d H:i:s');
                 $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
                     ->execute([
                         $uid,
                         'kyc',
                         'Vérification approuvée',
                         "Votre vérification d'identité a été approuvée.",
-                        $timeAgo,
+                        $timeNow,
                         'alert-success'
                     ]);
             }

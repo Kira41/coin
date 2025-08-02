@@ -16,10 +16,27 @@ function fetchAll($pdo, $sql, $params = []) {
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
+function formatTimeAgoFromDate($dateStr) {
+    $ts = strtotime($dateStr);
+    if (!$ts) return '';
+    $diff = time() - $ts;
+    if ($diff < 60) return "À l'instant";
+    $mins = floor($diff / 60);
+    if ($mins < 60) return 'Il y a ' . $mins . ' minute' . ($mins > 1 ? 's' : '');
+    $hours = floor($diff / 3600);
+    if ($hours < 24) return 'Il y a ' . $hours . ' heure' . ($hours > 1 ? 's' : '');
+    $days = floor($diff / 86400);
+    return 'Il y a ' . $days . ' jour' . ($days > 1 ? 's' : '');
+}
+
 $personal = fetchAll($pdo, 'SELECT * FROM personal_data WHERE user_id = ?', [$userId]);
 $personal = $personal ? $personal[0] : [];
 $bankWithdraw = fetchAll($pdo, 'SELECT * FROM bank_withdrawl_info WHERE user_id = ? LIMIT 1', [$userId]);
 $bankWithdraw = $bankWithdraw ? $bankWithdraw[0] : [];
+$notifications = fetchAll($pdo, 'SELECT DISTINCT type,title,message,time,alertClass FROM notifications WHERE user_id = ? ORDER BY id DESC LIMIT 100', [$userId]);
+foreach ($notifications as &$n) {
+    $n['time'] = formatTimeAgoFromDate($n['time']);
+}
 
 $kycRows = fetchAll($pdo, 'SELECT status,created_at FROM kyc WHERE user_id = ? ORDER BY created_at DESC LIMIT 20', [$userId]);
 $kycStatus = '0';
@@ -37,7 +54,7 @@ $data = [
     'personalData' => $personal,
     'wallets' => fetchAll($pdo, 'SELECT * FROM wallets WHERE user_id = ?', [$userId]),
     'transactions' => fetchAll($pdo, 'SELECT operationNumber,type,amount,date,status,statusClass FROM transactions WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC LIMIT 10', [$userId]),
-    'notifications' => fetchAll($pdo, 'SELECT DISTINCT type,title,message,time,alertClass FROM notifications WHERE user_id = ? ORDER BY id DESC LIMIT 100', [$userId]),
+    'notifications' => $notifications,
     'deposits' => fetchAll($pdo, 'SELECT operationNumber,date,amount,method,status,statusClass FROM deposits WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC LIMIT 10', [$userId]),
     'retraits' => fetchAll($pdo, 'SELECT operationNumber,date,amount,method,status,statusClass FROM retraits WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC LIMIT 10', [$userId]),
     'tradingHistory' => array_map(function($r){
