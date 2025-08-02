@@ -39,12 +39,32 @@ foreach ($notifications as &$n) {
 }
 
 $kycRows = fetchAll($pdo, 'SELECT status,created_at,file_type FROM kyc WHERE user_id = ? ORDER BY created_at DESC LIMIT 20', [$userId]);
-$kycStatus = '0';
-$kycDate = null;
+// Determine KYC step statuses based on individual documents
+$idStatus = '0';
+$idDate = null;
+$frontApproved = false;
+$backApproved = false;
+$addrStatus = '0';
+$addrDate = null;
 foreach ($kycRows as $r) {
-    if ($kycDate === null) { $kycDate = $r['created_at']; }
-    if ($r['status'] === 'approved') { $kycStatus = '1'; break; }
-    if ($r['status'] === 'pending' && $kycStatus !== '1') { $kycStatus = '2'; }
+    switch ($r['file_type']) {
+        case 'id_front':
+        case 'id_back':
+            if ($idDate === null) { $idDate = $r['created_at']; }
+            if ($r['file_type'] === 'id_front' && $r['status'] === 'approved') { $frontApproved = true; }
+            if ($r['file_type'] === 'id_back' && $r['status'] === 'approved') { $backApproved = true; }
+            $idStatus = '2';
+            break;
+        case 'address':
+            if ($addrDate === null) { $addrDate = $r['created_at']; }
+            $addrStatus = ($r['status'] === 'approved') ? '1' : '2';
+            break;
+        default:
+            break;
+    }
+}
+if ($frontApproved && $backApproved) {
+    $idStatus = '1';
 }
 
 $verify = fetchAll($pdo, 'SELECT * FROM verification_status WHERE user_id = ? LIMIT 1', [$userId]);
@@ -74,8 +94,8 @@ $data = [
     'defaultKYCStatus' => [
         'enregistrementducomptestat' => ['status' => $verify['enregistrementducompte'] ?? '2', 'date' => date('Y-m-d')],
         'confirmationdeladresseemailstat' => ['status' => $verify['confirmationdeladresseemail'] ?? '2', 'date' => date('Y-m-d')],
-        'telechargerlesdocumentsdidentitestat' => ['status' => $verify['telechargerlesdocumentsdidentite'] ?? ($kycRows ? $kycStatus : '2'), 'date' => $kycDate],
-        'verificationdeladressestat' => ['status' => $verify['verificationdeladresse'] ?? '2', 'date' => null],
+        'telechargerlesdocumentsdidentitestat' => ['status' => $verify['telechargerlesdocumentsdidentite'] ?? $idStatus, 'date' => $idDate],
+        'verificationdeladressestat' => ['status' => $verify['verificationdeladresse'] ?? $addrStatus, 'date' => $addrDate],
         'revisionfinalestat' => ['status' => $verify['revisionfinale'] ?? '2', 'date' => null],
     ],
 ];
