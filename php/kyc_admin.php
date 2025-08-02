@@ -15,9 +15,32 @@ try{
     $stmt=$pdo->prepare('SELECT is_admin FROM admins_agents WHERE id=?');
     $stmt->execute([$adminId]);
     $isAdmin=(int)$stmt->fetchColumn();
+
+    $updateVerify=function($uid) use ($pdo){
+        $idTypes=['id_front','id_back','selfie'];
+        $ph=implode(',',array_fill(0,count($idTypes),'?'));
+        $stmt=$pdo->prepare("SELECT status FROM kyc WHERE user_id=? AND file_type IN ($ph)");
+        $stmt->execute(array_merge([$uid],$idTypes));
+        $statuses=$stmt->fetchAll(PDO::FETCH_COLUMN);
+        if($statuses){
+            $val=1;
+            if(in_array('pending',$statuses)) $val=2;
+            elseif(in_array('rejected',$statuses)) $val=0;
+            $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,?) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=VALUES(telechargerlesdocumentsdidentite)')->execute([$uid,$val]);
+        }
+        $stmt=$pdo->prepare("SELECT status FROM kyc WHERE user_id=? AND file_type='address'");
+        $stmt->execute([$uid]);
+        $a=$stmt->fetchAll(PDO::FETCH_COLUMN);
+        if($a){
+            $val=1;
+            if(in_array('pending',$a)) $val=2;
+            elseif(in_array('rejected',$a)) $val=0;
+            $pdo->prepare('INSERT INTO verification_status (user_id, verificationdeladresse) VALUES (?,?) ON DUPLICATE KEY UPDATE verificationdeladresse=VALUES(verificationdeladresse)')->execute([$uid,$val]);
+        }
+    };
     if($_SERVER['REQUEST_METHOD']==='GET'){
         if(isset($_GET['id'])){
-            $stmt=$pdo->prepare('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_data,k.status,k.created_at FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE k.file_id=?');
+            $stmt=$pdo->prepare('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_data,k.file_type,k.status,k.created_at FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE k.file_id=?');
             $stmt->execute([(int)$_GET['id']]);
             $file=$stmt->fetch(PDO::FETCH_ASSOC);
             echo json_encode(['status'=>'ok','file'=>$file]);
@@ -25,15 +48,15 @@ try{
         }
         if(isset($_GET['all'])){
             if($isAdmin===1){
-                $stmt=$pdo->query('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id ORDER BY k.created_at DESC');
+                $stmt=$pdo->query('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id ORDER BY k.created_at DESC');
             }else{
-                $stmt=$pdo->prepare('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id=? ORDER BY k.created_at DESC');
+                $stmt=$pdo->prepare('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id=? ORDER BY k.created_at DESC');
                 $stmt->execute([$adminId]);
             }
             $rows=$stmt->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode(['status'=>'ok','kyc'=>$rows]);
         }else{
-            $sql='SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id=? AND k.status="pending"';
+            $sql='SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id=? AND k.status="pending"';
             $stmt=$pdo->prepare($sql);
             $stmt->execute([$adminId]);
             $rows=$stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -51,8 +74,7 @@ try{
         $uidStmt->execute([(int)$id]);
         $uid=$uidStmt->fetchColumn();
         if($uid){
-            $val=$status==='approved'?1:0;
-            $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,?) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=VALUES(telechargerlesdocumentsdidentite)')->execute([$uid,$val]);
+            $updateVerify($uid);
             if($status==='approved'){
                 $timeNow = date('Y-m-d H:i:s');
                 $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')

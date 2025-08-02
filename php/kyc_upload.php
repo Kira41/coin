@@ -15,6 +15,7 @@ try {
     }
 
     $files = $_FILES['files'];
+    $types = $_POST['file_types'] ?? [];
     if (!is_array($files['tmp_name'])) {
         $files = [
             'name'     => [$files['name']],
@@ -24,7 +25,9 @@ try {
     }
 
     $pdo->beginTransaction();
-    $stmt = $pdo->prepare('INSERT INTO kyc (user_id,file_name,file_data) VALUES (?,?,?)');
+    $stmt = $pdo->prepare('INSERT INTO kyc (user_id,file_name,file_data,file_type) VALUES (?,?,?,?)');
+    $hasIdentity = false;
+    $hasAddress  = false;
     foreach ($files['tmp_name'] as $i => $tmp) {
         if (($files['error'][$i] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
             throw new Exception('Upload error: ' . ($files['error'][$i] ?? 0));
@@ -35,9 +38,17 @@ try {
         $name = $files['name'][$i];
         $data = file_get_contents($tmp);
         $base64 = base64_encode($data);
-        $stmt->execute([$userId, $name, $base64]);
+        $type = $types[$i] ?? '';
+        $stmt->execute([$userId, $name, $base64, $type]);
+        if (in_array($type, ['id_front','id_back','selfie'], true)) { $hasIdentity = true; }
+        if ($type === 'address') { $hasAddress = true; }
     }
-    $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,2) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=2')->execute([$userId]);
+    if ($hasIdentity) {
+        $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,2) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=2')->execute([$userId]);
+    }
+    if ($hasAddress) {
+        $pdo->prepare('INSERT INTO verification_status (user_id, verificationdeladresse) VALUES (?,2) ON DUPLICATE KEY UPDATE verificationdeladresse=2')->execute([$userId]);
+    }
     $pdo->commit();
     echo json_encode(['status' => 'ok']);
 } catch (Throwable $e) {

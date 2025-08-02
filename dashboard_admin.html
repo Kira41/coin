@@ -1794,7 +1794,7 @@
                     const row = `<tr>
                         <td><input type="checkbox" class="form-check-input" data-id="${doc.file_id}"></td>
                         <td>${escapeHtml(doc.fullName || '')}</td>
-                        <td>${escapeHtml(doc.file_name)}</td>
+                        <td>${escapeHtml(doc.file_type || '')}</td>
                         <td>${escapeHtml(doc.created_at)}</td>
                         <td><span class="badge bg-warning">En Attente</span></td>
                         <td>
@@ -1825,7 +1825,7 @@
                     const row = `<tr>
                         <td></td>
                         <td>${escapeHtml(doc.fullName || '')}</td>
-                        <td>${escapeHtml(doc.file_name)}</td>
+                        <td>${escapeHtml(doc.file_type || '')}</td>
                         <td>${escapeHtml(doc.created_at)}</td>
                         <td><span class="badge ${statusClass}">${escapeHtml(doc.status)}</span></td>
                         <td>

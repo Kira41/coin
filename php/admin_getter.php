@@ -86,7 +86,7 @@ $stmt = $pdo->prepare($userSql);
 $stmt->execute($userParams);
 $result['users'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-$stmt = $pdo->prepare('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id = ? AND k.status = "pending"');
+$stmt = $pdo->prepare('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id = ? AND k.status = "pending"');
 $stmt->execute([$adminId]);
 $result['kyc'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
