@@ -52,6 +52,10 @@ $result = [
     'email' => $admin['email'],
 ];
 
+$stmt = $pdo->prepare('SELECT profile_pic FROM personal_data WHERE user_id = ?');
+$stmt->execute([$adminId]);
+$result['profile_pic'] = $stmt->fetchColumn();
+
 if ((int)$admin['is_admin'] === 1) {
     $stmt = $pdo->prepare('SELECT id,email,is_admin,created_by FROM admins_agents WHERE created_by = ?');
     $stmt->execute([$adminId]);

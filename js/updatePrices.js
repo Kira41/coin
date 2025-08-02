@@ -710,7 +710,7 @@ function initializeUI() {
     $('#firstname').text(nameValInit.split(' ')[0] || nameValInit);
     const picData = dashboardData.personalData.profile_pic;
     if (picData) {
-        $('.Profil-img').attr('src', 'data:image/*;base64,' + picData);
+        $('.Profil-img, .user-avatar').attr('src', 'data:image/*;base64,' + picData);
     }
     const createdAt = dashboardData.personalData.created_at;
     if (createdAt) {

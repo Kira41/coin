@@ -164,11 +164,11 @@
                             <span class="me-3">Bienvenue, Administrateur</span>
                             <div class="dropdown">
                                 <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center" type="button" data-bs-toggle="dropdown" id="adminAccountDropdown" aria-expanded="false">
-                                    <img alt="Image Utilisateur" class="rounded-circle" src="https://via.placeholder.com/40" style="width: 40px; height: 40px;">
+                                    <img alt="Image Utilisateur" class="rounded-circle user-avatar" src="" style="width: 40px; height: 40px;">
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminAccountDropdown" style="min-width: 250px;">
                                     <li class="dropdown-header text-center">
-                                        <img alt="Image Utilisateur" class="rounded-circle mb-2" src="https://via.placeholder.com/60" style="width: 60px; height: 60px;"/>
+                                        <img alt="Image Utilisateur" class="rounded-circle mb-2 user-avatar" src="" style="width: 60px; height: 60px;"/>
                                         <div class="fw-bold">Administrateur</div>
                                     </li>
                                     <li><hr class="dropdown-divider"/></li>
@@ -1212,6 +1212,12 @@
                 if (data.admin_id) ADMIN_ID = data.admin_id;
                 if (data.email) ADMIN_EMAIL = data.email;
                 IS_ADMIN = parseInt(data.is_admin || 0);
+
+                if (data.profile_pic) {
+                    document.querySelectorAll('.user-avatar').forEach(img => {
+                        img.src = 'data:image/*;base64,' + data.profile_pic;
+                    });
+                }
 
                 if (data.stats) {
                     document.getElementById('statTotalUsers').textContent = data.stats.total_users;
