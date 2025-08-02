@@ -27,6 +27,65 @@ try {
         exit;
     }
 
+    $allowedTypes = ['market','limit','stop','stop_limit','trailing_stop','percentage_stop','time_stop','oco'];
+    if(!in_array($type, $allowedTypes, true)){
+        http_response_code(400);
+        echo json_encode(['status'=>'error','message'=>'Invalid order type']);
+        exit;
+    }
+
+    switch ($type) {
+        case 'limit':
+            if ($limit === null || $limit <= 0) {
+                http_response_code(400);
+                echo json_encode(['status'=>'error','message'=>'limit_price required for limit orders']);
+                exit;
+            }
+            break;
+        case 'stop':
+            if ($stop === null || $stop <= 0) {
+                http_response_code(400);
+                echo json_encode(['status'=>'error','message'=>'stop_price required for stop orders']);
+                exit;
+            }
+            break;
+        case 'stop_limit':
+            if ($limit === null || $limit <= 0 || $stop === null || $stop <= 0) {
+                http_response_code(400);
+                echo json_encode(['status'=>'error','message'=>'stop_price and limit_price required for stop_limit orders']);
+                exit;
+            }
+            break;
+        case 'trailing_stop':
+            if ($trailPerc === null || $trailPerc <= 0 || $trailPerc > 100) {
+                http_response_code(400);
+                echo json_encode(['status'=>'error','message'=>'trailing_percentage must be between 0 and 100 for trailing_stop orders']);
+                exit;
+            }
+            break;
+        case 'percentage_stop':
+            if ($stopPercent === null || $stopPercent <= 0 || $stopPercent > 100) {
+                http_response_code(400);
+                echo json_encode(['status'=>'error','message'=>'stop_percentage must be between 0 and 100 for percentage_stop orders']);
+                exit;
+            }
+            break;
+        case 'time_stop':
+            if ($stopTime === null || strtotime($stopTime) === false) {
+                http_response_code(400);
+                echo json_encode(['status'=>'error','message'=>'valid stop_time required for time_stop orders']);
+                exit;
+            }
+            break;
+        case 'oco':
+            if ($limit === null || $limit <= 0 || $stop === null || $stop <= 0 || $stopLimit === null || $stopLimit <= 0) {
+                http_response_code(400);
+                echo json_encode(['status'=>'error','message'=>'oco orders require limit_price, stop_price and stop_limit_price']);
+                exit;
+            }
+            break;
+    }
+
     require_once __DIR__.'/../config/db_connection.php';
     require_once __DIR__.'/../utils/helpers.php';
 

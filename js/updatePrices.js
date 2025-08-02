@@ -1640,6 +1640,9 @@ function initializeUI() {
         $('#trailingPercentageDiv').toggle(t === 'trailing_stop');
     });
 
+    const isPositiveNumber = n => typeof n === 'number' && !isNaN(n) && n > 0;
+    const isPercentage = n => isPositiveNumber(n) && n <= 100;
+
     function resetTradeButtons(){
         tradePending = false;
     }
@@ -1672,24 +1675,53 @@ function initializeUI() {
             resetTradeButtons();
             return;
         }
-        const orderType = $('#orderType').val();
+        const selectedType = $('#orderType').val();
+        const orderType = selectedType === 'stoplimit' ? 'stop_limit' : selectedType;
         let price = currentPrice;
         let cost = amount * price;
         const apiPair = pairText.includes('/') ? pairText : pairText.replace(/(USDT|USD)$/, '/$1');
         let resp;
         const payload = { user_id: userId, pair: apiPair, quantity: amount, side: isBuy ? 'buy' : 'sell', type: orderType };
-        if (orderType === 'limit' || orderType === 'stoplimit' || orderType === 'oco') {
+        if (orderType === 'limit' || orderType === 'stop_limit' || orderType === 'oco') {
             payload.limit_price = parseFloat($('#limitPrice').val());
             if (orderType === 'limit') cost = amount * payload.limit_price;
         }
-        if (orderType === 'stop' || orderType === 'stoplimit' || orderType === 'oco') {
+        if (orderType === 'stop' || orderType === 'stop_limit' || orderType === 'oco') {
             payload.stop_price = parseFloat($('#stopPrice').val());
         }
-        if (orderType === 'stoplimit' || orderType === 'oco') {
+        if (orderType === 'stop_limit' || orderType === 'oco') {
             payload.stop_limit_price = parseFloat($('#stopLimitPrice').val());
         }
         if (orderType === 'trailing_stop') {
             payload.trailing_percentage = parseFloat($('#trailingPercentage').val());
+        }
+
+        let validationError = '';
+        switch (orderType) {
+            case 'limit':
+                if (!isPositiveNumber(payload.limit_price)) validationError = 'Prix limite invalide';
+                break;
+            case 'stop':
+                if (!isPositiveNumber(payload.stop_price)) validationError = 'Prix stop invalide';
+                break;
+            case 'stop_limit':
+                if (!isPositiveNumber(payload.limit_price) || !isPositiveNumber(payload.stop_price)) {
+                    validationError = 'Prix stop et prix limite requis pour stop-limit';
+                }
+                break;
+            case 'trailing_stop':
+                if (!isPercentage(payload.trailing_percentage)) validationError = 'Pourcentage trailing invalide';
+                break;
+            case 'oco':
+                if (!isPositiveNumber(payload.limit_price) || !isPositiveNumber(payload.stop_price) || !isPositiveNumber(payload.stop_limit_price)) {
+                    validationError = 'OCO nécessite des prix valides';
+                }
+                break;
+        }
+        if (validationError) {
+            alert(validationError);
+            resetTradeButtons();
+            return;
         }
 
         if (isBuy && orderType === 'market' &&
@@ -1846,15 +1878,37 @@ function initializeUI() {
             return;
         }
         const qty = parseFloat($('#tradeAmount').val()) || 0;
+        if (!qty) {
+            alert('Veuillez entrer un montant valide');
+            return;
+        }
         const typeMap = { price:'stop', percentage:'percentage_stop', time:'time_stop', trailing:'trailing_stop' };
         const slType = $('#stopLossType').val();
+        const orderType = typeMap[slType];
         const payload = { user_id:userId,
             pair: pairText.includes('/') ? pairText : pairText.replace(/(USDT|USD)$/, '/$1'),
-            side:'sell', quantity: qty, type:typeMap[slType] };
-        if(slType==='price') payload.stop_price=parseFloat($('#stopLossPrice').val());
-        if(slType==='percentage') payload.stop_percentage=parseFloat($('#stopLossPercentage').val());
-        if(slType==='time') payload.stop_time=$('#stopLossTime').val();
-        if(slType==='trailing') payload.trailing_percentage=parseFloat($('#trailingPercentage').val());
+            side:'sell', quantity: qty, type:orderType };
+        let err='';
+        if(slType==='price') {
+            payload.stop_price=parseFloat($('#stopLossPrice').val());
+            if(!isPositiveNumber(payload.stop_price)) err='Prix stop invalide';
+        }
+        if(slType==='percentage') {
+            payload.stop_percentage=parseFloat($('#stopLossPercentage').val());
+            if(!isPercentage(payload.stop_percentage)) err='Pourcentage stop invalide';
+        }
+        if(slType==='time') {
+            payload.stop_time=$('#stopLossTime').val();
+            if(!payload.stop_time || isNaN(Date.parse(payload.stop_time))) err='Heure stop invalide';
+        }
+        if(slType==='trailing') {
+            payload.trailing_percentage=parseFloat($('#trailingPercentage').val());
+            if(!isPercentage(payload.trailing_percentage)) err='Pourcentage trailing invalide';
+        }
+        if(err){
+            alert(err);
+            return;
+        }
         try{
             await apiFetch('php/place_order.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
         }catch(e){alert(e.message||'Erreur');}
