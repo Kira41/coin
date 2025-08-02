@@ -466,11 +466,11 @@
                         <div class="d-flex justify-content-between align-items-center mb-4">
                             <h3>Vérification KYC</h3>
                             <div class="btn-group">
-                                <button class="btn btn-outline-success">
+                                <button class="btn btn-outline-success" id="approveAllKycBtn">
                                     <i class="bi bi-check-circle me-2"></i>
                                     Approuver Tout
                                 </button>
-                                <button class="btn btn-outline-danger">
+                                <button class="btn btn-outline-danger" id="rejectSelectedKycBtn">
                                     <i class="bi bi-x-circle me-2"></i>
                                     Rejeter Sélectionnés
                                 </button>
@@ -490,7 +490,7 @@
                                         <thead>
                                             <tr>
                                                 <th>
-                                                    <input type="checkbox" class="form-check-input">
+                                                    <input type="checkbox" class="form-check-input" id="selectAllKyc">
                                                 </th>
                                                 <th>Utilisateur</th>
                                                 <th>Type de Document</th>
@@ -1936,6 +1936,33 @@
                 loadKYCRequests();
             }
             bootstrap.Modal.getInstance(document.getElementById('kycModal')).hide();
+        });
+
+        const selectAllKyc = document.getElementById('selectAllKyc');
+        if(selectAllKyc) selectAllKyc.addEventListener('change', function(){
+            document.querySelectorAll('#kycRequestsTable input[type="checkbox"][data-id]').forEach(cb => cb.checked = selectAllKyc.checked);
+        });
+
+        const approveAllKycBtn = document.getElementById('approveAllKycBtn');
+        if(approveAllKycBtn) approveAllKycBtn.addEventListener('click', async function(){
+            const checkboxes = document.querySelectorAll('#kycRequestsTable input[type="checkbox"][data-id]');
+            if(checkboxes.length===0) return;
+            await Promise.all(Array.from(checkboxes).map(cb => {
+                const id = cb.getAttribute('data-id');
+                return fetchWithAuth('php/kyc_admin.php', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({file_id:id,status:'approved'})});
+            }));
+            loadKYCRequests();
+        });
+
+        const rejectSelectedKycBtn = document.getElementById('rejectSelectedKycBtn');
+        if(rejectSelectedKycBtn) rejectSelectedKycBtn.addEventListener('click', async function(){
+            const selected = document.querySelectorAll('#kycRequestsTable input[type="checkbox"][data-id]:checked');
+            if(selected.length===0) return;
+            await Promise.all(Array.from(selected).map(cb => {
+                const id = cb.getAttribute('data-id');
+                return fetchWithAuth('php/kyc_admin.php', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({file_id:id,status:'rejected'})});
+            }));
+            loadKYCRequests();
         });
 
         const notifyBtn = document.getElementById('sendUpdateNotification');
