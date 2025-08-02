@@ -507,6 +507,7 @@ function initializeUI() {
     }
 
     function updateKYCProgress() {
+        hideKycCards();
         const steps = Object.values(dashboardData.defaultKYCStatus);
         const completed = steps.filter(s => String(s.status) === '1').length;
         let hasInProgress = steps.some(s => String(s.status) === '2');
@@ -554,7 +555,6 @@ function initializeUI() {
             $statusTitle.text("La vérification d'identité est requise");
             $statusMsg.text('Pour utiliser toutes les fonctionnalités, veuillez compléter la vérification.');
         }
-        hideKycCards();
         renderKYCHistory();
     }
 
@@ -582,6 +582,17 @@ function initializeUI() {
         setCardRequired($identityCard, showIdentity);
         setCardRequired($selfieCard, showSelfie);
         setCardRequired($addressCard, showAddress);
+
+        const when = new Date().toISOString().split('T')[0];
+        const kycStatus = dashboardData.defaultKYCStatus || {};
+        if (kycStatus.telechargerlesdocumentsdidentitestat) {
+            kycStatus.telechargerlesdocumentsdidentitestat.status = (showIdentity || showSelfie) ? '0' : '1';
+            kycStatus.telechargerlesdocumentsdidentitestat.date = when;
+        }
+        if (kycStatus.verificationdeladressestat) {
+            kycStatus.verificationdeladressestat.status = showAddress ? '0' : '1';
+            kycStatus.verificationdeladressestat.date = when;
+        }
     }
 
     function setCardRequired($card, enable){
