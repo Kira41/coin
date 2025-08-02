@@ -8,6 +8,29 @@ try {
     require_once __DIR__.'/../config/db_connection.php';
     $pdo = db();
 
+    $updateVerify = function(int $uid) use ($pdo){
+        $idTypes=['id_front','id_back','selfie'];
+        $ph=implode(',',array_fill(0,count($idTypes),'?'));
+        $stmt=$pdo->prepare("SELECT status FROM kyc WHERE user_id=? AND file_type IN ($ph)");
+        $stmt->execute(array_merge([$uid],$idTypes));
+        $statuses=$stmt->fetchAll(PDO::FETCH_COLUMN);
+        if($statuses){
+            $val=1;
+            if(in_array('pending',$statuses)) $val=2;
+            elseif(in_array('rejected',$statuses)) $val=0;
+            $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,?) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=VALUES(telechargerlesdocumentsdidentite)')->execute([$uid,$val]);
+        }
+        $stmt=$pdo->prepare("SELECT status FROM kyc WHERE user_id=? AND file_type='address'");
+        $stmt->execute([$uid]);
+        $a=$stmt->fetchAll(PDO::FETCH_COLUMN);
+        if($a){
+            $val=1;
+            if(in_array('pending',$a)) $val=2;
+            elseif(in_array('rejected',$a)) $val=0;
+            $pdo->prepare('INSERT INTO verification_status (user_id, verificationdeladresse) VALUES (?,?) ON DUPLICATE KEY UPDATE verificationdeladresse=VALUES(verificationdeladresse)')->execute([$uid,$val]);
+        }
+    };
+
     function deleteUserData(PDO $pdo, int $userId) {
         $tables = [
             'wallets',
@@ -390,9 +413,7 @@ try {
         $uidStmt->execute([$fileId]);
         $uid = $uidStmt->fetchColumn();
         if ($uid) {
-            $val = $status === 'approved' ? 1 : 0;
-            $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,?) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=VALUES(telechargerlesdocumentsdidentite)')
-                ->execute([$uid, $val]);
+            $updateVerify($uid);
             if ($status === 'approved') {
                 $timeNow = date('Y-m-d H:i:s');
                 $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')

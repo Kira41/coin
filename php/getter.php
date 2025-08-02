@@ -38,7 +38,7 @@ foreach ($notifications as &$n) {
     $n['time'] = formatTimeAgoFromDate($n['time']);
 }
 
-$kycRows = fetchAll($pdo, 'SELECT status,created_at FROM kyc WHERE user_id = ? ORDER BY created_at DESC LIMIT 20', [$userId]);
+$kycRows = fetchAll($pdo, 'SELECT status,created_at,file_type FROM kyc WHERE user_id = ? ORDER BY created_at DESC LIMIT 20', [$userId]);
 $kycStatus = '0';
 $kycDate = null;
 foreach ($kycRows as $r) {

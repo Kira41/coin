@@ -171,6 +171,7 @@ CREATE TABLE kyc (
     user_id BIGINT,
     file_name TEXT,
     file_data MEDIUMTEXT,
+    file_type VARCHAR(50),
     status TEXT DEFAULT 'pending',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id)

@@ -554,7 +554,19 @@ function initializeUI() {
             $statusTitle.text("La vérification d'identité est requise");
             $statusMsg.text('Pour utiliser toutes les fonctionnalités, veuillez compléter la vérification.');
         }
+        hideKycCards();
         renderKYCHistory();
+    }
+
+    function hideKycCards(){
+        const docs = dashboardData.kycDocs || [];
+        const front = docs.some(d => d.file_type === 'id_front' && d.status === 'approved');
+        const back = docs.some(d => d.file_type === 'id_back' && d.status === 'approved');
+        const selfie = docs.some(d => d.file_type === 'selfie' && d.status === 'approved');
+        const address = docs.some(d => d.file_type === 'address' && d.status === 'approved');
+        $('#identityDocumentsCard').toggle(!(front && back));
+        $('#selfieCard').toggle(!selfie);
+        $('#addressProofCard').toggle(!address);
     }
 
     function renderKYCHistory() {
@@ -1160,9 +1172,17 @@ function initializeUI() {
         e.preventDefault();
         const fd = new FormData();
         fd.append('user_id', userId);
-        ['#frontIdInput','#backIdInput','#addressProofInput','#selfieInput'].forEach(s => {
-            const f = $(s)[0]?.files[0];
-            if (f) fd.append('files[]', f, f.name);
+        [
+            {sel:'#frontIdInput', type:'id_front'},
+            {sel:'#backIdInput', type:'id_back'},
+            {sel:'#addressProofInput', type:'address'},
+            {sel:'#selfieInput', type:'selfie'}
+        ].forEach(o => {
+            const f = $(o.sel)[0]?.files[0];
+            if (f) {
+                fd.append('files[]', f, f.name);
+                fd.append('file_types[]', o.type);
+            }
         });
         const res = await fetch('php/kyc_upload.php', { method: 'POST', body: fd });
         const result = await res.json();
