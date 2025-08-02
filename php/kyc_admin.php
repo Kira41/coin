@@ -23,18 +23,24 @@ try{
         $stmt->execute(array_merge([$uid],$idTypes));
         $statuses=$stmt->fetchAll(PDO::FETCH_COLUMN);
         if($statuses){
-            $val=1;
-            if(in_array('pending',$statuses)) $val=2;
-            elseif(in_array('rejected',$statuses)) $val=0;
+            $val=0;
+            if(in_array('pending',$statuses)) {
+                $val=2;
+            } elseif(in_array('approved',$statuses)) {
+                $val=1;
+            }
             $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,?) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=VALUES(telechargerlesdocumentsdidentite)')->execute([$uid,$val]);
         }
         $stmt=$pdo->prepare("SELECT status FROM kyc WHERE user_id=? AND file_type='address'");
         $stmt->execute([$uid]);
         $a=$stmt->fetchAll(PDO::FETCH_COLUMN);
         if($a){
-            $val=1;
-            if(in_array('pending',$a)) $val=2;
-            elseif(in_array('rejected',$a)) $val=0;
+            $val=0;
+            if(in_array('pending',$a)) {
+                $val=2;
+            } elseif(in_array('approved',$a)) {
+                $val=1;
+            }
             $pdo->prepare('INSERT INTO verification_status (user_id, verificationdeladresse) VALUES (?,?) ON DUPLICATE KEY UPDATE verificationdeladresse=VALUES(verificationdeladresse)')->execute([$uid,$val]);
         }
     };

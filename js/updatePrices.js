@@ -596,11 +596,34 @@ function initializeUI() {
         if ($history.length === 0) return;
         $history.empty();
         const stepInfo = {
-            enregistrementducomptestat: { label: 'Enregistrement du compte', desc: 'Compte créé avec succès' },
-            confirmationdeladresseemailstat: { label: "Confirmation de l’adresse e-mail", desc: "Confirmation de l’adresse e-mail réussie" },
-            telechargerlesdocumentsdidentitestat: { label: "Docs d’identité à télécharger", desc: "En attente du téléchargement des documents" },
-            verificationdeladressestat: { label: "Vérification de l’adresse", desc: "En attente de la vérification de l’adresse" },
-            revisionfinalestat: { label: 'Révision finale', desc: 'En attente de la révision finale' }
+            enregistrementducomptestat: {
+                label: 'Enregistrement du compte',
+                desc: { default: 'Compte créé avec succès' }
+            },
+            confirmationdeladresseemailstat: {
+                label: "Confirmation de l’adresse e-mail",
+                desc: { default: "Confirmation de l’adresse e-mail réussie" }
+            },
+            telechargerlesdocumentsdidentitestat: {
+                label: "Docs d’identité à télécharger",
+                desc: {
+                    '0': "En attente du téléchargement des documents",
+                    '1': "Documents d'identité approuvés",
+                    '2': "Documents d'identité en cours de vérification"
+                }
+            },
+            verificationdeladressestat: {
+                label: "Vérification de l’adresse",
+                desc: {
+                    '0': "Adresse non vérifiée",
+                    '1': "Adresse approuvée",
+                    '2': "Adresse en cours de vérification"
+                }
+            },
+            revisionfinalestat: {
+                label: 'Révision finale',
+                desc: { default: 'En attente de la révision finale' }
+            }
         };
         Object.keys(dashboardData.defaultKYCStatus).forEach(k => {
             const step = dashboardData.defaultKYCStatus[k];
@@ -610,7 +633,9 @@ function initializeUI() {
             let statusTxt = 'Incomplet';
             if (val === '1') { badgeClass = 'bg-success'; statusTxt = 'complet'; }
             else if (val === '2') { badgeClass = 'bg-warning'; statusTxt = 'En cours'; }
-            const info = stepInfo[k] || { label: k, desc: '' };
+            const info = stepInfo[k] || { label: k, desc: {} };
+            const descObj = info.desc || {};
+            const desc = typeof descObj === 'object' ? (descObj[val] || descObj.default || '') : descObj;
             $history.append(`
                 <div class="timeline-item">
                     <div class="timeline-date">${escapeHtml(date || '-')}</div>
@@ -619,7 +644,7 @@ function initializeUI() {
                             <span class="badge ${escapeHtml(badgeClass)} me-2">${escapeHtml(statusTxt)}</span>
                             <h6 class="mb-0">${escapeHtml(info.label)}</h6>
                         </div>
-                        <p class="text-muted small">${escapeHtml(info.desc)}</p>
+                        <p class="text-muted small">${escapeHtml(desc)}</p>
                     </div>
                 </div>`);
         });
