@@ -272,14 +272,24 @@ try {
             $oldPrice = (float)$row['prix'];
             $oldProfit = (float)$row['profitPerte'];
             $newPrice = $oldPrice + ($profit - $oldProfit);
-            $upd = $pdo->prepare('UPDATE tradingHistory SET profitPerte = ?, prix = ? WHERE operationNumber = ?');
-            $upd->execute([$profit, $newPrice, $op]);
+            $profitClass = $profit >= 0 ? 'text-success' : 'text-danger';
+            $upd = $pdo->prepare('UPDATE tradingHistory SET profitPerte = ?, prix = ?, profitClass = ? WHERE operationNumber = ?');
+            $upd->execute([$profit, $newPrice, $profitClass, $op]);
             $pdo->commit();
-            echo json_encode(['status' => 'ok', 'prix' => $newPrice]);
+            echo json_encode(['status' => 'ok', 'prix' => $newPrice, 'profitClass' => $profitClass]);
         } catch (Exception $e) {
             $pdo->rollBack();
             throw $e;
         }
+    } elseif ($action === 'edit_transaction_amount') {
+        $op = isset($data['operationNumber']) ? trim($data['operationNumber']) : '';
+        $amount = isset($data['amount']) ? (float)$data['amount'] : null;
+        if ($op === '' || $amount === null) {
+            throw new Exception('Missing parameters');
+        }
+        $stmt = $pdo->prepare('UPDATE transactions SET amount = ? WHERE operationNumber = ?');
+        $stmt->execute([$amount, $op]);
+        echo json_encode(['status' => 'ok']);
     } elseif ($action === 'update_transaction') {
         $op = isset($data['id']) ? trim($data['id']) : '';
         if ($op === '') {

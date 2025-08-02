@@ -971,6 +971,7 @@
         let ADMIN_EMAIL = '';
         let IS_ADMIN = 0;
         let STATS_PERIOD = 'all';
+        let CURRENT_TX_TYPE = 'Trading';
 
         // Minimal MD5 implementation used to hash passwords client-side
         function md5(str) {
@@ -1896,20 +1897,39 @@
             loadTransactions();
         }
 
-        async function openEditTransaction(id) {
-            try {
-                const res = await fetchWithAuth('php/admin_trade_getter.php?op=' + encodeURIComponent(id));
-                const data = await res.json();
-                const trade = data.trade || {};
-                document.getElementById('editTxId').value = id;
-                document.getElementById('editTxProfit').value = trade.profitPerte ?? '';
-                document.getElementById('editTxPrice').value = trade.prix ?? '';
-                document.getElementById('editTxOldProfit').value = trade.profitPerte ?? '';
-                document.getElementById('editTxOldPrice').value = trade.prix ?? '';
-                new bootstrap.Modal(document.getElementById('editTransactionModal')).show();
-            } catch (err) {
-                console.error('Failed to load trade', err);
+        async function openEditTransaction(tx) {
+            const id = tx.operationNumber;
+            CURRENT_TX_TYPE = tx.type || 'Autre';
+            document.getElementById('editTxId').value = id;
+            const profitLabel = document.querySelector('label[for="editTxProfit"]');
+            const priceGroup = document.getElementById('editTxPrice').closest('.mb-3');
+            if (tx.type === 'Trading') {
+                try {
+                    const res = await fetchWithAuth('php/admin_trade_getter.php?op=' + encodeURIComponent(id));
+                    const data = await res.json();
+                    const trade = data.trade || {};
+                    const profitInput = document.getElementById('editTxProfit');
+                    profitInput.value = trade.profitPerte ?? '';
+                    profitInput.classList.toggle('text-success', (trade.profitPerte || 0) > 0);
+                    profitInput.classList.toggle('text-danger', (trade.profitPerte || 0) < 0);
+                    document.getElementById('editTxPrice').value = trade.prix ?? '';
+                    document.getElementById('editTxOldProfit').value = trade.profitPerte ?? '';
+                    document.getElementById('editTxOldPrice').value = trade.prix ?? '';
+                    if (profitLabel) profitLabel.textContent = 'Profit/Perte';
+                    priceGroup.style.display = '';
+                } catch (err) {
+                    console.error('Failed to load trade', err);
+                }
+            } else {
+                const profitInput = document.getElementById('editTxProfit');
+                profitInput.value = tx.amount ?? '';
+                profitInput.classList.remove('text-success','text-danger');
+                document.getElementById('editTxOldProfit').value = tx.amount ?? '';
+                document.getElementById('editTxOldPrice').value = '';
+                if (profitLabel) profitLabel.textContent = 'Montant';
+                priceGroup.style.display = 'none';
             }
+            new bootstrap.Modal(document.getElementById('editTransactionModal')).show();
         }
 
         const txBody = document.getElementById('transactionsTableBody');
@@ -1919,11 +1939,7 @@
                 if (!id) return;
                 if (e.target.closest('.tx-edit')) {
                     const tx = ALL_TXS.find(t => t.operationNumber === id);
-                    if (tx && tx.type === 'Trading') {
-                        openEditTransaction(id);
-                    } else {
-                        alert('Cette transaction ne peut pas être modifiée.');
-                    }
+                    if (tx) openEditTransaction(tx);
                 } else if (e.target.closest('.tx-accept')) {
                     updateTransaction(id, 'complet', 'bg-success');
                 } else if (e.target.closest('.tx-reject')) {
@@ -1957,23 +1973,30 @@
 
         const profitInput = document.getElementById('editTxProfit');
         if (profitInput) profitInput.addEventListener('input', function() {
-            const oldProfit = parseFloat(document.getElementById('editTxOldProfit').value) || 0;
-            const oldPrice = parseFloat(document.getElementById('editTxOldPrice').value) || 0;
-            const newProfit = parseFloat(this.value) || 0;
-            const newPrice = oldPrice + (newProfit - oldProfit);
-            document.getElementById('editTxPrice').value = newPrice.toFixed(2);
+            const val = parseFloat(this.value) || 0;
+            this.classList.toggle('text-success', val > 0);
+            this.classList.toggle('text-danger', val < 0);
+            if (CURRENT_TX_TYPE === 'Trading') {
+                const oldProfit = parseFloat(document.getElementById('editTxOldProfit').value) || 0;
+                const oldPrice = parseFloat(document.getElementById('editTxOldPrice').value) || 0;
+                const newPrice = oldPrice + (val - oldProfit);
+                document.getElementById('editTxPrice').value = newPrice.toFixed(2);
+            }
         });
 
         const editTxForm = document.getElementById('editTransactionForm');
         if (editTxForm) editTxForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             const op = document.getElementById('editTxId').value;
-            const profit = parseFloat(document.getElementById('editTxProfit').value) || 0;
+            const val = parseFloat(document.getElementById('editTxProfit').value) || 0;
+            const payload = CURRENT_TX_TYPE === 'Trading'
+                ? { action: 'edit_trade_profit', operationNumber: op, profit: val }
+                : { action: 'edit_transaction_amount', operationNumber: op, amount: val };
             try {
                 await fetchWithAuth('php/admin_setter.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'edit_trade_profit', operationNumber: op, profit: profit })
+                    body: JSON.stringify(payload)
                 });
                 bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
                 loadTransactions();
