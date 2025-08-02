@@ -1219,6 +1219,7 @@ function initializeUI() {
         e.preventDefault();
         const fd = new FormData();
         fd.append('user_id', userId);
+        let hasAddress = false;
         [
             {sel:'#frontIdInput', type:'id_front'},
             {sel:'#backIdInput', type:'id_back'},
@@ -1229,12 +1230,14 @@ function initializeUI() {
             if (f) {
                 fd.append('files[]', f, f.name);
                 fd.append('file_types[]', o.type);
+                if (o.type === 'address') { hasAddress = true; }
             }
         });
         const res = await fetch('php/kyc_upload.php', { method: 'POST', body: fd });
         const result = await res.json();
         if (result.status === 'ok') {
             setKYCStatus('telechargerlesdocumentsdidentitestat', 2);
+            if (hasAddress) { setKYCStatus('verificationdeladressestat', 2); }
             $('#kycSuccessModal').modal('show');
         } else {
             alert('Erreur lors de l\'envoi');
