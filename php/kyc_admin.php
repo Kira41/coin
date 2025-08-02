@@ -5,18 +5,6 @@ try{
     require_once __DIR__.'/../config/db_connection.php';
     $pdo = db();
 
-    function formatTimeAgoFromDate($dateStr){
-        $ts=strtotime($dateStr);
-        if(!$ts) return '';
-        $diff=time()-$ts;
-        if($diff<60) return "À l'instant";
-        $mins=floor($diff/60);
-        if($mins<60) return 'Il y a '.$mins.' minute'.($mins>1?'s':'');
-        $hours=floor($diff/3600);
-        if($hours<24) return 'Il y a '.$hours.' heure'.($hours>1?'s':'');
-        $days=floor($diff/86400);
-        return 'Il y a '.$days.' jour'.($days>1?'s':'');
-    }
     session_start();
     $adminId=$_SESSION['admin_id']??null;
     if(!$adminId){
@@ -66,14 +54,14 @@ try{
             $val=$status==='approved'?1:0;
             $pdo->prepare('INSERT INTO verification_status (user_id, telechargerlesdocumentsdidentite) VALUES (?,?) ON DUPLICATE KEY UPDATE telechargerlesdocumentsdidentite=VALUES(telechargerlesdocumentsdidentite)')->execute([$uid,$val]);
             if($status==='approved'){
-                $timeAgo=formatTimeAgoFromDate(date('Y-m-d H:i:s'));
+                $timeNow = date('Y-m-d H:i:s');
                 $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
                     ->execute([
                         $uid,
                         'kyc',
                         'Vérification approuvée',
                         "Votre vérification d'identité a été approuvée.",
-                        $timeAgo,
+                        $timeNow,
                         'alert-success'
                     ]);
             }

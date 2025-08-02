@@ -8,6 +8,19 @@ try {
     require_once __DIR__.'/../config/db_connection.php';
     $pdo = db();
 
+    function formatTimeAgoFromDate($dateStr) {
+        $ts = strtotime($dateStr);
+        if (!$ts) return '';
+        $diff = time() - $ts;
+        if ($diff < 60) return "À l'instant";
+        $mins = floor($diff / 60);
+        if ($mins < 60) return 'Il y a ' . $mins . ' minute' . ($mins > 1 ? 's' : '');
+        $hours = floor($diff / 3600);
+        if ($hours < 24) return 'Il y a ' . $hours . ' heure' . ($hours > 1 ? 's' : '');
+        $days = floor($diff / 86400);
+        return 'Il y a ' . $days . ' jour' . ($days > 1 ? 's' : '');
+    }
+
 $adminId = null;
 
 session_start();
@@ -116,6 +129,9 @@ if ($userIds) {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($userIds);
     $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($notifications as &$n) {
+        $n['time'] = formatTimeAgoFromDate($n['time']);
+    }
 }
 $result['notifications'] = $notifications;
 
