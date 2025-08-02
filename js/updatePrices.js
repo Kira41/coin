@@ -565,10 +565,30 @@ function initializeUI() {
         const selfie = docs.some(d => d.file_type === 'selfie' && d.status === 'approved');
         const address = docs.some(d => d.file_type === 'address' && d.status === 'approved');
         const allApproved = front && back && selfie && address;
-        $('#identityDocumentsCard').toggle(!(front && back));
-        $('#selfieCard').toggle(!selfie);
-        $('#addressProofCard').toggle(!address);
+
+        const $identityCard = $('#identityDocumentsCard');
+        const $selfieCard = $('#selfieCard');
+        const $addressCard = $('#addressProofCard');
+
+        const showIdentity = !(front && back);
+        const showSelfie = !selfie;
+        const showAddress = !address;
+
+        $identityCard.toggle(showIdentity);
+        $selfieCard.toggle(showSelfie);
+        $addressCard.toggle(showAddress);
         $('#kycSubmitButton').toggle(!allApproved);
+
+        setCardRequired($identityCard, showIdentity);
+        setCardRequired($selfieCard, showSelfie);
+        setCardRequired($addressCard, showAddress);
+    }
+
+    function setCardRequired($card, enable){
+        $card.find('input, select').each(function(){
+            $(this).prop('required', enable);
+            $(this).prop('disabled', !enable);
+        });
     }
 
     function renderKYCHistory() {
