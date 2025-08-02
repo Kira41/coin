@@ -1136,6 +1136,8 @@
         function fetchWithAuth(url, options = {}) {
             options.headers = options.headers || {};
             if (ADMIN_ID) options.headers['Authorization'] = 'Bearer ' + ADMIN_ID;
+            // Always include credentials so PHP sessions work correctly
+            options.credentials = 'include';
             return fetch(url, options);
         }
 
@@ -1188,6 +1190,14 @@
                 minimumFractionDigits: hasDecimals ? 2 : 0,
                 maximumFractionDigits: hasDecimals ? 2 : 0
             }) + ' $';
+        }
+
+        // Format cryptocurrency amounts with up to 8 decimals
+        function formatCrypto(num) {
+            return Number(num).toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 8
+            });
         }
 
         async function loadAdminData() {
