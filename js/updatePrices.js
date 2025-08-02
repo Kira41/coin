@@ -498,6 +498,11 @@ function initializeUI() {
         $('#totalDepots').text(formatDollar(dashboardData.personalData.totalDepots));
         const profit = dashboardData.personalData.balance - dashboardData.personalData.totalDepots;
         $('#profit').text(formatDollar(profit));
+
+        const $profitBox = $('#profit-box');
+        $profitBox.removeClass('stat-success stat-danger')
+            .addClass(profit >= 0 ? 'stat-success' : 'stat-danger');
+
         $('#nbTransactions').text(dashboardData.personalData.nbTransactions);
     }
 
