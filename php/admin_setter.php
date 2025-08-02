@@ -255,6 +255,31 @@ try {
             $pdo->rollBack();
             throw $e;
         }
+    } elseif ($action === 'edit_trade_profit') {
+        $op = isset($data['operationNumber']) ? trim($data['operationNumber']) : '';
+        $profit = isset($data['profit']) ? (float)$data['profit'] : null;
+        if ($op === '' || $profit === null) {
+            throw new Exception('Missing parameters');
+        }
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare('SELECT prix, profitPerte FROM tradingHistory WHERE operationNumber = ? FOR UPDATE');
+            $stmt->execute([$op]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                throw new Exception('Trade not found');
+            }
+            $oldPrice = (float)$row['prix'];
+            $oldProfit = (float)$row['profitPerte'];
+            $newPrice = $oldPrice + ($profit - $oldProfit);
+            $upd = $pdo->prepare('UPDATE tradingHistory SET profitPerte = ?, prix = ? WHERE operationNumber = ?');
+            $upd->execute([$profit, $newPrice, $op]);
+            $pdo->commit();
+            echo json_encode(['status' => 'ok', 'prix' => $newPrice]);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
     } elseif ($action === 'update_transaction') {
         $op = isset($data['id']) ? trim($data['id']) : '';
         if ($op === '') {

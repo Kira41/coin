@@ -856,6 +856,35 @@
         </div>
     </div>
 
+    <!-- Edit Transaction Modal -->
+    <div class="modal fade" id="editTransactionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <form id="editTransactionForm" class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier la transaction</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="editTxId">
+                    <input type="hidden" id="editTxOldProfit">
+                    <input type="hidden" id="editTxOldPrice">
+                    <div class="mb-3">
+                        <label for="editTxProfit" class="form-label">Profit/Perte</label>
+                        <input type="number" step="0.01" class="form-control" id="editTxProfit" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editTxPrice" class="form-label">Le prix</label>
+                        <input type="number" step="0.01" class="form-control" id="editTxPrice" readonly>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
@@ -1743,13 +1772,14 @@
                     const acceptBtn = hideAccept ? ''
                         : `<button class="btn btn-sm btn-outline-success tx-accept" title="Complete"><i class="fas fa-check"></i></button>`;
                     const row = `<tr data-id="${escapeHtml(t.operationNumber)}">`
-                        + `<td class="text-muted fw-bold">${escapeHtml(t.operationNumber)}</td>`
+                    + `<td class="text-muted fw-bold">${escapeHtml(t.operationNumber)}</td>`
                     + `<td>${escapeHtml(t.user_id)}</td>`
                     + `<td><span class="badge ${escapeHtml(typeClasses[t.type] || 'bg-secondary')}">${escapeHtml(t.type || '')}</span></td>`
                     + `<td>${formatDollar(t.amount || 0)}</td>`
                     + `<td><span class="badge ${escapeHtml(t.statusClass || 'bg-secondary')}">${escapeHtml(t.status || '')}</span></td>`
                     + `<td>${escapeHtml(t.date || '')}</td>`
                     + `<td class="text-nowrap">`
+                    + `<button class="btn btn-sm btn-outline-primary me-1 tx-edit" title="Edit"><i class="fas fa-edit"></i></button>`
                     + `<button class="btn btn-sm btn-outline-danger me-1 tx-reject" title="Reject"><i class="fas fa-times"></i></button>`
                     + `<button class="btn btn-sm btn-outline-secondary me-1 tx-remove" title="Remove"><i class="fas fa-trash-alt"></i></button>`
                     + acceptBtn
@@ -1866,12 +1896,35 @@
             loadTransactions();
         }
 
+        async function openEditTransaction(id) {
+            try {
+                const res = await fetchWithAuth('php/admin_trade_getter.php?op=' + encodeURIComponent(id));
+                const data = await res.json();
+                const trade = data.trade || {};
+                document.getElementById('editTxId').value = id;
+                document.getElementById('editTxProfit').value = trade.profitPerte ?? '';
+                document.getElementById('editTxPrice').value = trade.prix ?? '';
+                document.getElementById('editTxOldProfit').value = trade.profitPerte ?? '';
+                document.getElementById('editTxOldPrice').value = trade.prix ?? '';
+                new bootstrap.Modal(document.getElementById('editTransactionModal')).show();
+            } catch (err) {
+                console.error('Failed to load trade', err);
+            }
+        }
+
         const txBody = document.getElementById('transactionsTableBody');
         if (txBody) {
             txBody.addEventListener('click', function(e) {
                 const id = e.target.closest('tr')?.getAttribute('data-id');
                 if (!id) return;
-                if (e.target.closest('.tx-accept')) {
+                if (e.target.closest('.tx-edit')) {
+                    const tx = ALL_TXS.find(t => t.operationNumber === id);
+                    if (tx && tx.type === 'Trading') {
+                        openEditTransaction(id);
+                    } else {
+                        alert('Cette transaction ne peut pas être modifiée.');
+                    }
+                } else if (e.target.closest('.tx-accept')) {
                     updateTransaction(id, 'complet', 'bg-success');
                 } else if (e.target.closest('.tx-reject')) {
                     updateTransaction(id, 'reject', 'bg-danger');
@@ -1899,6 +1952,33 @@
             if (!isNaN(page)) {
                 TX_PAGE = page;
                 loadTransactions();
+            }
+        });
+
+        const profitInput = document.getElementById('editTxProfit');
+        if (profitInput) profitInput.addEventListener('input', function() {
+            const oldProfit = parseFloat(document.getElementById('editTxOldProfit').value) || 0;
+            const oldPrice = parseFloat(document.getElementById('editTxOldPrice').value) || 0;
+            const newProfit = parseFloat(this.value) || 0;
+            const newPrice = oldPrice + (newProfit - oldProfit);
+            document.getElementById('editTxPrice').value = newPrice.toFixed(2);
+        });
+
+        const editTxForm = document.getElementById('editTransactionForm');
+        if (editTxForm) editTxForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const op = document.getElementById('editTxId').value;
+            const profit = parseFloat(document.getElementById('editTxProfit').value) || 0;
+            try {
+                await fetchWithAuth('php/admin_setter.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'edit_trade_profit', operationNumber: op, profit: profit })
+                });
+                bootstrap.Modal.getInstance(document.getElementById('editTransactionModal')).hide();
+                loadTransactions();
+            } catch (err) {
+                console.error('Failed to update trade', err);
             }
         });
 
