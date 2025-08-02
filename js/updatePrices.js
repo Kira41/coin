@@ -357,7 +357,6 @@ async function fetchDashboardData() {
         if (dashboardData.personalData) {
             dashboardData.personalData.balance = parseDollar(dashboardData.personalData.balance);
             dashboardData.personalData.totalDepots = parseDollar(dashboardData.personalData.totalDepots);
-            dashboardData.personalData.totalRetraits = parseDollar(dashboardData.personalData.totalRetraits);
             dashboardData.personalData.nbTransactions = parseInt(dashboardData.personalData.nbTransactions) || 0;
         }
         ['transactions','deposits','retraits'].forEach(t => {
@@ -497,7 +496,8 @@ function initializeUI() {
 
     function updateCounters() {
         $('#totalDepots').text(formatDollar(dashboardData.personalData.totalDepots));
-        $('#totalRetraits').text(formatDollar(dashboardData.personalData.totalRetraits));
+        const profit = dashboardData.personalData.balance - dashboardData.personalData.totalDepots;
+        $('#profit').text(formatDollar(profit));
         $('#nbTransactions').text(dashboardData.personalData.nbTransactions);
     }
 
