@@ -5,8 +5,17 @@ set_error_handler(function ($severity, $message, $file, $line) {
 });
 
 try {
-    require_once __DIR__.'/../config/db_connection.php';
-    $pdo = db();
+require_once __DIR__.'/../config/db_connection.php';
+$pdo = db();
+
+    session_start();
+    $viewerAdminId = $_SESSION['admin_id'] ?? null;
+    $isSuperAdmin = false;
+    if ($viewerAdminId) {
+        $stmt = $pdo->prepare('SELECT is_admin FROM admins_agents WHERE id = ?');
+        $stmt->execute([$viewerAdminId]);
+        $isSuperAdmin = ((int)$stmt->fetchColumn() === 2);
+    }
 
     $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 1;
 
@@ -31,6 +40,7 @@ function formatTimeAgoFromDate($dateStr) {
 
 $personal = fetchAll($pdo, 'SELECT * FROM personal_data WHERE user_id = ?', [$userId]);
 $personal = $personal ? $personal[0] : [];
+if (!$isSuperAdmin) { unset($personal['linked_to_id']); }
 $bankWithdraw = fetchAll($pdo, 'SELECT * FROM bank_withdrawl_info WHERE user_id = ? LIMIT 1', [$userId]);
 $bankWithdraw = $bankWithdraw ? $bankWithdraw[0] : [];
 $notifications = fetchAll($pdo, 'SELECT DISTINCT type,title,message,time,alertClass FROM notifications WHERE user_id = ? ORDER BY id DESC LIMIT 100', [$userId]);
