@@ -80,6 +80,7 @@ function showBootstrapAlert(containerId, message, type = 'success') {
 }
 
 function progressToColor(percent) {
+    if (percent >= 100) return '#198754';
     const r = Math.round(255 * (100 - percent) / 100);
     const g = Math.round(255 * percent / 100);
     return `rgb(${r},${g},0)`;
