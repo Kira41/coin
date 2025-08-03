@@ -21,6 +21,25 @@ try {
         return 'Il y a ' . $days . ' jour' . ($days > 1 ? 's' : '');
     }
 
+    // Récupère récursivement tous les identifiants d'administrateurs/agents
+    // créés par un administrateur donné (y compris ses sous-comptes).
+    function getAllAdminIds(PDO $pdo, int $rootId): array {
+        $allIds = [$rootId];
+        $queue = [$rootId];
+        while ($queue) {
+            $current = array_shift($queue);
+            $stmt = $pdo->prepare('SELECT id FROM admins_agents WHERE created_by = ?');
+            $stmt->execute([$current]);
+            foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $child) {
+                if (!in_array($child, $allIds, true)) {
+                    $allIds[] = (int)$child;
+                    $queue[] = (int)$child;
+                }
+            }
+        }
+        return $allIds;
+    }
+
 $adminId = null;
 
 session_start();
@@ -56,14 +75,14 @@ $stmt = $pdo->prepare('SELECT profile_pic FROM personal_data WHERE user_id = ?')
 $stmt->execute([$adminId]);
 $result['profile_pic'] = $stmt->fetchColumn();
 
-if ((int)$admin['is_admin'] === 1) {
-    $stmt = $pdo->prepare('SELECT id,email,is_admin,created_by FROM admins_agents WHERE created_by = ?');
-    $stmt->execute([$adminId]);
-    $result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} elseif ((int)$admin['is_admin'] === 2) {
-    $stmt = $pdo->query('SELECT id,email,is_admin,created_by FROM admins_agents');
-    $result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+// Collect all descendant admin/agent IDs (including the current admin)
+$adminIds = getAllAdminIds($pdo, $adminId);
+
+// Retrieve agents/admins created by any ID in the hierarchy
+$placeholders = implode(',', array_fill(0, count($adminIds), '?'));
+$stmt = $pdo->prepare("SELECT id,email,is_admin,created_by FROM admins_agents WHERE created_by IN ($placeholders)");
+$stmt->execute($adminIds);
+$result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $period = isset($_GET['period']) ? strtolower($_GET['period']) : 'all';
 $startDate = null;
@@ -79,27 +98,21 @@ switch ($period) {
         break;
 }
 
-$userSql = 'SELECT * FROM personal_data';
-$userParams = [];
-if ((int)$admin['is_admin'] !== 2) {
-    $userSql .= ' WHERE linked_to_id = ?';
-    $userParams[] = $adminId;
-}
+$userSql = 'SELECT * FROM personal_data WHERE linked_to_id IN (' . $placeholders . ')';
+$userParams = $adminIds;
 if ($startDate) {
-    $userSql .= (strpos($userSql, 'WHERE') === false ? ' WHERE' : ' AND') .
-        ' STR_TO_DATE(created_at, "%Y-%m-%d") >= STR_TO_DATE(?, "%Y-%m-%d")';
+    $userSql .= ' AND STR_TO_DATE(created_at, "%Y-%m-%d") >= STR_TO_DATE(?, "%Y-%m-%d")';
     $userParams[] = $startDate;
 }
 $stmt = $pdo->prepare($userSql);
 $stmt->execute($userParams);
 $result['users'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-if ((int)$admin['is_admin'] === 2) {
-    $stmt = $pdo->query('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE k.status = "pending"');
-} else {
-    $stmt = $pdo->prepare('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id = ? AND k.status = "pending"');
-    $stmt->execute([$adminId]);
-}
+$kycSql = 'SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status '
+        . 'FROM kyc k JOIN personal_data p ON k.user_id=p.user_id '
+        . 'WHERE p.linked_to_id IN (' . $placeholders . ') AND k.status = "pending"';
+$stmt = $pdo->prepare($kycSql);
+$stmt->execute($adminIds);
 $result['kyc'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Compute statistics for the admin's users
@@ -132,19 +145,9 @@ $result['stats'] = [
     'success_rate' => $successRate,
 ];
 
-// Fetch recent notifications
+// Fetch recent notifications for users in the hierarchy
 $notifications = [];
-if ((int)$admin['is_admin'] === 2) {
-    $stmt = $pdo->query("SELECT n.type,n.title,n.message,n.time,n.alertClass,p.fullName
-            FROM notifications n
-            JOIN personal_data p ON p.user_id = n.user_id
-            ORDER BY n.id DESC
-            LIMIT 10");
-    $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    foreach ($notifications as &$n) {
-        $n['time'] = formatTimeAgoFromDate($n['time']);
-    }
-} elseif ($userIds) {
+if ($userIds) {
     $place = implode(',', array_fill(0, count($userIds), '?'));
     $sql = "SELECT n.type,n.title,n.message,n.time,n.alertClass,p.fullName
             FROM notifications n
