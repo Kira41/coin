@@ -65,8 +65,9 @@ if (!$admin) {
     exit;
 }
 
+$isAdmin = (int)$admin['is_admin'];
 $result = [
-    'is_admin' => (int)$admin['is_admin'],
+    'is_admin' => $isAdmin,
     'admin_id' => $adminId,
     'email' => $admin['email'],
 ];
@@ -75,14 +76,21 @@ $stmt = $pdo->prepare('SELECT profile_pic FROM personal_data WHERE user_id = ?')
 $stmt->execute([$adminId]);
 $result['profile_pic'] = $stmt->fetchColumn();
 
-// Collect all descendant admin/agent IDs (including the current admin)
-$adminIds = getAllAdminIds($pdo, $adminId);
-
-// Retrieve agents/admins created by any ID in the hierarchy
-$placeholders = implode(',', array_fill(0, count($adminIds), '?'));
-$stmt = $pdo->prepare("SELECT id,email,is_admin,created_by FROM admins_agents WHERE created_by IN ($placeholders)");
-$stmt->execute($adminIds);
-$result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+if ($isAdmin === 2) {
+    // Super admin can see all admins/agents
+    $stmt = $pdo->query('SELECT id FROM admins_agents');
+    $adminIds = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+    $stmt = $pdo->query('SELECT id,email,is_admin,created_by FROM admins_agents');
+    $result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    // Collect all descendant admin/agent IDs (including the current admin)
+    $adminIds = getAllAdminIds($pdo, $adminId);
+    // Retrieve agents/admins created by any ID in the hierarchy
+    $placeholders = implode(',', array_fill(0, count($adminIds), '?'));
+    $stmt = $pdo->prepare("SELECT id,email,is_admin,created_by FROM admins_agents WHERE created_by IN ($placeholders)");
+    $stmt->execute($adminIds);
+    $result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 $period = isset($_GET['period']) ? strtolower($_GET['period']) : 'all';
 $startDate = null;
@@ -98,22 +106,48 @@ switch ($period) {
         break;
 }
 
-$userSql = 'SELECT * FROM personal_data WHERE linked_to_id IN (' . $placeholders . ')';
-$userParams = $adminIds;
-if ($startDate) {
-    $userSql .= ' AND STR_TO_DATE(created_at, "%Y-%m-%d") >= STR_TO_DATE(?, "%Y-%m-%d")';
-    $userParams[] = $startDate;
+if ($isAdmin === 2) {
+    $userSql = 'SELECT * FROM personal_data';
+    $userParams = [];
+    if ($startDate) {
+        $userSql .= ' WHERE STR_TO_DATE(created_at, "%Y-%m-%d") >= STR_TO_DATE(?, "%Y-%m-%d")';
+        $userParams[] = $startDate;
+    }
+    $stmt = $pdo->prepare($userSql);
+    $stmt->execute($userParams);
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $placeholders = implode(',', array_fill(0, count($adminIds), '?'));
+    $userSql = 'SELECT * FROM personal_data WHERE linked_to_id IN (' . $placeholders . ')';
+    $userParams = $adminIds;
+    if ($startDate) {
+        $userSql .= ' AND STR_TO_DATE(created_at, "%Y-%m-%d") >= STR_TO_DATE(?, "%Y-%m-%d")';
+        $userParams[] = $startDate;
+    }
+    $stmt = $pdo->prepare($userSql);
+    $stmt->execute($userParams);
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Non-super admins should not see linked_to_id
+    foreach ($users as &$u) { unset($u['linked_to_id']); }
 }
-$stmt = $pdo->prepare($userSql);
-$stmt->execute($userParams);
-$result['users'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$result['users'] = $users;
 
-$kycSql = 'SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status '
-        . 'FROM kyc k JOIN personal_data p ON k.user_id=p.user_id '
-        . 'WHERE p.linked_to_id IN (' . $placeholders . ') AND k.status = "pending"';
-$stmt = $pdo->prepare($kycSql);
-$stmt->execute($adminIds);
-$result['kyc'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+if ($isAdmin === 2) {
+    $kycSql = 'SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status '
+            . 'FROM kyc k JOIN personal_data p ON k.user_id=p.user_id '
+            . 'WHERE k.status = "pending"';
+    $stmt = $pdo->prepare($kycSql);
+    $stmt->execute();
+    $result['kyc'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $placeholders = implode(',', array_fill(0, count($adminIds), '?'));
+    $kycSql = 'SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status '
+            . 'FROM kyc k JOIN personal_data p ON k.user_id=p.user_id '
+            . 'WHERE p.linked_to_id IN (' . $placeholders . ') AND k.status = "pending"';
+    $stmt = $pdo->prepare($kycSql);
+    $stmt->execute($adminIds);
+    $result['kyc'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
 
 // Compute statistics for the admin's users
 $userIds = array_column($result['users'], 'user_id');
