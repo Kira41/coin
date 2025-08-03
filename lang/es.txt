@@ -1,0 +1,4 @@
+hero_heading=Comienza a operar con criptomonedas con confianza
+hero_subtext=Únete a Coin Trade y explora un comercio de criptomonedas rápido, seguro y global. Experimenta el futuro de las finanzas digitales con nuestra plataforma de vanguardia.
+start_trading=Comenzar a operar
+live_market_prices=Precios del mercado en vivo

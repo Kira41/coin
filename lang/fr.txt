@@ -1,0 +1,4 @@
+hero_heading=Commencez à trader la crypto en toute confiance
+hero_subtext=Rejoignez Coin Trade et explorez un trading crypto rapide, sécurisé et mondial. Découvrez l'avenir de la finance numérique avec notre plateforme de pointe.
+start_trading=Commencer à trader
+live_market_prices=Prix du marché en direct
