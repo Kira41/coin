@@ -1,0 +1,4 @@
+hero_heading=Start Trading Crypto with Confidence
+hero_subtext=Join Coin Trade and explore fast, secure, and global crypto trading. Experience the future of digital finance with our cutting-edge platform.
+start_trading=Start Trading
+live_market_prices=Live Market Prices

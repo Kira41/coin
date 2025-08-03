@@ -83,6 +83,16 @@
             border-top: 1px solid rgba(59, 130, 246, 0.2);
         }
 
+        .light-mode .dropdown .btn {
+            color: #000;
+            border-color: #000;
+        }
+
+        .light-mode .dropdown-menu {
+            background: #ffffff;
+            color: #000;
+        }
+
         /* Header Styles */
         .navbar {
             background: rgba(15, 23, 42, 0.95);
@@ -805,13 +815,13 @@
                 
                 <div class="d-flex align-items-center">
                     <div class="dropdown me-3">
-                        <button class="btn btn-outline-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-globe"></i> EN | USD
+                        <button class="btn btn-outline-light btn-sm dropdown-toggle" id="langDropdown" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-globe"></i> <span id="current-lang">EN | USD</span>
                         </button>
-                        <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="#">EN | USD</a></li>
-                            <li><a class="dropdown-item" href="#">FR | CAD</a></li>
-                            <li><a class="dropdown-item" href="#">ES | EUR</a></li>
+                        <ul class="dropdown-menu" id="lang-menu">
+                            <li><a class="dropdown-item" href="#" data-lang="en" data-currency="usd">EN | USD</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="fr" data-currency="cad">FR | CAD</a></li>
+                            <li><a class="dropdown-item" href="#" data-lang="es" data-currency="eur">ES | EUR</a></li>
                         </ul>
                     </div>
                     
@@ -834,9 +844,9 @@
         </div>
         <div class="container">
             <div class="hero-content fade-in-up">
-                <h1>Start Trading Crypto with Confidence</h1>
-                <p>Join Coin Trade and explore fast, secure, and global crypto trading. Experience the future of digital finance with our cutting-edge platform.</p>
-                <a href="#markets" class="btn-cta">Start Trading</a>
+                <h1 id="hero-heading" data-translate="hero_heading">Start Trading Crypto with Confidence</h1>
+                <p id="hero-subtext" data-translate="hero_subtext">Join Coin Trade and explore fast, secure, and global crypto trading. Experience the future of digital finance with our cutting-edge platform.</p>
+                <a href="#markets" class="btn-cta" id="start-trading-btn" data-translate="start_trading">Start Trading</a>
             </div>
         </div>
     </section>
@@ -844,14 +854,14 @@
     <!-- Live Market Prices -->
     <section id="markets" class="market-section">
         <div class="container">
-            <h2 class="section-title">Live Market Prices</h2>
+            <h2 class="section-title" id="live-market-title" data-translate="live_market_prices">Live Market Prices</h2>
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="market-card">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="crypto-symbol">BTC/USDT</div>
-                                <div class="crypto-price">$43,250.00</div>
+                                <div class="crypto-symbol" data-coin="bitcoin">BTC/USDT</div>
+                                <div class="crypto-price" id="price-bitcoin">$43,250.00</div>
                             </div>
                             <div class="text-end">
                                 <div class="price-change positive">+2.45%</div>
@@ -863,10 +873,10 @@
                 
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="market-card">
-                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="crypto-symbol">ETH/USDT</div>
-                                <div class="crypto-price">$2,680.50</div>
+                                <div class="crypto-symbol" data-coin="ethereum">ETH/USDT</div>
+                                <div class="crypto-price" id="price-ethereum">$2,680.50</div>
                             </div>
                             <div class="text-end">
                                 <div class="price-change positive">+1.82%</div>
@@ -878,10 +888,10 @@
                 
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="market-card">
-                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="crypto-symbol">ADA/USDT</div>
-                                <div class="crypto-price">$0.4820</div>
+                                <div class="crypto-symbol" data-coin="cardano">ADA/USDT</div>
+                                <div class="crypto-price" id="price-cardano">$0.4820</div>
                             </div>
                             <div class="text-end">
                                 <div class="price-change negative">-0.95%</div>
@@ -893,10 +903,10 @@
                 
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="market-card">
-                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <div class="crypto-symbol">SOL/USDT</div>
-                                <div class="crypto-price">$98.75</div>
+                                <div class="crypto-symbol" data-coin="solana">SOL/USDT</div>
+                                <div class="crypto-price" id="price-solana">$98.75</div>
                             </div>
                             <div class="text-end">
                                 <div class="price-change positive">+3.21%</div>
@@ -1304,6 +1314,67 @@
                 brandText.style.display = 'none';
             }
         }
+        
+        // Load translations from txt files
+        async function loadLanguage(lang) {
+            const response = await fetch('lang/' + lang + '.txt');
+            const text = await response.text();
+            const translations = {};
+            text.split('\n').forEach(line => {
+                const parts = line.split('=');
+                if (parts.length === 2) {
+                    translations[parts[0].trim()] = parts[1].trim();
+                }
+            });
+            document.querySelectorAll('[data-translate]').forEach(el => {
+                const key = el.getAttribute('data-translate');
+                if (translations[key]) {
+                    el.textContent = translations[key];
+                }
+            });
+        }
+
+        // Format numbers as currency
+        function formatCurrency(num, currency) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency.toUpperCase() }).format(num);
+        }
+
+        // Fetch live crypto prices
+        async function fetchPrices(currency) {
+            const response = await fetch('php/crypto_prices.php?currency=' + currency);
+            const data = await response.json();
+            const mapping = {
+                bitcoin: 'price-bitcoin',
+                ethereum: 'price-ethereum',
+                cardano: 'price-cardano',
+                solana: 'price-solana'
+            };
+            Object.keys(mapping).forEach(coin => {
+                if (data[coin] && data[coin][currency]) {
+                    document.getElementById(mapping[coin]).textContent = formatCurrency(data[coin][currency], currency);
+                    const symbolEl = document.querySelector('[data-coin="' + coin + '"]');
+                    if (symbolEl) {
+                        symbolEl.textContent = symbolEl.textContent.split('/')[0] + '/' + currency.toUpperCase();
+                    }
+                }
+            });
+        }
+
+        // Handle language/currency dropdown
+        document.querySelectorAll('#lang-menu .dropdown-item').forEach(item => {
+            item.addEventListener('click', function(e) {
+                e.preventDefault();
+                const lang = this.getAttribute('data-lang');
+                const currency = this.getAttribute('data-currency');
+                document.getElementById('current-lang').textContent = this.textContent;
+                loadLanguage(lang);
+                fetchPrices(currency);
+            });
+        });
+
+        // Initialize defaults
+        loadLanguage('en');
+        fetchPrices('usd');
 
         // FAQ Toggle
         function toggleFaq(element) {
