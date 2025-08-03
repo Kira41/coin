@@ -828,11 +828,11 @@
             
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav mx-auto">
-                    <li class="nav-item"><a class="nav-link" href="#home">Home</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#markets">Markets</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#about">About</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#faq">FAQ</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#contact" onclick="openContactModal()">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#home" data-translate="nav_home">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#markets" data-translate="nav_markets">Markets</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#about" data-translate="nav_about">About</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#faq" data-translate="nav_faq">FAQ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#contact" onclick="openContactModal()" data-translate="nav_contact">Contact</a></li>
                 </ul>
                 
                 <div class="d-flex align-items-center">
@@ -944,7 +944,7 @@
     <!-- About Section -->
     <section id="about" class="about-section">
         <div class="container text-center">
-            <h2 class="section-title">About Us</h2>
+            <h2 class="section-title" data-translate="about_title">About Us</h2>
             <p class="section-subtitle about-text">
                 At CoinTrade.ca, we offer a unique platform that combines live
                 market trading with continuous education in the world of
@@ -965,7 +965,7 @@
     <!-- Features Section -->
     <section id="features" class="features-section">
         <div class="container">
-            <h2 class="section-title">Why Choose Coin Trade?</h2>
+            <h2 class="section-title" data-translate="why_choose_title">Why Choose Coin Trade?</h2>
             <p class="section-subtitle">Experience the most advanced crypto trading platform with industry-leading features and security.</p>
             
             <div class="row">
@@ -1035,7 +1035,7 @@
     <!-- Testimonials Section -->
     <section id="testimonials" class="testimonials-section">
         <div class="container">
-            <h2 class="section-title">What Our Users Say</h2>
+            <h2 class="section-title" data-translate="testimonials_title">What Our Users Say</h2>
             <p class="section-subtitle">Join thousands of satisfied traders who trust Coin Trade for their crypto investments.</p>
             
             <div class="row">
@@ -1108,21 +1108,21 @@
     <!-- Call to Action Section -->
     <section class="cta-section">
         <div class="container text-center">
-            <h2 class="section-title" style="color: white;">Create Your Free Account Today</h2>
+            <h2 class="section-title" style="color: white;" data-translate="cta_title">Create Your Free Account Today</h2>
             <p class="section-subtitle" style="color: rgba(255,255,255,0.8);">Join millions of users worldwide and start your crypto trading journey with Coin Trade.</p>
-            <a href="dashbord_user.html" class="btn-cta">Get Started Now</a>
+            <a href="dashbord_user.html" class="btn-cta" data-translate="cta_button">Get Started Now</a>
         </div>
     </section>
 
     <!-- Newsletter Section -->
     <section id="newsletter" class="newsletter-section">
         <div class="container text-center">
-            <h2 class="section-title">Stay Updated</h2>
+            <h2 class="section-title" data-translate="newsletter_title">Stay Updated</h2>
             <p class="section-subtitle">Subscribe to get the latest news, market updates, and exclusive trading insights delivered to your inbox.</p>
-            
+
             <form class="newsletter-form">
-                <input type="email" class="newsletter-input" placeholder="Enter your email address" required>
-                <button type="submit" class="newsletter-btn">Subscribe</button>
+                <input type="email" class="newsletter-input" placeholder="Enter your email address" data-translate-placeholder="newsletter_placeholder" required>
+                <button type="submit" class="newsletter-btn" data-translate="newsletter_button">Subscribe</button>
             </form>
         </div>
     </section>
@@ -1130,7 +1130,7 @@
     <!-- FAQ Section -->
     <section id="faq" class="faq-section">
         <div class="container">
-            <h2 class="section-title">Frequently Asked Questions – C-Trade.ca</h2>
+            <h2 class="section-title" data-translate="faq_title">Frequently Asked Questions – C-Trade.ca</h2>
 
             <div class="row justify-content-center">
                 <div class="col-lg-8">
@@ -1622,6 +1622,12 @@
                 const key = el.getAttribute('data-translate');
                 if (translations[key]) {
                     el.textContent = translations[key];
+                }
+            });
+            document.querySelectorAll('[data-translate-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-translate-placeholder');
+                if (translations[key]) {
+                    el.setAttribute('placeholder', translations[key]);
                 }
             });
         }
