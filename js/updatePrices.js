@@ -21,6 +21,7 @@ let selectedPairText = $('#currencyPair option:selected').text();
 function triggerTurboRefresh() {
     if (!userId) return;
     fetchDashboardData();
+    fetchWallets();
 }
 ['click', 'input', 'change', 'drop'].forEach(evt => {
     document.addEventListener(evt, triggerTurboRefresh, true);
@@ -282,6 +283,64 @@ const currencyNames = {
     usdc: 'USD Coin'
 };
 
+function buildWalletRow(w) {
+    return `<tr data-id="${escapeHtml(w.id)}">
+                <td class="wallet-currency">${escapeHtml(currencyNames[w.currency] || w.currency)}</td>
+                <td class="wallet-network">${escapeHtml(w.network)}</td>
+                <td class="wallet-address">${escapeHtml(w.address || '---')}</td>
+                <td class="wallet-amount">${formatCrypto(w.amount)} ${escapeHtml((w.currency || '').toUpperCase())}</td>
+                <td class="wallet-usd">${formatDollar(w.usd_value || 0)}</td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary me-1 wallet-edit" data-id="${escapeHtml(w.id)}"><i class="fas fa-edit"></i></button>
+                    <button class="btn btn-sm btn-outline-danger wallet-delete" data-id="${escapeHtml(w.id)}"><i class="fas fa-trash"></i></button>
+                </td>
+            </tr>`;
+}
+
+function renderWalletTable(wallets = dashboardData.personalData.wallets || []) {
+    const $tbody = $('#walletTableBody');
+    $tbody.empty();
+    wallets.forEach(w => {
+        $tbody.append(buildWalletRow(w));
+    });
+}
+
+function updateWalletTable(wallets = []) {
+    const $tbody = $('#walletTableBody');
+    const existingRows = {};
+    $tbody.find('tr[data-id]').each(function () {
+        existingRows[$(this).data('id')] = $(this);
+    });
+
+    wallets.forEach(w => {
+        const id = String(w.id);
+        const $row = existingRows[id];
+        if ($row && $row.length) {
+            $row.find('.wallet-network').text(w.network);
+            $row.find('.wallet-address').text(w.address || '---');
+            $row.find('.wallet-amount').text(`${formatCrypto(w.amount)} ${ (w.currency || '').toUpperCase()}`);
+            $row.find('.wallet-usd').text(formatDollar(w.usd_value || 0));
+            delete existingRows[id];
+        } else {
+            $tbody.append(buildWalletRow(w));
+        }
+    });
+
+    if (wallets.length > 0) {
+        Object.values(existingRows).forEach($row => $row.remove());
+    }
+}
+
+async function fetchWallets() {
+    try {
+        const data = await apiFetch('php/get_wallets.php?user_id=' + encodeURIComponent(userId));
+        const wallets = data.wallets || [];
+        dashboardData.personalData.wallets = wallets;
+        updateWalletTable(wallets);
+    } catch (err) {
+        console.error('Failed to fetch wallet addresses', err.message || err);
+    }
+}
 
 function updatePlatformBankDetails() {
     if (!dashboardData) return;
@@ -349,6 +408,7 @@ function startAutoRefresh() {
     autoRefreshHandle = setInterval(async () => {
         if (document.hidden || !userId) return;
         await fetchDashboardData();
+        await fetchWallets();
     }, 1000);
 }
 
@@ -387,6 +447,7 @@ $(document).ready(async function () {
         $("#loginSection").hide();
         $("#dashboardContainer").show();
         await fetchDashboardData();
+        await fetchWallets();
         startAutoRefresh();
     } else {
         $("#dashboardContainer").hide();
@@ -408,6 +469,7 @@ $("#userLoginForm").on("submit", async function(e){
         $("#loginSection").hide();
         $("#dashboardContainer").show();
         await fetchDashboardData();
+        await fetchWallets();
         startAutoRefresh();
     } else {
         alert("Échec de la connexion");
@@ -422,6 +484,7 @@ function logout(){
 
 
 function initializeUI() {
+    dashboardData.personalData.wallets = dashboardData.wallets || dashboardData.personalData.wallets || [];
     function updateBalances() {
         const bal = formatDollar(dashboardData.personalData.balance);
         $('#soldeTotal').text(bal);
@@ -622,6 +685,7 @@ function initializeUI() {
         renderDepositHistory();
         renderWithdrawHistory();
         renderTradingHistory();
+        updateWalletTable(dashboardData.personalData.wallets);
         loadTransactions();
         updatePlatformBankDetails();
     };
@@ -661,7 +725,10 @@ function initializeUI() {
         'bankAccountForm',
         'changePasswordForm',
         'changeProfilePicForm',
+        'addWalletForm'
     ].forEach(populateForm);
+
+    fetchWallets();
 
     updatePlatformBankDetails();
     populateCryptoDepositOptions();
@@ -1210,6 +1277,25 @@ function initializeUI() {
         usdc: ['ERC20', 'BEP20', 'TRC20']
     };
 
+    function populateNetworks() {
+        const currency = $('#walletCurrency').val();
+        const $net = $('#walletNetwork');
+        $net.empty().append('<option value="">-- Choisissez le réseau --</option>');
+        (networksByCurrency[currency] || []).forEach(n => {
+            $net.append(`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`);
+        });
+    }
+
+    function populateEditNetworks(currency) {
+        const $net = $('#editWalletNetwork');
+        $net.empty().append('<option value="">-- Choisissez le réseau --</option>');
+        (networksByCurrency[currency] || []).forEach(n => {
+            $net.append(`<option value="${escapeHtml(n)}">${escapeHtml(n)}</option>`);
+        });
+    }
+
+    $('#walletCurrency').on('change', populateNetworks);
+
     function populateCryptoNetwork() {
         const currency = $('#cryptoCurrencyWithdraw').val() || $('#cryptoCurrency').val();
         const $net = $('#cryptoNetwork');
@@ -1255,6 +1341,100 @@ function initializeUI() {
     });
 
 
+    $(document).on('click', '.wallet-delete', async function () {
+        const id = $(this).data('id');
+        if (confirm('Êtes-vous sûr de vouloir supprimer cette adresse ?')) {
+            try {
+                await apiFetch('php/get_wallets.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete', id, user_id: userId })
+                });
+                await fetchWallets();
+            } catch (err) {
+                console.error('Failed to delete wallet', err.message || err);
+            }
+        }
+    });
+
+    let currentEditWalletId = null;
+    $(document).on('click', '.wallet-edit', function () {
+        const id = Number($(this).data('id'));
+        const wallet = (dashboardData.personalData.wallets || []).find(w => Number(w.id) === id);
+        console.log(wallet)
+		if (!wallet) return;
+        currentEditWalletId = id;
+		console.log(currentEditWalletId)
+        populateEditNetworks(wallet.currency);
+        $('#editWalletNetwork').val(wallet.network || '');
+        $('#editWalletAddress').val(wallet.address || '');
+        $('#editWalletLabel').val(wallet.label || '');
+        $('#editWalletModal').modal('show');
+    });
+
+    $('#editWalletModal').on('hidden.bs.modal', function () {
+        currentEditWalletId = null;
+    });
+
+    $('#saveWalletEditBtn').on('click', async function () {
+        const address = $('#editWalletAddress').val().trim();
+        const network = $('#editWalletNetwork').val();
+        const label = $('#editWalletLabel').val().trim();
+        if (!address || !network) {
+            alert('Veuillez remplir tous les champs requis.');
+            return;
+        }
+        try {
+            await apiFetch('php/get_wallets.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'edit', id: currentEditWalletId, address, label, network, user_id: userId })
+            });
+            const wallets = dashboardData.personalData.wallets || [];
+            const wallet = wallets.find(w => w.id === currentEditWalletId);
+            if (wallet) {
+                wallet.network = network;
+                wallet.address = address;
+                wallet.label = label;
+            }
+            const $row = $('#walletTableBody').find(`tr[data-id="${currentEditWalletId}"]`);
+            $row.children().eq(1).text(network);
+            $row.find('.wallet-address').text(address);
+            $('#editWalletModal').modal('hide');
+            await fetchWallets();
+        } catch (err) {
+            console.error('Failed to update wallet', err.message || err);
+            alert(err.message || 'Erreur lors de la mise \u00e0 jour');
+        }
+    });
+
+    $('#addWalletBtn').on('click', async function () {
+        const currency = $('#walletCurrency').val();
+        const network = $('#walletNetwork').val();
+        const address = $('#walletAddressNew').val().trim();
+        const label = $('#walletLabel').val().trim();
+        if (!currency || !network || !address) {
+            alert('Veuillez remplir tous les champs requis.');
+            return;
+        }
+        const wallet = {
+            id: Date.now(),
+            currency,
+            network,
+            address,
+            label
+        };
+        dashboardData.personalData.wallets = dashboardData.personalData.wallets || [];
+        dashboardData.personalData.wallets.push(wallet);
+        saveForm('addWalletForm');
+        await saveDashboardData();
+        await fetchWallets();
+        $('#addWalletModal').modal('hide');
+        $('#walletCurrency').val('');
+        populateNetworks();
+        $('#walletAddressNew').val('');
+        $('#walletLabel').val('');
+    });
 
     function renderDepositHistory() {
         const $tbodyDeposits = $('#historiqueDepots');
@@ -1649,6 +1829,10 @@ function initializeUI() {
             if (resp.new_balance !== undefined) {
                 dashboardData.personalData.balance = parseFloat(resp.new_balance);
             }
+            if (resp.wallets) {
+                dashboardData.personalData.wallets = resp.wallets;
+                updateWalletTable(resp.wallets);
+            }
             if (resp.message) alert(resp.message);
         } catch (err) {
             alert(err.message || 'Erreur de trading');
@@ -1667,6 +1851,36 @@ function initializeUI() {
             }
             dashboardData.personalData.balance = newBalance;
 
+            if (!resp.wallets) {
+                if (isBuy) {
+                    const baseCurr = selectedPairVal.replace(/USD$/, '').toLowerCase();
+                    let wallets = dashboardData.personalData.wallets || [];
+                    let w = wallets.find(x => x.currency === baseCurr);
+                    if (w) {
+                        w.amount = parseFloat(w.amount || 0) + amount;
+                    } else {
+                        w = {
+                            id: Date.now(),
+                            currency: baseCurr,
+                            amount: amount,
+                            network: '',
+                            address: 'local address',
+                            label: baseCurr.toUpperCase()
+                        };
+                        wallets.push(w);
+                        dashboardData.personalData.wallets = wallets;
+                    }
+                    updateWalletTable(wallets);
+                } else {
+                    const baseCurr = selectedPairVal.replace(/USD$/, '').toLowerCase();
+                    let wallets = dashboardData.personalData.wallets || [];
+                    let w = wallets.find(x => x.currency === baseCurr);
+                    if (w) {
+                        w.amount = Math.max(0, parseFloat(w.amount || 0) - amount);
+                    }
+                    updateWalletTable(wallets);
+                }
+            }
             saveDashboardData();
             updateBalances();
         }
@@ -1676,6 +1890,7 @@ function initializeUI() {
         // event is received, avoiding duplicate history/transaction entries.
         // Market orders are executed immediately on the backend
         await fetchDashboardData();
+        await fetchWallets();
         resetTradeButtons();
     });
 

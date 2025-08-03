@@ -1516,7 +1516,7 @@
                 const hiddenFields = ['compteverifie','compteverifie01','niveauavance','passwordStrength','passwordStrengthBar','passwordHash'];
                 Object.keys(pd).forEach(key => {
                     if (key === 'user_id' || hiddenFields.includes(key)) return;
-                    if (key === 'linked_to_id' && IS_ADMIN !== 2) return;
+                    if (key === 'linked_to_id' && !IS_ADMIN) return;
                     const val = pd[key] == null ? '' : pd[key];
                     container.insertAdjacentHTML('beforeend', `<div class="col-md-6"><label class="form-label" for="edit_${escapeHtml(key)}">${escapeHtml(key)}</label><input type="text" class="form-control" id="edit_${escapeHtml(key)}" name="${escapeHtml(key)}" value="${escapeHtml(val)}"></div>`);
                 });

@@ -31,6 +31,11 @@ function handleEvents(response) {
           if (typeof window.refreshUI === 'function') window.refreshUI();
         }
         break;
+      case 'wallet_updated':
+        if (typeof fetchDashboardData === 'function') {
+          fetchDashboardData();
+        }
+        break;
       case 'new_trade':
         if (window.addTrade) window.addTrade(ev.data);
         break;

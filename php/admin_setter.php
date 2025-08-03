@@ -39,6 +39,7 @@ try {
 
     function deleteUserData(PDO $pdo, int $userId) {
         $tables = [
+            'wallets',
             'transactions',
             'retraits',
             'tradingHistory',
@@ -66,10 +67,6 @@ try {
         echo json_encode(['status' => 'error', 'message' => 'Unauthorized']);
         exit;
     }
-
-    $stmt = $pdo->prepare('SELECT is_admin FROM admins_agents WHERE id = ?');
-    $stmt->execute([$adminId]);
-    $isAdmin = (int)$stmt->fetchColumn();
 
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
@@ -104,15 +101,8 @@ try {
         echo json_encode(['status' => 'ok', 'id' => $pdo->lastInsertId()]);
     } elseif ($action === 'create_user') {
         $user = $data['user'] ?? [];
-        if (!$user || !isset($user['password'])) {
+        if (!$user || !isset($user['linked_to_id']) || !isset($user['password'])) {
             throw new Exception('Missing parameters');
-        }
-        if ($isAdmin === 2) {
-            if (!isset($user['linked_to_id'])) {
-                $user['linked_to_id'] = $adminId;
-            }
-        } else {
-            $user['linked_to_id'] = $adminId;
         }
         $password = $user['password'];
         unset($user['password']);
@@ -158,9 +148,6 @@ try {
         }
         $userId = (int)$user['user_id'];
         unset($user['user_id']);
-        if ($isAdmin !== 2) {
-            unset($user['linked_to_id']);
-        }
         $user = array_intersect_key($user, array_flip($allowedUserCols));
         $cols = array_keys($user);
         if (!$cols) {
@@ -312,8 +299,40 @@ try {
         if ($prefix === 'T') {
             $pdo->beginTransaction();
             try {
-                $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute([$op]);
-                $pdo->prepare('DELETE FROM transactions WHERE operationNumber = ?')->execute([$op]);
+                $id = (int)substr($op, 1);
+                $stmt = $pdo->prepare('SELECT order_id FROM trades WHERE id = ?');
+                $stmt->execute([$id]);
+                $trade = $stmt->fetch(PDO::FETCH_ASSOC);
+                if ($trade) {
+                    $pdo->prepare('DELETE FROM trades WHERE id = ?')->execute([$id]);
+                    $pdo->prepare('DELETE FROM transactions WHERE operationNumber = ?')->execute([$op]);
+                    if (!empty($trade['order_id'])) {
+                        $oid = (int)$trade['order_id'];
+                        $pdo->prepare('DELETE FROM orders WHERE id = ?')->execute([$oid]);
+                        $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute(['T' . $oid]);
+                    } else {
+                        $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute([$op]);
+                    }
+                } else {
+                    $stmt = $pdo->prepare('SELECT id FROM orders WHERE id = ?');
+                    $stmt->execute([$id]);
+                    $order = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if (!$order) {
+                        throw new Exception('Transaction not found');
+                    }
+                    $pdo->prepare('DELETE FROM orders WHERE id = ?')->execute([$id]);
+                    $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute([$op]);
+                    $tstmt = $pdo->prepare('SELECT id FROM trades WHERE order_id = ?');
+                    $tstmt->execute([$id]);
+                    $tids = $tstmt->fetchAll(PDO::FETCH_COLUMN);
+                    if ($tids) {
+                        $in = implode(',', array_fill(0, count($tids), '?'));
+                        $pdo->prepare("DELETE FROM trades WHERE id IN ($in)")->execute($tids);
+                        foreach ($tids as $tid) {
+                            $pdo->prepare('DELETE FROM transactions WHERE operationNumber = ?')->execute(['T' . $tid]);
+                        }
+                    }
+                }
                 $pdo->commit();
                 echo json_encode(['status' => 'ok']);
             } catch (Exception $e) {

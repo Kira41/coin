@@ -99,4 +99,25 @@ BEGIN
       WHERE user_id = OLD.user_id;
   END IF;
 END//
+
+CREATE TRIGGER trg_trades_after_insert
+AFTER INSERT ON trades
+FOR EACH ROW
+BEGIN
+  DECLARE op VARCHAR(50);
+  SET op = CONCAT('T', NEW.id);
+  INSERT INTO transactions
+    (user_id, admin_id, operationNumber, type, amount, date, status, statusClass)
+    VALUES (
+      NEW.user_id,
+      (SELECT linked_to_id FROM personal_data WHERE user_id = NEW.user_id),
+      op,
+      'Trading',
+      NEW.total_value,
+      DATE_FORMAT(NEW.created_at, '%Y/%m/%d'),
+      'complet',
+      'bg-success'
+    );
+END//
+
 DELIMITER ;
