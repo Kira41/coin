@@ -783,8 +783,8 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container">
             <a class="navbar-brand" href="#home">
-                <img src="img/logo4x2.png" alt="Coin Trade Logo">
-                Coin Trade
+                <img id="brand-logo" src="img/logo4x2.png" alt="CoinTrade Logo">
+                <span id="brand-text" style="display: none;">CoinTrade</span>
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -1285,17 +1285,23 @@
         function toggleTheme() {
             const body = document.body;
             const themeIcon = document.getElementById('theme-icon');
-            
+            const brandLogo = document.getElementById('brand-logo');
+            const brandText = document.getElementById('brand-text');
+
             if (body.classList.contains('dark-mode')) {
                 body.classList.remove('dark-mode');
                 body.classList.add('light-mode');
                 themeIcon.classList.remove('fa-moon');
                 themeIcon.classList.add('fa-sun');
+                brandLogo.src = 'img/icon.png';
+                brandText.style.display = 'inline';
             } else {
                 body.classList.remove('light-mode');
                 body.classList.add('dark-mode');
                 themeIcon.classList.remove('fa-sun');
                 themeIcon.classList.add('fa-moon');
+                brandLogo.src = 'img/logo4x2.png';
+                brandText.style.display = 'none';
             }
         }
 
