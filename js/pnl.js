@@ -21,3 +21,17 @@ export function profitLossShort(buyPrice, sellPrice, qty) {
     return (sellPrice - buyPrice) * qty;
 }
 
+// Execute a market order at the current price and return the position
+export function marketOrder(side, price, usdAmount) {
+    const quantity = usdAmount / price;
+    return { side, entryPrice: price, quantity };
+}
+
+// Close an existing position at the provided price and return profit or loss
+export function closePosition(position, exitPrice) {
+    if (position.side === 'buy') {
+        return profitLossLong(exitPrice, position.entryPrice, position.quantity);
+    }
+    return profitLossShort(position.entryPrice, exitPrice, position.quantity);
+}
+
