@@ -23,7 +23,6 @@ try {
     if (isset($data['personalData'])) {
         $personal = $data['personalData'];
         $personal['user_id'] = $userId;
-        unset($personal['wallets']);
 
         $cols = array_keys($personal);
         $place = implode(',', array_fill(0, count($cols), '?'));
