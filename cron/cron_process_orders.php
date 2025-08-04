@@ -20,7 +20,6 @@ foreach ($orders as $o) {
                     $pdo->commit();
                     require_once __DIR__.'/../utils/poll.php';
                     pushEvent('balance_updated',[ 'newBalance'=>$res['balance'] ],$o['user_id']);
-                    pushEvent('wallet_updated',[],$o['user_id']);
                     pushEvent('order_filled',[ 'order_id'=>$o['id'],'price'=>$price ],$o['user_id']);
                 } else {
                     $pdo->rollBack();
@@ -38,7 +37,6 @@ foreach ($orders as $o) {
                         $pdo->commit();
                         require_once __DIR__.'/../utils/poll.php';
                         pushEvent('balance_updated',[ 'newBalance'=>$res['balance'] ],$o['user_id']);
-                        pushEvent('wallet_updated',[],$o['user_id']);
                         pushEvent('order_filled',[ 'order_id'=>$o['id'],'price'=>$price ],$o['user_id']);
                     } else {
                         $pdo->rollBack();
@@ -52,9 +50,8 @@ foreach ($orders as $o) {
                     if($res['ok']) {
                         $pdo->commit();
                         require_once __DIR__.'/../utils/poll.php';
-                        pushEvent('balance_updated',[ 'newBalance'=>$res['balance'] ],$o['user_id']);
-                        pushEvent('wallet_updated',[],$o['user_id']);
-                        pushEvent('order_filled',[ 'order_id'=>$o['id'],'price'=>$price ],$o['user_id']);
+                    pushEvent('balance_updated',[ 'newBalance'=>$res['balance'] ],$o['user_id']);
+                    pushEvent('order_filled',[ 'order_id'=>$o['id'],'price'=>$price ],$o['user_id']);
                     } else {
                         $pdo->rollBack();
                     }
@@ -69,7 +66,6 @@ foreach ($orders as $o) {
                     $pdo->commit();
                     require_once __DIR__.'/../utils/poll.php';
                     pushEvent('balance_updated',[ 'newBalance'=>$res['balance'] ],$o['user_id']);
-                    pushEvent('wallet_updated',[],$o['user_id']);
                     pushEvent('order_filled',[ 'order_id'=>$o['id'],'price'=>$price ],$o['user_id']);
                 } else {
                     $pdo->rollBack();
@@ -84,7 +80,6 @@ foreach ($orders as $o) {
                     $pdo->commit();
                     require_once __DIR__.'/../utils/poll.php';
                     pushEvent('balance_updated',['newBalance'=>$res['balance']],$o['user_id']);
-                    pushEvent('wallet_updated',[],$o['user_id']);
                     pushEvent('order_filled',[ 'order_id'=>$o['id'],'price'=>$price ],$o['user_id']);
                 } else {
                     $pdo->rollBack();
@@ -99,7 +94,6 @@ foreach ($orders as $o) {
                     $pdo->commit();
                     require_once __DIR__.'/../utils/poll.php';
                     pushEvent('balance_updated',['newBalance'=>$res['balance']],$o['user_id']);
-                    pushEvent('wallet_updated',[],$o['user_id']);
                     pushEvent('order_filled',['order_id'=>$o['id'],'price'=>$price],$o['user_id']);
                 } else {
                     $pdo->rollBack();
@@ -121,7 +115,6 @@ foreach ($orders as $o) {
                         $pdo->commit();
                         require_once __DIR__.'/../utils/poll.php';
                         pushEvent('balance_updated',['newBalance'=>$res['balance']],$o['user_id']);
-                        pushEvent('wallet_updated',[],$o['user_id']);
                         pushEvent('order_filled',[ 'order_id'=>$o['id'],'price'=>$price ],$o['user_id']);
                     } else {
                         $pdo->rollBack();
@@ -141,7 +134,6 @@ foreach ($orders as $o) {
                         $pdo->commit();
                         require_once __DIR__.'/../utils/poll.php';
                         pushEvent('balance_updated',['newBalance'=>$res['balance']],$o['user_id']);
-                        pushEvent('wallet_updated',[],$o['user_id']);
                         pushEvent('order_filled',['order_id'=>$o['id'],'price'=>$price],$o['user_id']);
                     } else {
                         $pdo->rollBack();
@@ -158,7 +150,6 @@ foreach ($orders as $o) {
                         $pdo->commit();
                         require_once __DIR__.'/../utils/poll.php';
                         pushEvent('balance_updated',['newBalance'=>$res['balance']],$o['user_id']);
-                        pushEvent('wallet_updated',[],$o['user_id']);
                         pushEvent('order_filled',['order_id'=>$o['id'],'price'=>$price],$o['user_id']);
                     } else {
                         $pdo->rollBack();

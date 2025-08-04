@@ -87,7 +87,7 @@ function executeTrade(PDO $pdo, array $order, float $price) {
             $pdo->prepare('UPDATE orders SET status="filled",price_at_execution=?,executed_at=NOW() WHERE id=?')->execute([$price,$orderId]);
         }
         $opNum = 'T'.($order['id'] ?: $tradeId);
-        addHistory($pdo,$order['user_id'],$opNum,$order['pair'],$order['side'],$order['quantity'],$price,'En cours');
+        addHistory($pdo,$order['user_id'],$opNum,$order['pair'],$order['side'],$order['quantity'],$price,'complet');
         return ['ok'=>true,'balance'=>$bal-$total,'price'=>$price,'profit'=>0,'operation'=>$opNum];
     }
 

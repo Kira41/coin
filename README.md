@@ -13,11 +13,7 @@ This project uses small PHP helpers (`getter.php` and `setter.php`) to read and 
 3. The PHP scripts connect to `coin_db` on `localhost` using the `root` user with an empty password. Update the connection settings in `getter.php` and `setter.php` if your environment differs.
 
 The dashboard pages (`dashbord_user.html` and `js/updatePrices.js`) request data from `php/getter.php` and send updates to `php/setter.php`.
-`js/updatePrices.js` now fetches wallet addresses from `php/get_wallets.php`, which returns `SELECT * FROM wallets WHERE user_id = ?` in JSON. The `wallets` table stores
-crypto addresses with a `BIGINT` `id` so each entry keeps the unique identifier
-generated in JavaScript with `Date.now()`. User accounts use the same approach:
-the `personal_data.user_id` column is also a `BIGINT` so IDs created with
-`Date.now()` are inserted without overflowing.
+The trading interface operates directly on each user's account balance. Wallet functionality has been removed, so trades deduct from the balance and record immediately in the trading history.
 
 All tables now use the **InnoDB** storage engine and any `AUTO_INCREMENT`
 columns have been widened to `BIGINT` to prevent errors when new rows are
@@ -54,28 +50,7 @@ Foreign keys from tables such as `transactions`, `deposits`, `retraits` and
 `personal_data` will automatically clean up any related records, preventing
 foreign key errors.
 
-## Wallet management
-
-Wallets now store the amount of each currency owned by a user. The `wallets`
-table contains an `amount` column and one row per `(user, currency)` pair. If a
-user buys a currency for the first time a new row is created with the address
-set to `local address`.
-
-Each wallet row includes edit and delete icons. Clicking the **edit** icon opens
-a modal where you can update the address or its label. The **trash** icon
-removes the wallet entirely. Edits and deletions are sent to
-`get_wallets.php`, and the wallet list refreshes immediately to show the latest
-data. The wallet table on the user dashboard now also displays the current
-balance for each address. Wallet entries track their value in USD and this field
-is updated whenever a trade executes. The optional `cron_wallet_usd.php` task can
-refresh the value periodically for inactive accounts. This value is shown in the
-wallet table so users can see the approximate amount in USD for each of their
-crypto holdings.
-
-The trading history table was updated as well. Amounts are shown with the
-traded coin symbol instead of dollars, e.g. `100 XRP`. The database now stores
-trade quantities and prices with up to ten decimal places so small orders such
-as `0.005 BTC` are recorded accurately.
+The trading history table shows amounts using the traded coin symbol instead of dollars, e.g. `100 XRP`. The database now stores trade quantities and prices with up to ten decimal places so small orders such as `0.005 BTC` are recorded accurately.
 
 ## Admin dashboard
 
@@ -88,8 +63,8 @@ present, the request is rejected with `401 Unauthorized`. Once authenticated,
 Use the "Créer Agent" form to add new agents under the logged‑in admin.
 
 Deleting an agent with `admin_setter.php` now removes all of the users tied to
-that account. Each affected user's rows in `personal_data`, `wallets`,
-`transactions`, `tradingHistory`, `notifications`, `loginHistory`, `deposits`
+that account. Each affected user's rows in `personal_data`, `transactions`,
+`tradingHistory`, `notifications`, `loginHistory`, `deposits`
 and `bank_withdrawl_info` are deleted before the agent record itself is
 removed. The same cleanup occurs when deleting an individual user.
 
@@ -106,13 +81,6 @@ Use `admin_login.php` to sign in. POST `email` and `password`; a successful logi
 
 ## Automated trade closing
 
-Wallet USD amounts are updated immediately whenever a trade executes. You can still
-schedule `cron_wallet_usd.php` for periodic refreshes if no trading activity
-occurs:
-
-```cron
-* * * * * php /path/to/cron_wallet_usd.php
-```
 For Windows users, double-click `run_cron_jobs.bat` in the project root to execute all cron tasks manually.
 
 ### Order types
@@ -144,7 +112,7 @@ recordTrade($userId, $pair, $side, $quantity, $price);
 The old WebSocket server has been removed. The dashboard now relies on a
 long polling endpoint (`php/long_poll.php`). Client-side JavaScript keeps
 sending background requests and immediately processes any returned events to
-update balances, wallets or orders without reloading the page.
+update balances or orders without reloading the page.
 
 ## Profit/Loss calculation
 
