@@ -143,7 +143,7 @@ try {
 
     if($type==='market'){
         $pdo->beginTransaction();
-        $order=['id'=>0,'user_id'=>$userId,'pair'=>$pair,'side'=>$side,'quantity'=>$qty];
+        $order=['id'=>null,'user_id'=>$userId,'pair'=>$pair,'side'=>$side,'quantity'=>$qty];
         $result = executeTrade($pdo,$order,$livePrice);
         if(!$result['ok']){ $pdo->rollBack(); http_response_code(400); echo json_encode(['status'=>'error','message'=>$result['msg']]); return; }
         $pdo->commit();
