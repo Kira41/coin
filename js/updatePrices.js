@@ -1696,6 +1696,7 @@ function initializeUI() {
         // event is received, avoiding duplicate history/transaction entries.
         // Market orders are executed immediately on the backend
         await fetchDashboardData();
+        await loadTransactions();
         resetTradeButtons();
     });
 
