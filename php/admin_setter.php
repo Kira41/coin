@@ -98,16 +98,20 @@ try {
     $action = $data['action'] ?? '';
 
     if ($action === 'create_admin') {
-        if ($isAdmin !== 2) { $forbidden(); }
+        if ($isAdmin < 1) { $forbidden(); }
         $email = $data['email'] ?? '';
         $password = $data['password'] ?? '';
         $newIsAdmin = isset($data['is_admin']) ? (int)$data['is_admin'] : 0;
-        $createdBy = $data['created_by'] ?? null;
+        if ($newIsAdmin === 2) {
+            http_response_code(400);
+            echo json_encode(['status' => 'error', 'message' => 'Cannot assign Super Admin privilege']);
+            exit;
+        }
         if (!$email || !$password) {
             throw new Exception('Missing parameters');
         }
         $stmt = $pdo->prepare('INSERT INTO admins_agents (email, password, is_admin, created_by) VALUES (?,?,?,?)');
-        $stmt->execute([$email, $password, $newIsAdmin, $createdBy]);
+        $stmt->execute([$email, $password, $newIsAdmin, $adminId]);
         echo json_encode(['status' => 'ok', 'id' => $pdo->lastInsertId()]);
     } elseif ($action === 'create_user') {
         $user = $data['user'] ?? [];
@@ -233,8 +237,14 @@ try {
         }
         if (isset($data['is_admin'])) {
             if ($isAdmin !== 2) { $forbidden(); }
+            $newIsAdmin = (int)$data['is_admin'];
+            if ($newIsAdmin === 2) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Cannot assign Super Admin privilege']);
+                exit;
+            }
             $fields[] = 'is_admin = ?';
-            $values[] = (int)$data['is_admin'];
+            $values[] = $newIsAdmin;
         }
         if (!$fields) {
             throw new Exception('No fields to update');
