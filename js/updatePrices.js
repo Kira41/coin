@@ -1724,13 +1724,28 @@ function initializeUI() {
         const trade = (dashboardData.tradingHistory || []).find(t => t.operationNumber === op);
         const orderId = trade?.details?.order_id ?? trade?.order_id;
         if (trade && trade.statut === 'En cours' && orderId) {
+            const openTrade = (dashboardData.openTrades || []).find(t => t.id == orderId);
             try {
-                await apiFetch('php/cancel_order.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ user_id: userId, order_id: orderId })
-                });
-                showBootstrapAlert('cancelOrderAlert', 'Ordre annulé.', 'success');
+                if (openTrade) {
+                    await apiFetch('php/market_order.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            user_id: userId,
+                            pair: openTrade.pair,
+                            side: 'sell',
+                            quantity: openTrade.quantity
+                        })
+                    });
+                    showBootstrapAlert('cancelOrderAlert', 'Position clôturée.', 'success');
+                } else {
+                    await apiFetch('php/cancel_order.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ user_id: userId, order_id: orderId })
+                    });
+                    showBootstrapAlert('cancelOrderAlert', 'Ordre annulé.', 'success');
+                }
             } catch (e) {
                 showBootstrapAlert('cancelOrderAlert', e.message || 'Erreur lors de l\'annulation', 'danger');
             }
