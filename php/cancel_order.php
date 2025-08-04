@@ -47,7 +47,7 @@ try{
             ->execute([$order['related_order_id']]);
     }
     $price = isset($order['target_price']) ? $order['target_price'] : 0;
-    addHistory($pdo,$userId,'T'.$orderId,$order['pair'],$order['side'],$order['quantity'],$price,'annule');
+    addHistory($pdo,$userId,'T'.$orderId,$order['pair'],$order['side'],$order['quantity'],$price,'annule',null,$order['type'] ?? null);
     $pdo->commit();
     require_once __DIR__.'/../utils/poll.php';
     pushEvent('order_cancelled',['order_id'=>$orderId],$userId);

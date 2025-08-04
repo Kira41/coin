@@ -48,7 +48,8 @@ try {
         'user_id' => $userId,
         'pair' => $pair,
         'side' => $side,
-        'quantity' => $quantity
+        'quantity' => $quantity,
+        'type' => 'market'
     ];
     $result = executeTrade($pdo, $order, $price);
     if (!$result['ok']) {
