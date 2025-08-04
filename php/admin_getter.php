@@ -132,6 +132,13 @@ if ((int)$admin['is_admin'] === 2) {
     $result['users'] = $users;
 }
 
+if ((int)$admin['is_admin'] !== 2) {
+    foreach ($result['users'] as &$u) {
+        unset($u['linked_to_id']);
+    }
+    unset($u);
+}
+
 if ((int)$admin['is_admin'] === 2) {
     $stmt = $pdo->query('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE k.status = "pending"');
 } else {
