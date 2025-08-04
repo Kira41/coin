@@ -12,12 +12,7 @@ This project uses small PHP helpers (`getter.php` and `setter.php`) to read and 
    ```
 3. The PHP scripts connect to `coin_db` on `localhost` using the `root` user with an empty password. Update the connection settings in `getter.php` and `setter.php` if your environment differs.
 
-The dashboard pages (`dashbord_user.html` and `js/updatePrices.js`) request data from `php/getter.php` and send updates to `php/setter.php`.
-`js/updatePrices.js` now fetches wallet addresses from `php/get_wallets.php`, which returns `SELECT * FROM wallets WHERE user_id = ?` in JSON. The `wallets` table stores
-crypto addresses with a `BIGINT` `id` so each entry keeps the unique identifier
-generated in JavaScript with `Date.now()`. User accounts use the same approach:
-the `personal_data.user_id` column is also a `BIGINT` so IDs created with
-`Date.now()` are inserted without overflowing.
+The dashboard page (`dashbord_user.html`) requests data from `php/getter.php` and sends updates to `php/setter.php`.
 
 All tables now use the **InnoDB** storage engine and any `AUTO_INCREMENT`
 columns have been widened to `BIGINT` to prevent errors when new rows are
@@ -54,29 +49,6 @@ Foreign keys from tables such as `transactions`, `deposits`, `retraits` and
 `personal_data` will automatically clean up any related records, preventing
 foreign key errors.
 
-## Wallet management
-
-Wallets now store the amount of each currency owned by a user. The `wallets`
-table contains an `amount` column and one row per `(user, currency)` pair. If a
-user buys a currency for the first time a new row is created with the address
-set to `local address`.
-
-Each wallet row includes edit and delete icons. Clicking the **edit** icon opens
-a modal where you can update the address or its label. The **trash** icon
-removes the wallet entirely. Edits and deletions are sent to
-`get_wallets.php`, and the wallet list refreshes immediately to show the latest
-data. The wallet table on the user dashboard now also displays the current
-balance for each address. Wallet entries track their value in USD and this field
-is updated whenever a trade executes. The optional `cron_wallet_usd.php` task can
-refresh the value periodically for inactive accounts. This value is shown in the
-wallet table so users can see the approximate amount in USD for each of their
-crypto holdings.
-
-The trading history table was updated as well. Amounts are shown with the
-traded coin symbol instead of dollars, e.g. `100 XRP`. The database now stores
-trade quantities and prices with up to ten decimal places so small orders such
-as `0.005 BTC` are recorded accurately.
-
 ## Admin dashboard
 
 `insertdata.sql` seeds a default administrator account (`admin@scampia.io`) with
@@ -88,10 +60,10 @@ present, the request is rejected with `401 Unauthorized`. Once authenticated,
 Use the "Créer Agent" form to add new agents under the logged‑in admin.
 
 Deleting an agent with `admin_setter.php` now removes all of the users tied to
-that account. Each affected user's rows in `personal_data`, `wallets`,
-`transactions`, `tradingHistory`, `notifications`, `loginHistory`, `deposits`
-and `bank_withdrawl_info` are deleted before the agent record itself is
-removed. The same cleanup occurs when deleting an individual user.
+that account. Each affected user's rows in `personal_data`, `transactions`,
+`tradingHistory`, `notifications`, `loginHistory`, `deposits` and
+`bank_withdrawl_info` are deleted before the agent record itself is removed.
+The same cleanup occurs when deleting an individual user.
 
 Use `admin_login.php` to sign in. POST `email` and `password`; a successful login starts a session and stores `admin_id` for subsequent requests.
 
@@ -104,73 +76,13 @@ Use `admin_login.php` to sign in. POST `email` and `password`; a successful logi
 
 `dashbord_user.html` now includes a login form. Submit your email and password to `user_login.php`; on success the script stores your `user_id` in `localStorage` and loads the dashboard for that account. Each successful login is also recorded in the `loginHistory` table along with the IP address and device used.
 
-## Automated trade closing
-
-Wallet USD amounts are updated immediately whenever a trade executes. You can still
-schedule `cron_wallet_usd.php` for periodic refreshes if no trading activity
-occurs:
-
-```cron
-* * * * * php /path/to/cron_wallet_usd.php
-```
-For Windows users, double-click `run_cron_jobs.bat` in the project root to execute all cron tasks manually.
-
-### Order types
-
-The platform supports a variety of order types. Market orders are executed immediately using the current price returned by Binance. Pending orders (limit, stop, stop‑limit, trailing stop, percentage based stop, time based stop and OCO) are stored in the `orders` table until the `cron_process_orders.php` task evaluates them.
-
-When querying Binance for live prices remember that pairs use the `USDT` quote currency. A pair like `ADA/USD` should be converted to `ADAUSDT` before requesting the price.
-
-Example pseudo-code for order execution:
-
-```php
-// Market order execution
-$price = getLivePrice($pair);
-$total = $price * $quantity;
-if ($side === 'buy') {
-    // deduct dollars from the user's account balance
-    deductFromAccount($userId, $total);
-    addToWallet($userId, $base, $quantity, $price);
-} else {
-    deductFromWallet($userId, $base, $quantity, $price);
-    // credit dollars back to the account
-    addToAccount($userId, $total);
-}
-recordTrade($userId, $pair, $side, $quantity, $price);
-```
 
 ## Real-time updates
 
 The old WebSocket server has been removed. The dashboard now relies on a
 long polling endpoint (`php/long_poll.php`). Client-side JavaScript keeps
 sending background requests and immediately processes any returned events to
-update balances, wallets or orders without reloading the page.
-
-## Profit/Loss calculation
-
-Use the executed trade price, not the candle price, to determine profit or loss.
-The basic formula for closing a long position is:
-
-```
-(sell price - average buy price) * quantity sold
-```
-
-For short selling the logic is reversed:
-
-```
-(sell price - buy price) * quantity
-```
-
-`utils/pnl.php` contains helper functions implementing these rules. The
-`calculate_average_buy_price()` function builds the weighted average from a list
-of prior buy trades, while `profit_loss_long()` and `profit_loss_short()` return
-the resulting PnL. A small JavaScript version lives in `js/pnl.js` for client
-side use. Example usage in PHP:
-
-```php
-$avg = calculate_average_buy_price($previousBuys);
-$profit = profit_loss_long($executedSellPrice, $avg, $soldQty);
-```
+update balances without reloading the page.
 
 ## Historical prices
 

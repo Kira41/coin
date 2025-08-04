@@ -39,7 +39,6 @@ try {
 
     function deleteUserData(PDO $pdo, int $userId) {
         $tables = [
-            'wallets',
             'transactions',
             'retraits',
             'tradingHistory',
@@ -296,133 +295,88 @@ try {
             throw new Exception('Missing id');
         }
         $prefix = strtoupper(substr($op, 0, 1));
-        if ($prefix === 'T') {
-            $pdo->beginTransaction();
-            try {
-                $id = (int)substr($op, 1);
-                $stmt = $pdo->prepare('SELECT order_id FROM trades WHERE id = ?');
-                $stmt->execute([$id]);
-                $trade = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($trade) {
-                    $pdo->prepare('DELETE FROM trades WHERE id = ?')->execute([$id]);
-                    $pdo->prepare('DELETE FROM transactions WHERE operationNumber = ?')->execute([$op]);
-                    if (!empty($trade['order_id'])) {
-                        $oid = (int)$trade['order_id'];
-                        $pdo->prepare('DELETE FROM orders WHERE id = ?')->execute([$oid]);
-                        $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute(['T' . $oid]);
-                    } else {
-                        $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute([$op]);
-                    }
-                } else {
-                    $stmt = $pdo->prepare('SELECT id FROM orders WHERE id = ?');
-                    $stmt->execute([$id]);
-                    $order = $stmt->fetch(PDO::FETCH_ASSOC);
-                    if (!$order) {
-                        throw new Exception('Transaction not found');
-                    }
-                    $pdo->prepare('DELETE FROM orders WHERE id = ?')->execute([$id]);
-                    $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute([$op]);
-                    $tstmt = $pdo->prepare('SELECT id FROM trades WHERE order_id = ?');
-                    $tstmt->execute([$id]);
-                    $tids = $tstmt->fetchAll(PDO::FETCH_COLUMN);
-                    if ($tids) {
-                        $in = implode(',', array_fill(0, count($tids), '?'));
-                        $pdo->prepare("DELETE FROM trades WHERE id IN ($in)")->execute($tids);
-                        foreach ($tids as $tid) {
-                            $pdo->prepare('DELETE FROM transactions WHERE operationNumber = ?')->execute(['T' . $tid]);
-                        }
-                    }
-                }
-                $pdo->commit();
-                echo json_encode(['status' => 'ok']);
-            } catch (Exception $e) {
-                $pdo->rollBack();
-                throw $e;
+        $historyTable = null;
+        if ($prefix === 'D') {
+            $historyTable = 'deposits';
+        } elseif ($prefix === 'R') {
+            $historyTable = 'retraits';
+        }
+        $pdo->beginTransaction();
+        try {
+            $stmt = ($historyTable
+                ? $pdo->prepare("SELECT user_id, amount, status, date FROM $historyTable WHERE operationNumber = ? FOR UPDATE")
+                : $pdo->prepare("SELECT user_id, amount, status, date FROM transactions WHERE operationNumber = ? FOR UPDATE"));
+            $stmt->execute([$op]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            if (!$row) {
+                throw new Exception('Transaction not found');
             }
-        } else {
-            $historyTable = null;
-            if ($prefix === 'D') {
-                $historyTable = 'deposits';
-            } elseif ($prefix === 'R') {
-                $historyTable = 'retraits';
-            }
-            $pdo->beginTransaction();
-            try {
-                $stmt = ($historyTable
-                    ? $pdo->prepare("SELECT user_id, amount, status, date FROM $historyTable WHERE operationNumber = ? FOR UPDATE")
-                    : $pdo->prepare("SELECT user_id, amount, status, date FROM transactions WHERE operationNumber = ? FOR UPDATE"));
-                $stmt->execute([$op]);
-                $row = $stmt->fetch(PDO::FETCH_ASSOC);
-                if (!$row) {
-                    throw new Exception('Transaction not found');
+            $userId = (int)$row['user_id'];
+            $amount = (float)$row['amount'];
+            $oldStatus = $row['status'];
+            if (!empty($data['delete'])) {
+                if ($historyTable) {
+                    $pdo->prepare("DELETE FROM $historyTable WHERE operationNumber = ?")->execute([$op]);
                 }
-                $userId = (int)$row['user_id'];
-                $amount = (float)$row['amount'];
-                $oldStatus = $row['status'];
-                if (!empty($data['delete'])) {
-                    if ($historyTable) {
-                        $pdo->prepare("DELETE FROM $historyTable WHERE operationNumber = ?")->execute([$op]);
-                    }
-                    $pdo->prepare("DELETE FROM transactions WHERE operationNumber = ?")->execute([$op]);
-                    if ($oldStatus === 'complet') {
-                        // balance adjustments now handled by database triggers
-                    }
-                } else {
-                    $status = $data['status'] ?? null;
-                    $class = $data['statusClass'] ?? null;
-                    if ($status === null || $class === null) {
-                        throw new Exception('Missing status');
-                    }
-                    if ($historyTable) {
-                        $pdo->prepare("UPDATE $historyTable SET status = ?, statusClass = ? WHERE operationNumber = ?")
-                            ->execute([$status, $class, $op]);
-                    }
-                    $pdo->prepare("UPDATE transactions SET status = ?, statusClass = ? WHERE operationNumber = ?")
+                $pdo->prepare("DELETE FROM transactions WHERE operationNumber = ?")->execute([$op]);
+                if ($oldStatus === 'complet') {
+                    // balance adjustments now handled by database triggers
+                }
+            } else {
+                $status = $data['status'] ?? null;
+                $class = $data['statusClass'] ?? null;
+                if ($status === null || $class === null) {
+                    throw new Exception('Missing status');
+                }
+                if ($historyTable) {
+                    $pdo->prepare("UPDATE $historyTable SET status = ?, statusClass = ? WHERE operationNumber = ?")
                         ->execute([$status, $class, $op]);
-                    if ($prefix === 'D') {
-                        if ($oldStatus !== 'complet' && $status === 'complet') {
-                            // deposit completion adjustments handled by triggers
+                }
+                $pdo->prepare("UPDATE transactions SET status = ?, statusClass = ? WHERE operationNumber = ?")
+                    ->execute([$status, $class, $op]);
+                if ($prefix === 'D') {
+                    if ($oldStatus !== 'complet' && $status === 'complet') {
+                        // deposit completion adjustments handled by triggers
 
-                            $timeNow = date('Y-m-d H:i:s');
-                            $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
-                            $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
-                                ->execute([
-                                    $userId,
-                                    'success',
-                                    'Dépôt réussi',
-                                    "Un montant de $msgAmount a été déposé avec succès.",
-                                    $timeNow,
-                                    'alert-success'
-                                ]);
-                        } elseif ($oldStatus === 'complet' && $status !== 'complet') {
-                            // revert handled by trigger trg_deposits_after_update
-                        }
-                    } elseif ($prefix === 'R') {
-                        if ($oldStatus !== 'complet' && $status === 'complet') {
-                            // withdrawal completion handled by trigger trg_retraits_after_update
+                        $timeNow = date('Y-m-d H:i:s');
+                        $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
+                        $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
+                            ->execute([
+                                $userId,
+                                'success',
+                                'Dépôt réussi',
+                                "Un montant de $msgAmount a été déposé avec succès.",
+                                $timeNow,
+                                'alert-success'
+                            ]);
+                    } elseif ($oldStatus === 'complet' && $status !== 'complet') {
+                        // revert handled by trigger trg_deposits_after_update
+                    }
+                } elseif ($prefix === 'R') {
+                    if ($oldStatus !== 'complet' && $status === 'complet') {
+                        // withdrawal completion handled by trigger trg_retraits_after_update
 
-                            $timeNow = date('Y-m-d H:i:s');
-                            $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
-                            $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
-                                ->execute([
-                                    $userId,
-                                    'success',
-                                    'Retrait approuvé',
-                                    "Votre retrait de $msgAmount a été approuvé.",
-                                    $timeNow,
-                                    'alert-success'
-                                ]);
-                        } elseif ($oldStatus === 'complet' && $status !== 'complet') {
-                            // revert handled by trigger trg_retraits_after_update
-                        }
+                        $timeNow = date('Y-m-d H:i:s');
+                        $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
+                        $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
+                            ->execute([
+                                $userId,
+                                'success',
+                                'Retrait approuvé',
+                                "Votre retrait de $msgAmount a été approuvé.",
+                                $timeNow,
+                                'alert-success'
+                            ]);
+                    } elseif ($oldStatus === 'complet' && $status !== 'complet') {
+                        // revert handled by trigger trg_retraits_after_update
                     }
                 }
-                $pdo->commit();
-                echo json_encode(['status' => 'ok']);
-            } catch (Exception $e) {
-                $pdo->rollBack();
-                throw $e;
             }
+            $pdo->commit();
+            echo json_encode(['status' => 'ok']);
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw $e;
         }
     } elseif ($action === 'broadcast_update') {
         $date = $data['date'] ?? '';
