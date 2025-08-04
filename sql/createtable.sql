@@ -189,6 +189,7 @@ CREATE TABLE orders (
     trail_price DECIMAL(20,10),
     related_order_id BIGINT,
     status ENUM('open','triggered','filled','cancelled') DEFAULT 'open',
+    blocked TINYINT(1) DEFAULT 0,
     price_at_execution DECIMAL(20,10),
     executed_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,

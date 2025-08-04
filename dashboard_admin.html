@@ -719,7 +719,7 @@
                     <h6 class="mt-3">Historique de Trading</h6>
                     <table class="table table-sm">
                         <thead>
-                            <tr><th>Temps</th><th>Paire</th><th>Type</th><th>Montant</th><th>Prix</th><th>Statut</th><th>Profit/Perte</th></tr>
+                            <tr><th>Temps</th><th>Paire</th><th>Type</th><th>Montant</th><th>Prix</th><th>Statut</th><th>Profit/Perte</th><th>Action</th></tr>
                         </thead>
                         <tbody id="viewTrading"></tbody>
                     </table>
@@ -1500,9 +1500,33 @@
                 (data.tradingHistory || []).slice(0,10).forEach(t => {
                     const profit = t.profitPerte == null ? '-' : formatDollar(t.profitPerte);
                     const baseCoin = (t.paireDevises || '').split('/')[0];
-                    tradeBody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHtml(t.temps)}</td><td>${escapeHtml(t.paireDevises)}</td><td><span class="badge ${escapeHtml(t.statutTypeClass)}">${escapeHtml(t.type)}</span></td><td>${formatCrypto(t.montant)} ${escapeHtml(baseCoin)}</td><td>${formatDollar(t.prix)}</td><td><span class="badge ${escapeHtml(t.statutClass)}">${escapeHtml(t.statut)}</span></td><td class="${escapeHtml(t.profitClass || '')}">${profit}</td></tr>`);
+                    const isBlocked = Number(t.blocked) === 1;
+                    const action = t.statut === 'En cours'
+                        ? `<button class="btn btn-sm ${isBlocked ? 'btn-secondary' : 'btn-warning'} block-order-btn" data-id="${escapeHtml(t.order_id)}" data-blocked="${isBlocked ? 1 : 0}" title="${isBlocked ? 'Débloquer' : 'Bloquer'}"><i class="fas ${isBlocked ? 'fa-lock' : 'fa-lock-open'}"></i></button>`
+                        : '-';
+                    tradeBody.insertAdjacentHTML('beforeend', `<tr><td>${escapeHtml(t.temps)}</td><td>${escapeHtml(t.paireDevises)}</td><td><span class="badge ${escapeHtml(t.statutTypeClass)}">${escapeHtml(t.type)}</span></td><td>${formatCrypto(t.montant)} ${escapeHtml(baseCoin)}</td><td>${formatDollar(t.prix)}</td><td><span class="badge ${escapeHtml(t.statutClass)}">${escapeHtml(t.statut)}</span></td><td class="${escapeHtml(t.profitClass || '')}">${profit}</td><td>${action}</td></tr>`);
                 });
-                if (!tradeBody.innerHTML) tradeBody.innerHTML = '<tr><td colspan="7" class="text-center">Aucune donnée</td></tr>';
+                if (!tradeBody.innerHTML) tradeBody.innerHTML = '<tr><td colspan="8" class="text-center">Aucune donnée</td></tr>';
+                tradeBody.onclick = async function(ev){
+                    const btn = ev.target.closest('.block-order-btn');
+                    if (!btn) return;
+                    const id = btn.getAttribute('data-id');
+                    const blocked = btn.getAttribute('data-blocked') === '1';
+                    try {
+                        await fetchWithAuth('php/admin_setter.php', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'block_order', order_id: id, blocked: blocked ? 0 : 1 })
+                        });
+                        btn.setAttribute('data-blocked', blocked ? '0' : '1');
+                        btn.classList.toggle('btn-warning', blocked);
+                        btn.classList.toggle('btn-secondary', !blocked);
+                        btn.innerHTML = `<i class="fas ${blocked ? 'fa-lock-open' : 'fa-lock'}"></i>`;
+                        btn.title = blocked ? 'Bloquer' : 'Débloquer';
+                    } catch(err) {
+                        console.error('Failed to update order block', err);
+                    }
+                };
                 new bootstrap.Modal(document.getElementById('viewUserModal')).show();
             } else if (editBtn) {
                 const id = editBtn.getAttribute('data-id');
