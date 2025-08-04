@@ -62,11 +62,12 @@ try {
     $opNum      = $result['operation'];
     $profit     = $result['profit'];
     $price      = $result['price'];
+    $opened     = $result['opened'];
 
     require_once __DIR__.'/../utils/poll.php';
     pushEvent('balance_updated', ['newBalance' => $newBalance], $userId);
 
-    if ($side === 'buy') {
+    if ($opened) {
         // Notify frontend of the new open trade
         pushEvent('new_trade', [
             'operation_number' => $opNum,

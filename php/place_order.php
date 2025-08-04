@@ -151,8 +151,9 @@ try {
         $price   = $result['price'];
         $profit  = $result['profit'];
         $opNum   = $result['operation'];
+        $opened  = $result['opened'];
         pushEvent('balance_updated', ['newBalance' => $result['balance']], $userId);
-        if($side==='buy'){
+        if($opened){
             pushEvent('new_trade', [
                 'operation_number' => $opNum,
                 'pair' => $pair,
