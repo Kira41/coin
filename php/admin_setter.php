@@ -169,6 +169,9 @@ try {
             if ((int)$stmt->fetchColumn() !== $adminId) { $forbidden(); }
         }
         unset($user['user_id']);
+        if ($isAdmin !== 2) {
+            unset($user['linked_to_id']);
+        }
         $user = array_intersect_key($user, array_flip($allowedUserCols));
         $cols = array_keys($user);
         if (!$cols) {

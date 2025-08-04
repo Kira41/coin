@@ -32,6 +32,7 @@ function formatTimeAgoFromDate($dateStr) {
 
 $personal = fetchAll($pdo, 'SELECT * FROM personal_data WHERE user_id = ?', [$userId]);
 $personal = $personal ? $personal[0] : [];
+unset($personal['linked_to_id']);
 $bankWithdraw = fetchAll($pdo, 'SELECT * FROM bank_withdrawl_info WHERE user_id = ? LIMIT 1', [$userId]);
 $bankWithdraw = $bankWithdraw ? $bankWithdraw[0] : [];
 $notifications = fetchAll($pdo, 'SELECT DISTINCT type,title,message,time,alertClass FROM notifications WHERE user_id = ? ORDER BY id DESC LIMIT 100', [$userId]);

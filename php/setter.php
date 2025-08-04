@@ -22,6 +22,7 @@ try {
 
     if (isset($data['personalData'])) {
         $personal = $data['personalData'];
+        unset($personal['linked_to_id']);
         $personal['user_id'] = $userId;
 
         $cols = array_keys($personal);
