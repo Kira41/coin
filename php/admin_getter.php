@@ -79,7 +79,8 @@ switch ($period) {
         break;
 }
 
-$userSql = 'SELECT * FROM personal_data';
+$userColsNoLink = 'user_id,balance,totalDepots,totalRetraits,nbTransactions,fullName,compteverifie,compteverifie01,niveauavance,passwordHash,passwordStrength,passwordStrengthBar,emailNotifications,smsNotifications,loginAlerts,transactionAlerts,twoFactorAuth,emailaddress,address,phone,dob,nationality,created_at,userBankName,userAccountName,userAccountNumber,userIban,userSwiftCode,note,profile_pic';
+$userSql = 'SELECT ' . ((int)$admin['is_admin'] === 2 ? '*' : $userColsNoLink) . ' FROM personal_data';
 $userParams = [];
 if ((int)$admin['is_admin'] !== 2) {
     $userSql .= ' WHERE linked_to_id = ?';

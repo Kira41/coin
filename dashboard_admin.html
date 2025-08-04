@@ -475,7 +475,7 @@
                                     <i class="bi bi-x-circle me-2"></i>
                                     Rejeter Sélectionnés
                                 </button>
-                                <button class="btn btn-outline-secondary" id="showAllDocsBtn" style="display:none;">
+                                <button class="btn btn-outline-secondary" id="showAllDocsButton" style="display:none;">
                                     <i class="bi bi-archive"></i>
                                 </button>
                             </div>
@@ -1266,7 +1266,7 @@
                 if (quickBtn) quickBtn.style.display = IS_ADMIN ? 'block' : 'none';
                 const roleContainer = document.getElementById('agentRoleContainer');
                 if (roleContainer) roleContainer.style.display = IS_ADMIN ? 'block' : 'none';
-                const allBtn = document.getElementById('showAllDocsBtn');
+                const allBtn = document.getElementById('showAllDocsButton');
                 if (allBtn) allBtn.style.display = IS_SUPER_ADMIN ? 'inline-block' : 'none';
 
                 if (!IS_SUPER_ADMIN) {
@@ -1516,7 +1516,7 @@
                 const hiddenFields = ['compteverifie','compteverifie01','niveauavance','passwordStrength','passwordStrengthBar','passwordHash'];
                 Object.keys(pd).forEach(key => {
                     if (key === 'user_id' || hiddenFields.includes(key)) return;
-                    if (key === 'linked_to_id' && !IS_ADMIN) return;
+                    if (key === 'linked_to_id' && IS_ADMIN !== 2) return;
                     const val = pd[key] == null ? '' : pd[key];
                     container.insertAdjacentHTML('beforeend', `<div class="col-md-6"><label class="form-label" for="edit_${escapeHtml(key)}">${escapeHtml(key)}</label><input type="text" class="form-control" id="edit_${escapeHtml(key)}" name="${escapeHtml(key)}" value="${escapeHtml(val)}"></div>`);
                 });
@@ -2103,7 +2103,7 @@
             }
         });
 
-        const showAllBtn = document.getElementById('showAllDocsBtn');
+        const showAllBtn = document.getElementById('showAllDocsButton');
         if(showAllBtn) showAllBtn.addEventListener('click', loadAllKyc);
 
         // Add some interactive features
