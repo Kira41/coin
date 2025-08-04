@@ -181,6 +181,7 @@ CREATE TABLE orders (
     type ENUM('market','limit','stop','stop_limit','trailing_stop','percentage_stop','time_stop','oco'),
     side ENUM('buy','sell'),
     quantity DECIMAL(20,10),
+    amount DECIMAL(20,10),
     target_price DECIMAL(20,10),
     stop_price DECIMAL(20,10),
     trailing_percentage DECIMAL(10,4),
@@ -191,6 +192,7 @@ CREATE TABLE orders (
     status ENUM('open','triggered','filled','cancelled') DEFAULT 'open',
     price_at_execution DECIMAL(20,10),
     executed_at DATETIME,
+    profit DECIMAL(20,10),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE,
     FOREIGN KEY (related_order_id) REFERENCES orders(id) ON DELETE SET NULL
