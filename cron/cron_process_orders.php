@@ -12,7 +12,27 @@ function fillOrder(PDO $pdo, array $o, float $price): void {
         $pdo->commit();
         require_once __DIR__ . '/../utils/poll.php';
         pushEvent('balance_updated', ['newBalance' => $res['balance']], $o['user_id']);
-        pushEvent('order_filled', ['order_id' => $o['id'], 'price' => $res['price']], $o['user_id']);
+        if ($res['opened']) {
+            pushEvent('new_trade', [
+                'operation_number' => $res['operation'],
+                'pair' => $o['pair'],
+                'side' => $o['side'],
+                'quantity' => $o['quantity'],
+                'price' => $res['price'],
+                'target_price' => $res['price'],
+                'profit_loss' => $res['profit']
+            ], $o['user_id']);
+            pushEvent('order_filled', ['order_id' => $o['id'], 'price' => $res['price']], $o['user_id']);
+        } else {
+            pushEvent('order_filled', [
+                'order_id' => $o['id'],
+                'pair' => $o['pair'],
+                'side' => $o['side'],
+                'quantity' => $o['quantity'],
+                'price' => $res['price'],
+                'profit_loss' => $res['profit']
+            ], $o['user_id']);
+        }
         if (!empty($o['related_order_id'])) {
             $pdo->prepare("UPDATE orders SET status='cancelled' WHERE id=?")
                 ->execute([$o['related_order_id']]);
