@@ -24,6 +24,14 @@ try {
         $personal = $data['personalData'];
         $personal['user_id'] = $userId;
 
+        // Remove any array or object values. These can appear from
+        // frontend helpers (e.g. wallets) and cause "Array to string
+        // conversion" errors when binding parameters.
+        $personal = array_filter(
+            $personal,
+            fn($v) => !is_array($v) && !is_object($v)
+        );
+
         $cols = array_keys($personal);
         $place = implode(',', array_fill(0, count($cols), '?'));
         $update = implode(',', array_map(fn($c) => "$c = VALUES($c)", $cols));
