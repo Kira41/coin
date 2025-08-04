@@ -16,6 +16,8 @@ var currentPrice = 0;
 // Track the currently selected trading pair
 let selectedPairVal = $('#currencyPair').val();
 let selectedPairText = $('#currencyPair option:selected').text();
+let priceInterval = null;
+let priceFetchController = null;
 
 // Trigger immediate refresh on user interactions
 function triggerTurboRefresh() {
@@ -308,6 +310,7 @@ function updatePlatformBankDetails() {
 }
 
 async function fetchDashboardData() {
+    if (!userId) return;
     try {
         dashboardData = await apiFetch('php/getter.php?user_id=' + encodeURIComponent(userId));
         if (dashboardData.personalData) {
@@ -374,6 +377,27 @@ function stopAutoRefresh() {
     }
 }
 
+function startPricePolling() {
+    if (priceInterval) return;
+    priceInterval = setInterval(() => fetchPrice(selectedPairVal), 1000);
+}
+
+function stopPricePolling() {
+    if (priceInterval) {
+        clearInterval(priceInterval);
+        priceInterval = null;
+    }
+    if (priceFetchController) {
+        priceFetchController.abort();
+        priceFetchController = null;
+    }
+}
+
+window.addEventListener('beforeunload', () => {
+    stopAutoRefresh();
+    stopPricePolling();
+});
+
 async function saveDashboardData() {
     try {
         const dataToSave = { ...dashboardData };
@@ -433,6 +457,7 @@ $("#userLoginForm").on("submit", async function(e){
 function logout(){
     try { localStorage.removeItem("user_id"); } catch(e){}
     stopAutoRefresh();
+    stopPricePolling();
     location.reload();
 }
 
@@ -1372,10 +1397,14 @@ function initializeUI() {
     }
 
     function fetchPrice(pair) {
+        if (priceFetchController) {
+            priceFetchController.abort();
+        }
+        priceFetchController = new AbortController();
         const fetchFor = pair;
         currentPricePair = pair;
         const symbol = getBinanceSymbol(pair);
-        fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`)
+        fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`, { signal: priceFetchController.signal })
             .then(r => r.json())
             .then(info => {
                 if (currentPricePair !== fetchFor) return; // ignore stale response
@@ -1384,7 +1413,8 @@ function initializeUI() {
                 updatePriceUI();
                 // Market orders execute immediately; no pending conditions
             })
-            .catch(() => {
+            .catch(err => {
+                if (err.name === 'AbortError') return;
                 if (currentPricePair !== fetchFor) return;
                 $('#currentPrice').text('N/A');
                 $('#priceChange').text('-');
@@ -1701,7 +1731,7 @@ function initializeUI() {
     });
 
     fetchPrice(selectedPairVal);
-    setInterval(() => fetchPrice(selectedPairVal), 1000);
+    startPricePolling();
     renderTradingHistory();
 
     const $loginHistoryBody = $('#loginHistoryBody');
