@@ -25,8 +25,8 @@ function fillOrder(PDO $pdo, array $o, float $price): void {
 // ---- Order condition helpers ----
 
 function shouldFillLimit(array $o, float $price): bool {
-    return ($o['side'] === 'buy' && $price <= $o['target_price'])
-        || ($o['side'] === 'sell' && $price >= $o['target_price']);
+    return ($o['side'] === 'buy' && $price >= $o['target_price'])
+        || ($o['side'] === 'sell' && $price <= $o['target_price']);
 }
 
 function shouldFillStop(array $o, float $price): bool {
