@@ -39,7 +39,6 @@ try {
 
     function deleteUserData(PDO $pdo, int $userId) {
         $tables = [
-            'wallets',
             'transactions',
             'retraits',
             'tradingHistory',

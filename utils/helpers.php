@@ -30,46 +30,6 @@ function getHistoricalPrice(string $pair, int $timestamp): float {
     return isset($data[$base][$quote]) ? (float)$data[$base][$quote] : 0.0;
 }
 
-function addToWallet(PDO $pdo, int $uid, string $cur, float $amt, float $price): void {
-    $cur = strtolower($cur);
-    $st = $pdo->prepare('SELECT amount,purchase_price FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
-    $st->execute([$uid, $cur]);
-    $row = $st->fetch(PDO::FETCH_ASSOC);
-    if ($row) {
-        $new = $row['amount'] + $amt;
-        $avg = ($row['amount'] * $row['purchase_price'] + $amt * $price) / $new;
-        $pdo->prepare('UPDATE wallets SET amount=?, purchase_price=?, usd_value=? WHERE user_id=? AND currency=?')
-            ->execute([$new, $avg, $new * $price, $uid, $cur]);
-    } else {
-        $pdo->prepare('INSERT INTO wallets (user_id,currency,amount,address,label,purchase_price,usd_value) VALUES (?,?,?,?,?,?,?)')
-            ->execute([$uid, $cur, $amt, 'local address', strtoupper($cur), $price, $amt * $price]);
-    }
-}
-
-function deductFromWallet(PDO $pdo, int $uid, string $cur, float $amt, float $price) {
-    $cur = strtolower($cur);
-    $st = $pdo->prepare('SELECT amount,purchase_price FROM wallets WHERE user_id=? AND currency=? FOR UPDATE');
-    $st->execute([$uid, $cur]);
-    $row = $st->fetch(PDO::FETCH_ASSOC);
-    if (!$row || $row['amount'] < $amt) {
-        return false;
-    }
-    $new = $row['amount'] - $amt;
-    if ($new > 0) {
-        $pdo->prepare('UPDATE wallets SET amount=?, usd_value=? WHERE user_id=? AND currency=?')
-            ->execute([$new, $new * $price, $uid, $cur]);
-    } else {
-        $pdo->prepare('DELETE FROM wallets WHERE user_id=? AND currency=?')->execute([$uid, $cur]);
-    }
-    return (float)$row['purchase_price'];
-}
-
-function getUserWallets(PDO $pdo, int $uid): array {
-    $st = $pdo->prepare('SELECT * FROM wallets WHERE user_id=?');
-    $st->execute([$uid]);
-    return $st->fetchAll(PDO::FETCH_ASSOC);
-}
-
 function addHistory(PDO $pdo, int $uid, string $opNum, string $pair, string $side,
     float $qty, float $price, string $status, ?float $profit = null): void {
     $typeTxt = $side === 'buy' ? 'Acheter' : 'Vendre';
@@ -103,85 +63,48 @@ function addHistory(PDO $pdo, int $uid, string $opNum, string $pair, string $sid
 }
 
 function executeTrade(PDO $pdo, array $order, float $price) {
-    [$base] = explode('/', strtoupper($order['pair']));
-
-    // Avoid executing the same order twice
     if (!empty($order['id'])) {
         $check = $pdo->prepare('SELECT 1 FROM trades WHERE order_id = ?');
         $check->execute([$order['id']]);
         if ($check->fetchColumn()) {
             return ['ok' => false, 'msg' => 'Order already filled'];
         }
-    } else {
-        $dup = $pdo->prepare(
-            'SELECT price, created_at FROM trades
-             WHERE user_id=? AND pair=? AND side=? AND quantity=?
-             ORDER BY id DESC LIMIT 1'
-        );
-        $dup->execute([
-            $order['user_id'],
-            $order['pair'],
-            $order['side'],
-            $order['quantity']
-        ]);
-        $ex = $dup->fetch(PDO::FETCH_ASSOC);
-        if ($ex && bccomp((string)$ex['price'], (string)$price, 8) === 0 &&
-            strtotime($ex['created_at']) >= time() - 5) {
-            return ['ok' => false, 'msg' => 'Trade already recorded'];
-        }
     }
+
+    $st = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id=? FOR UPDATE');
+    $st->execute([$order['user_id']]);
+    $bal = (float)$st->fetchColumn();
     $total = $price * $order['quantity'];
+
     if ($order['side'] === 'buy') {
-        $st = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id=? FOR UPDATE');
-        $st->execute([$order['user_id']]);
-        $bal = $st->fetchColumn();
-        if ($bal === false || $bal < $total) return ['ok' => false, 'msg' => 'Solde insuffisant'];
+        if ($bal < $total) return ['ok' => false, 'msg' => 'Solde insuffisant'];
         $pdo->prepare('UPDATE personal_data SET balance=balance-? WHERE user_id=?')->execute([$total, $order['user_id']]);
-        addToWallet($pdo, $order['user_id'], $base, $order['quantity'], $price);
-        $newBal = $bal - $total;
-        $profit = 0;
-    } else {
-        $st = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id=? FOR UPDATE');
-        $st->execute([$order['user_id']]);
-        $bal = $st->fetchColumn();
-        $purchase = deductFromWallet($pdo, $order['user_id'], $base, $order['quantity'], $price);
-        if ($purchase === false) return ['ok' => false, 'msg' => 'Solde insuffisant'];
-        $pdo->prepare('UPDATE personal_data SET balance=balance+? WHERE user_id=?')->execute([$total, $order['user_id']]);
-        $newBal = $bal + $total;
-        $profit = ($price - $purchase) * $order['quantity'];
+        $orderId = empty($order['id']) ? null : $order['id'];
+        $stmt = $pdo->prepare('INSERT INTO trades (user_id,order_id,pair,side,quantity,price,total_value,fee,profit_loss,status) VALUES (?,?,?,?,?,?,?,0,0,"open")');
+        $stmt->execute([$order['user_id'],$orderId,$order['pair'],$order['side'],$order['quantity'],$price,$total]);
+        $tradeId = $pdo->lastInsertId();
+        if ($orderId !== null) {
+            $pdo->prepare('UPDATE orders SET status="filled",price_at_execution=?,executed_at=NOW() WHERE id=?')->execute([$price,$orderId]);
+        }
+        $opNum = 'T'.($order['id'] ?: $tradeId);
+        addHistory($pdo,$order['user_id'],$opNum,$order['pair'],$order['side'],$order['quantity'],$price,'En cours');
+        return ['ok'=>true,'balance'=>$bal-$total,'price'=>$price,'profit'=>0,'operation'=>$opNum];
     }
-    // allow market orders which have no corresponding entry in the orders table
-    $orderId = empty($order['id']) ? null : $order['id'];
-    $stmt = $pdo->prepare(
-        'INSERT INTO trades (user_id,order_id,pair,side,quantity,price,total_value,fee,profit_loss) '
-        . 'VALUES (?,?,?,?,?,?,?,0,?)'
-    );
-    $stmt->execute([
-        $order['user_id'],
-        $orderId,
-        $order['pair'],
-        $order['side'],
-        $order['quantity'],
-        $price,
-        $total,
-        $profit
-    ]);
-    $tradeId = $pdo->lastInsertId();
-    if ($orderId !== null) {
-        $pdo->prepare('UPDATE orders SET status="filled",price_at_execution=?,executed_at=NOW() WHERE id=?')
-            ->execute([$price, $orderId]);
+
+    $stOpen=$pdo->prepare('SELECT id,price,quantity FROM trades WHERE user_id=? AND pair=? AND status="open" ORDER BY id ASC LIMIT 1');
+    $stOpen->execute([$order['user_id'],$order['pair']]);
+    $open=$stOpen->fetch(PDO::FETCH_ASSOC);
+    if(!$open || $open['quantity'] < $order['quantity']) return ['ok'=>false,'msg'=>'Position insuffisante'];
+    $profit=($price-$open['price'])*$order['quantity'];
+    $pdo->prepare('UPDATE personal_data SET balance=balance+? WHERE user_id=?')->execute([$total,$order['user_id']]);
+    $remaining=$open['quantity']-$order['quantity'];
+    if($remaining>0){
+        $pdo->prepare('UPDATE trades SET quantity=?, total_value=?, profit_loss=profit_loss+? WHERE id=?')->execute([$remaining,$remaining*$open['price'],$profit,$open['id']]);
+    }else{
+        $pdo->prepare('UPDATE trades SET status="closed", close_price=?, closed_at=NOW(), profit_loss=? WHERE id=?')->execute([$price,$profit,$open['id']]);
     }
-    $opNum = 'T' . ($order['id'] ?: $tradeId);
-    addHistory($pdo, $order['user_id'], $opNum, $order['pair'], $order['side'], $order['quantity'], $price, 'complet', $profit);
-    if (!empty($order['related_order_id'])) {
-        $pdo->prepare("UPDATE orders SET status='cancelled' WHERE id=? AND status IN ('open','triggered')")->execute([$order['related_order_id']]);
-    }
-    return [
-        'ok' => true,
-        'balance' => $newBal,
-        'price' => $price,
-        'profit' => $profit,
-        'operation' => $opNum
-    ];
+    $opNum='T'.$open['id'];
+    addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'sell',$order['quantity'],$price,'complet',$profit);
+    return ['ok'=>true,'balance'=>$bal+$total,'price'=>$price,'profit'=>$profit,'operation'=>$opNum];
 }
 ?>

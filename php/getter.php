@@ -6,6 +6,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
 
 try {
     require_once __DIR__.'/../config/db_connection.php';
+    require_once __DIR__.'/../utils/helpers.php';
     $pdo = db();
 
     $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 1;
@@ -82,9 +83,18 @@ if ($verify) {
     }
 }
 
+$openTrades = fetchAll($pdo, 'SELECT id,pair,side,quantity,price FROM trades WHERE user_id = ? AND status="open"', [$userId]);
+foreach ($openTrades as &$t) {
+    $current = getLivePrice($t['pair']);
+    $t['current_price'] = $current;
+    $sign = $t['side'] === 'buy' ? 1 : -1;
+    $t['unrealized_pnl'] = ($current - $t['price']) * $t['quantity'] * $sign;
+}
+unset($t);
+
 $data = [
     'personalData' => $personal,
-    'wallets' => fetchAll($pdo, 'SELECT * FROM wallets WHERE user_id = ?', [$userId]),
+    'openTrades' => $openTrades,
     'transactions' => fetchAll($pdo, 'SELECT operationNumber,type,amount,date,status,statusClass FROM transactions WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC LIMIT 10', [$userId]),
     'notifications' => $notifications,
     'deposits' => fetchAll($pdo, 'SELECT operationNumber,date,amount,method,status,statusClass FROM deposits WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC LIMIT 10', [$userId]),

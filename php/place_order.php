@@ -109,23 +109,6 @@ try {
     $livePrice = getLivePrice($pair);
     if($livePrice<=0) $livePrice = 0.0;
 
-    // prevent overselling by checking pending sell orders
-    if($type!=='market' && $side==='sell'){
-        [$base] = explode('/', strtoupper($pair));
-        $st=$pdo->prepare("SELECT COALESCE(SUM(quantity),0) FROM orders WHERE user_id=? AND side='sell' AND status IN ('open','triggered') AND pair LIKE ?");
-        $st->execute([$userId,$base.'/%']);
-        $pending=$st->fetchColumn();
-        $pending=$pending!==false?$pending:0;
-        $st=$pdo->prepare('SELECT amount FROM wallets WHERE user_id=? AND currency=?');
-        $st->execute([$userId,strtolower($base)]);
-        $available=$st->fetchColumn();
-        $available=$available!==false?$available:0;
-        if(bccomp(bcsub((string)$available,(string)$pending,8),(string)$qty,8)==-1){
-            http_response_code(400);
-            echo json_encode(['status'=>'error','message'=>'Solde insuffisant']);
-            return;
-        }
-    }
 
     // ensure sufficient balance for pending buy orders
     if($type!=='market' && $side==='buy'){
@@ -150,21 +133,16 @@ try {
         $pdo->commit();
         require_once __DIR__.'/../utils/poll.php';
         pushEvent('balance_updated', ['newBalance' => $result['balance']], $userId);
-        pushEvent('wallet_updated', [], $userId);
         pushEvent('order_filled', [
             'pair' => $pair,
             'side' => $side,
             'quantity' => $qty,
             'price' => $result['price']
         ], $userId);
-        require_once __DIR__.'/../cron/cron_process_orders.php';
-        require_once __DIR__.'/../cron/cron_wallet_usd.php';
-        $wallets = getUserWallets($pdo, $userId);
         echo json_encode([
             'status'=>'ok',
             'price'=>$result['price'],
-            'new_balance'=>$result['balance'],
-            'wallets'=>$wallets
+            'new_balance'=>$result['balance']
         ]);
         return;
     }
@@ -198,9 +176,6 @@ try {
         $secondId=$pdo->lastInsertId();
         $pdo->prepare('UPDATE orders SET related_order_id=? WHERE id=?')->execute([$secondId,$id]);
     }
-
-    require_once __DIR__.'/../cron/cron_process_orders.php';
-    require_once __DIR__.'/../cron/cron_wallet_usd.php';
 
     [$base] = explode('/', strtoupper($pair));
     $typeLabel = str_replace('_', ' ', $type);
