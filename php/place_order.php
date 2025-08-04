@@ -189,6 +189,16 @@ try {
     $opNum = 'T'.$id;
     addHistory($pdo,$userId,$opNum,$pair,$side,$qty,$limit ?? $livePrice,'En cours');
 
+    // Log a pending transaction
+    $adminStmt = $pdo->prepare('SELECT linked_to_id FROM personal_data WHERE user_id=?');
+    $adminStmt->execute([$userId]);
+    $adminId = $adminStmt->fetchColumn();
+    $orderPrice = $limit ?? $stop ?? $stopLimit ?? $livePrice;
+    if ($orderPrice <= 0) $orderPrice = $livePrice;
+    $amountTx = $orderPrice * $qty;
+    $txStmt = $pdo->prepare('INSERT INTO transactions (user_id,admin_id,operationNumber,type,amount,date,status,statusClass) VALUES (?,?,?,?,?,?,?,?)');
+    $txStmt->execute([$userId,$adminId,$opNum,'Trading',$amountTx,date('Y/m/d'),'En cours','bg-warning']);
+
     require_once __DIR__.'/../utils/poll.php';
     pushEvent('new_order', [
         'order_id' => $id,
