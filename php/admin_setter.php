@@ -67,6 +67,10 @@ try {
         exit;
     }
 
+    $stmt = $pdo->prepare('SELECT is_admin FROM admins_agents WHERE id = ?');
+    $stmt->execute([$adminId]);
+    $isAdmin = (int)$stmt->fetchColumn();
+
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
     if (!is_array($data)) {
@@ -100,8 +104,13 @@ try {
         echo json_encode(['status' => 'ok', 'id' => $pdo->lastInsertId()]);
     } elseif ($action === 'create_user') {
         $user = $data['user'] ?? [];
-        if (!$user || !isset($user['linked_to_id']) || !isset($user['password'])) {
+        if (!$user || !isset($user['password'])) {
             throw new Exception('Missing parameters');
+        }
+        if ($isAdmin !== 2) {
+            $user['linked_to_id'] = $adminId;
+        } elseif (!isset($user['linked_to_id'])) {
+            throw new Exception('Missing linked_to_id');
         }
         $password = $user['password'];
         unset($user['password']);
@@ -147,6 +156,9 @@ try {
         }
         $userId = (int)$user['user_id'];
         unset($user['user_id']);
+        if ($isAdmin !== 2 && isset($user['linked_to_id'])) {
+            unset($user['linked_to_id']);
+        }
         $user = array_intersect_key($user, array_flip($allowedUserCols));
         $cols = array_keys($user);
         if (!$cols) {

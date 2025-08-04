@@ -11,6 +11,21 @@ try {
 
     $userId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 1;
 
+    $adminId = null;
+    session_start();
+    if (isset($_SESSION['admin_id'])) {
+        $adminId = (int)$_SESSION['admin_id'];
+    } elseif (!empty($_SERVER['HTTP_AUTHORIZATION']) &&
+              preg_match('/Bearer\s+(\d+)/i', $_SERVER['HTTP_AUTHORIZATION'], $m)) {
+        $adminId = (int)$m[1];
+    }
+    $adminRole = 0;
+    if ($adminId) {
+        $stmt = $pdo->prepare('SELECT is_admin FROM admins_agents WHERE id = ?');
+        $stmt->execute([$adminId]);
+        $adminRole = (int)$stmt->fetchColumn();
+    }
+
 function fetchAll($pdo, $sql, $params = []) {
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);
@@ -32,6 +47,9 @@ function formatTimeAgoFromDate($dateStr) {
 
 $personal = fetchAll($pdo, 'SELECT * FROM personal_data WHERE user_id = ?', [$userId]);
 $personal = $personal ? $personal[0] : [];
+if ($adminRole !== 2) {
+    unset($personal['linked_to_id']);
+}
 $bankWithdraw = fetchAll($pdo, 'SELECT * FROM bank_withdrawl_info WHERE user_id = ? LIMIT 1', [$userId]);
 $bankWithdraw = $bankWithdraw ? $bankWithdraw[0] : [];
 $notifications = fetchAll($pdo, 'SELECT DISTINCT type,title,message,time,alertClass FROM notifications WHERE user_id = ? ORDER BY id DESC LIMIT 100', [$userId]);
