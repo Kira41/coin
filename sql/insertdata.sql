@@ -25,13 +25,6 @@ INSERT INTO deposit_crypto_address (user_id, crypto_name, wallet_info) VALUES
     (1, 'Tron', 'TRc123456...'),
     (1, 'USDT', 'USDT123...');
 
-
-INSERT INTO wallets (id, user_id, currency, amount, purchase_price, usd_value, network, address, label) VALUES (
-    1751038645430, 1, 'btc', 0, 0, 0,
-    'Bitcoin',
-    'BTC12345678', ''
-);
-
 INSERT INTO notifications (user_id, type, title, message, time, alertClass) VALUES (1, 'info', 'Mise à jour du système', 'Le système sera mis à jour vendredi prochain.', 'Il y a 2 heures', 'alert-info');
 INSERT INTO notifications (user_id, type, title, message, time, alertClass) VALUES (1, 'success', 'Dépôt réussi', 'Un montant de 500 $ a été déposé avec succès.', 'Il y a un jour', 'alert-success');
 INSERT INTO notifications (user_id, type, title, message, time, alertClass) VALUES (1, 'warning', 'Vérification KYC', 'Merci de vérifier votre identité.', 'Il y a 3 jours', 'alert-warning');
