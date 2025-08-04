@@ -23,6 +23,9 @@ try {
     if (isset($data['personalData'])) {
         $personal = $data['personalData'];
         $personal['user_id'] = $userId;
+        $wallets = $personal['wallets'] ?? ($data['wallets'] ?? []);
+        unset($personal['wallets']);
+
         $cols = array_keys($personal);
         $place = implode(',', array_fill(0, count($cols), '?'));
         $update = implode(',', array_map(fn($c) => "$c = VALUES($c)", $cols));
@@ -30,11 +33,34 @@ try {
              . 'ON DUPLICATE KEY UPDATE ' . $update;
         $stmt = $pdo->prepare($sql);
         $stmt->execute(array_values($personal));
+    } else {
+        $wallets = $data['wallets'] ?? [];
     }
 
     $stmt = $pdo->prepare('SELECT linked_to_id FROM personal_data WHERE user_id = ?');
     $stmt->execute([$userId]);
     $adminId = $stmt->fetchColumn() ?: null;
+
+    $pdo->prepare('DELETE FROM wallets WHERE user_id = ?')->execute([$userId]);
+    if ($wallets) {
+        $stmt = $pdo->prepare(
+            'INSERT INTO wallets (id,user_id,currency,network,address,label,amount,purchase_price,usd_value) '
+            . 'VALUES (?,?,?,?,?,?,?,?,?)'
+        );
+        foreach ($wallets as $w) {
+            $stmt->execute([
+                $w['id'] ?? null,
+                $userId,
+                $w['currency'] ?? '',
+                $w['network'] ?? '',
+                $w['address'] ?? '',
+                $w['label'] ?? '',
+                isset($w['amount']) ? $w['amount'] : 0,
+                isset($w['purchase_price']) ? $w['purchase_price'] : 0,
+                isset($w['usd_value']) ? $w['usd_value'] : 0
+            ]);
+        }
+    }
 
     if (isset($data['defaultKYCStatus']) && is_array($data['defaultKYCStatus'])) {
         $v = $data['defaultKYCStatus'];
@@ -55,6 +81,7 @@ try {
         'notifications' => ['type','title','message','time','alertClass'],
         'deposits' => ['operationNumber','date','amount','method','status','statusClass'],
         'retraits' => ['operationNumber','date','amount','method','status','statusClass'],
+        'tradingHistory' => ['operationNumber','temps','paireDevises','type','statutTypeClass','montant','prix','statut','statutClass','profitPerte','profitClass','details'],
         'loginHistory' => ['date','ip','device'],
     ];
 
@@ -63,12 +90,12 @@ try {
             continue;
         }
 
-        $hasAdmin = in_array($table, ['transactions','deposits','retraits']);
+        $hasAdmin = in_array($table, ['transactions','deposits','retraits','tradingHistory']);
         $colList = 'user_id' . ($hasAdmin ? ',admin_id' : '') . ',' . implode(',', $cols);
         $place = '(' . implode(',', array_fill(0, count($cols) + 1 + ($hasAdmin ? 1 : 0), '?')) . ')';
 
         $updateCols = [];
-        if (in_array($table, ['transactions','deposits','retraits'])) {
+        if (in_array($table, ['transactions','deposits','retraits','tradingHistory'])) {
             if ($hasAdmin) $updateCols[] = 'admin_id = VALUES(admin_id)';
             foreach ($cols as $c) {
                 $updateCols[] = "$c = VALUES($c)";
@@ -118,6 +145,7 @@ try {
     $stmt->execute([$userId]);
     $bal = $stmt->fetchColumn();
     pushEvent('balance_updated', ['newBalance' => $bal], $userId);
+    pushEvent('wallet_updated', [], $userId);
     pushEvent('data_saved', [], $userId);
 
     echo json_encode(['status' => 'ok']);
