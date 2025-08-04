@@ -29,6 +29,12 @@ try{
         echo json_encode(['status'=>'error','message'=>'Order not cancellable']);
         exit;
     }
+    if(($order['type'] ?? '') !== 'market'){
+        $pdo->rollBack();
+        http_response_code(403);
+        echo json_encode(['status'=>'error','message'=>'Only market orders can be cancelled']);
+        exit;
+    }
     if(!empty($order['blocked'])){
         $pdo->rollBack();
         http_response_code(403);
