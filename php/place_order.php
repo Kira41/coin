@@ -143,7 +143,7 @@ try {
 
     if($type==='market'){
         $pdo->beginTransaction();
-        $order=['id'=>0,'user_id'=>$userId,'pair'=>$pair,'side'=>$side,'quantity'=>$qty];
+        $order=['id'=>0,'user_id'=>$userId,'pair'=>$pair,'side'=>$side,'quantity'=>$qty,'type'=>'market'];
         $result = executeTrade($pdo,$order,$livePrice);
         if(!$result['ok']){ $pdo->rollBack(); http_response_code(400); echo json_encode(['status'=>'error','message'=>$result['msg']]); return; }
         $pdo->commit();
@@ -187,7 +187,7 @@ try {
     $stmt->execute([$userId,$pair,$type,$side,$qty,$limit,$stop,$trailPerc,$stopPercent,$stopTime,$trailPrice]);
     $id=$pdo->lastInsertId();
     $opNum = 'T'.$id;
-    addHistory($pdo,$userId,$opNum,$pair,$side,$qty,$limit ?? $livePrice,'En cours');
+    addHistory($pdo,$userId,$opNum,$pair,$side,$qty,$limit ?? $livePrice,'En cours',null,$type);
 
     require_once __DIR__.'/../utils/poll.php';
     pushEvent('new_order', [
