@@ -39,6 +39,12 @@ function shouldFillStopLimit(PDO $pdo, array &$o, float $price): bool {
         $pdo->prepare("UPDATE orders SET status='triggered' WHERE id=?")
             ->execute([$o['id']]);
         $o['status'] = 'triggered';
+        if (!empty($o['related_order_id'])) {
+            $pdo->prepare("UPDATE orders SET status='cancelled' WHERE id=?")
+                ->execute([$o['related_order_id']]);
+            require_once __DIR__ . '/../utils/poll.php';
+            pushEvent('order_cancelled', ['order_id' => $o['related_order_id']], $o['user_id']);
+        }
     }
     return $o['status'] === 'triggered' && shouldFillLimit($o, $price);
 }
