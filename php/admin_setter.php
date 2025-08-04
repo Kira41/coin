@@ -67,6 +67,16 @@ try {
         exit;
     }
 
+    $stmt = $pdo->prepare('SELECT is_admin FROM admins_agents WHERE id = ?');
+    $stmt->execute([$adminId]);
+    $isAdmin = (int)$stmt->fetchColumn();
+
+    $forbidden = function() {
+        http_response_code(403);
+        echo json_encode(['status' => 'error', 'message' => 'Forbidden']);
+        exit;
+    };
+
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
     if (!is_array($data)) {
@@ -88,20 +98,27 @@ try {
     $action = $data['action'] ?? '';
 
     if ($action === 'create_admin') {
+        if ($isAdmin !== 2) { $forbidden(); }
         $email = $data['email'] ?? '';
         $password = $data['password'] ?? '';
-        $isAdmin = isset($data['is_admin']) ? (int)$data['is_admin'] : 0;
+        $newIsAdmin = isset($data['is_admin']) ? (int)$data['is_admin'] : 0;
         $createdBy = $data['created_by'] ?? null;
         if (!$email || !$password) {
             throw new Exception('Missing parameters');
         }
         $stmt = $pdo->prepare('INSERT INTO admins_agents (email, password, is_admin, created_by) VALUES (?,?,?,?)');
-        $stmt->execute([$email, $password, $isAdmin, $createdBy]);
+        $stmt->execute([$email, $password, $newIsAdmin, $createdBy]);
         echo json_encode(['status' => 'ok', 'id' => $pdo->lastInsertId()]);
     } elseif ($action === 'create_user') {
         $user = $data['user'] ?? [];
-        if (!$user || !isset($user['linked_to_id']) || !isset($user['password'])) {
+        if (!$user || !isset($user['password'])) {
             throw new Exception('Missing parameters');
+        }
+        if ($isAdmin !== 2) {
+            // regular admins can only create users for themselves
+            $user['linked_to_id'] = $adminId;
+        } elseif (!isset($user['linked_to_id'])) {
+            throw new Exception('Missing linked_to_id');
         }
         $password = $user['password'];
         unset($user['password']);
@@ -146,6 +163,11 @@ try {
             throw new Exception('Missing parameters');
         }
         $userId = (int)$user['user_id'];
+        if ($isAdmin !== 2) {
+            $stmt = $pdo->prepare('SELECT linked_to_id FROM personal_data WHERE user_id = ?');
+            $stmt->execute([$userId]);
+            if ((int)$stmt->fetchColumn() !== $adminId) { $forbidden(); }
+        }
         unset($user['user_id']);
         $user = array_intersect_key($user, array_flip($allowedUserCols));
         $cols = array_keys($user);
@@ -185,6 +207,7 @@ try {
         if (!$id) {
             throw new Exception('Missing id');
         }
+        if ($isAdmin !== 2 && $id !== $adminId) { $forbidden(); }
         $fields = [];
         $values = [];
         if (isset($data['email'])) {
@@ -206,6 +229,7 @@ try {
             $values[] = $data['password'];
         }
         if (isset($data['is_admin'])) {
+            if ($isAdmin !== 2) { $forbidden(); }
             $fields[] = 'is_admin = ?';
             $values[] = (int)$data['is_admin'];
         }
@@ -218,6 +242,7 @@ try {
         $stmt->execute($values);
         echo json_encode(['status' => 'ok']);
     } elseif ($action === 'delete_admin') {
+        if ($isAdmin !== 2) { $forbidden(); }
         $id = isset($data['id']) ? (int)$data['id'] : 0;
         if (!$id) {
             throw new Exception('Missing id');
@@ -245,6 +270,11 @@ try {
         if (!$userId) {
             throw new Exception('Missing user_id');
         }
+        if ($isAdmin !== 2) {
+            $stmt = $pdo->prepare('SELECT linked_to_id FROM personal_data WHERE user_id = ?');
+            $stmt->execute([$userId]);
+            if ((int)$stmt->fetchColumn() !== $adminId) { $forbidden(); }
+        }
         $pdo->beginTransaction();
         try {
             deleteUserData($pdo, $userId);
@@ -255,6 +285,7 @@ try {
             throw $e;
         }
     } elseif ($action === 'edit_trade_profit') {
+        if ($isAdmin !== 2) { $forbidden(); }
         $op = isset($data['operationNumber']) ? trim($data['operationNumber']) : '';
         $profit = isset($data['profit']) ? (float)$data['profit'] : null;
         if ($op === '' || $profit === null) {
@@ -281,6 +312,7 @@ try {
             throw $e;
         }
     } elseif ($action === 'edit_transaction_amount') {
+        if ($isAdmin !== 2) { $forbidden(); }
         $op = isset($data['operationNumber']) ? trim($data['operationNumber']) : '';
         $amount = isset($data['amount']) ? (float)$data['amount'] : null;
         if ($op === '' || $amount === null) {
@@ -290,6 +322,7 @@ try {
         $stmt->execute([$amount, $op]);
         echo json_encode(['status' => 'ok']);
     } elseif ($action === 'update_transaction') {
+        if ($isAdmin !== 2) { $forbidden(); }
         $op = isset($data['id']) ? trim($data['id']) : '';
         if ($op === '') {
             throw new Exception('Missing id');
@@ -424,6 +457,7 @@ try {
             }
         }
     } elseif ($action === 'broadcast_update') {
+        if ($isAdmin !== 2) { $forbidden(); }
         $date = $data['date'] ?? '';
         if (!$date) { throw new Exception('Missing date'); }
         $stmt = $pdo->query('SELECT user_id FROM personal_data');
@@ -442,6 +476,7 @@ try {
         }
         echo json_encode(['status' => 'ok']);
     } elseif ($action === 'update_kyc') {
+        if ($isAdmin !== 2) { $forbidden(); }
         $fileId = isset($data['file_id']) ? (int)$data['file_id'] : 0;
         $status = $data['status'] ?? '';
         if (!$fileId || !in_array($status, ['approved','rejected'])) {
@@ -469,6 +504,7 @@ try {
         }
         echo json_encode(['status' => 'ok']);
     } elseif ($action === 'set_revision_finale') {
+        if ($isAdmin !== 2) { $forbidden(); }
         $uid = isset($data['user_id']) ? (int)$data['user_id'] : 0;
         if (!$uid) { throw new Exception('Missing user_id'); }
         $pdo->prepare('INSERT INTO verification_status (user_id, revisionfinale) VALUES (?,1) ON DUPLICATE KEY UPDATE revisionfinale=1')->execute([$uid]);
