@@ -23,6 +23,10 @@ try {
     if (isset($data['personalData'])) {
         $personal = $data['personalData'];
         unset($personal['linked_to_id']);
+
+        // Exclude any nested arrays/objects to avoid "Array to string conversion"
+        // notices when binding parameters. Only scalar values are persisted.
+        $personal = array_filter($personal, fn($v) => !is_array($v));
         $personal['user_id'] = $userId;
 
         $cols = array_keys($personal);
