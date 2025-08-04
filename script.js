@@ -13,10 +13,6 @@ $(function() {
 
     $('#stopLossType').on('change', updateStopLossFields);
 
-    $('#enableOCO').on('change', function() {
-        $('#takeProfitDiv').toggle(this.checked);
-    });
-
     function updateTradeAmountCurrency() {
         const pairText = $('#currencyPair option:selected').text() || '';
         const parts = pairText.split('/');
