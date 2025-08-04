@@ -1727,13 +1727,14 @@ function initializeUI() {
             const openTrade = (dashboardData.openTrades || []).find(t => t.id == orderId);
             try {
                 if (openTrade) {
+                    const side = openTrade.side === 'buy' ? 'sell' : 'buy';
                     await apiFetch('php/market_order.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             user_id: userId,
                             pair: openTrade.pair,
-                            side: 'sell',
+                            side: side,
                             quantity: openTrade.quantity
                         })
                     });
