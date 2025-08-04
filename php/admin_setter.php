@@ -6,6 +6,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
 
 try {
     require_once __DIR__.'/../config/db_connection.php';
+    require_once __DIR__.'/../utils/permissions.php';
     $pdo = db();
 
     $updateVerify = function(int $uid) use ($pdo){
@@ -298,7 +299,6 @@ try {
             throw $e;
         }
     } elseif ($action === 'edit_trade_profit') {
-        if ($isAdmin !== 2) { $forbidden(); }
         $op = isset($data['operationNumber']) ? trim($data['operationNumber']) : '';
         $profit = isset($data['profit']) ? (float)$data['profit'] : null;
         if ($op === '' || $profit === null) {
@@ -306,18 +306,28 @@ try {
         }
         $pdo->beginTransaction();
         try {
-            $stmt = $pdo->prepare('SELECT prix, profitPerte FROM tradingHistory WHERE operationNumber = ? FOR UPDATE');
+            $stmt = $pdo->prepare('SELECT th.user_id, th.prix, th.profitPerte, p.linked_to_id FROM tradingHistory th JOIN personal_data p ON p.user_id = th.user_id WHERE th.operationNumber = ? FOR UPDATE');
             $stmt->execute([$op]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$row) {
                 throw new Exception('Trade not found');
             }
+            $userId = (int)$row['user_id'];
+            if ($isAdmin !== 2) {
+                $allowedIds = getDescendantAdminIds($pdo, $adminId);
+                if (!in_array((int)$row['linked_to_id'], $allowedIds, true)) {
+                    $pdo->rollBack();
+                    $forbidden();
+                }
+            }
             $oldPrice = (float)$row['prix'];
             $oldProfit = (float)$row['profitPerte'];
-            $newPrice = $oldPrice + ($profit - $oldProfit);
+            $diff = $profit - $oldProfit;
+            $newPrice = $oldPrice + $diff;
             $profitClass = $profit >= 0 ? 'text-success' : 'text-danger';
-            $upd = $pdo->prepare('UPDATE tradingHistory SET profitPerte = ?, prix = ?, profitClass = ? WHERE operationNumber = ?');
-            $upd->execute([$profit, $newPrice, $profitClass, $op]);
+            $pdo->prepare('UPDATE tradingHistory SET profitPerte = ?, prix = ?, profitClass = ? WHERE operationNumber = ?')->execute([$profit, $newPrice, $profitClass, $op]);
+            $pdo->prepare('UPDATE transactions SET amount = ? WHERE operationNumber = ?')->execute([$profit, $op]);
+            $pdo->prepare('UPDATE personal_data SET balance = balance + ? WHERE user_id = ?')->execute([$diff, $userId]);
             $pdo->commit();
             echo json_encode(['status' => 'ok', 'prix' => $newPrice, 'profitClass' => $profitClass]);
         } catch (Exception $e) {
