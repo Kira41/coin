@@ -12,6 +12,7 @@ try {
     $userId = (int)($input['user_id'] ?? 0);
     $pair = $input['pair'] ?? '';
     $qty = isset($input['quantity']) ? (float)$input['quantity'] : 0.0;
+    $amount = isset($input['amount']) ? (float)$input['amount'] : 0.0; // USD amount for market orders
     $side = strtolower($input['side'] ?? 'buy');
     $type = strtolower($input['type'] ?? 'market');
     if ($type === 'stoplimit') $type = 'stop_limit';
@@ -30,7 +31,9 @@ try {
     $trailPerc = $trailPerc !== null ? (float)$trailPerc : null;
     $stopPercent = $stopPercent !== null ? (float)$stopPercent : null;
 
-    if(!$userId || !$pair || !$isPositive($qty) || !in_array($side,['buy','sell'])){
+    $qtyProvided = $isPositive($qty);
+    $amtProvided = $isPositive($amount);
+    if(!$userId || !$pair || (!in_array($side,['buy','sell'])) || (!$qtyProvided && !($type==='market' && $amtProvided))){
         http_response_code(400);
         echo json_encode(['status'=>'error','message'=>'Missing parameters']);
         exit;
@@ -107,8 +110,21 @@ try {
     $pdo = db();
 
     $livePrice = getLivePrice($pair);
+    if($type==='market' && !$qtyProvided && $amtProvided){
+        if($livePrice<=0){
+            http_response_code(500);
+            echo json_encode(['status'=>'error','message'=>'Failed to fetch price']);
+            return;
+        }
+        $qty = $amount / $livePrice;
+        $qtyProvided = $isPositive($qty);
+        if(!$qtyProvided){
+            http_response_code(400);
+            echo json_encode(['status'=>'error','message'=>'Invalid amount']);
+            return;
+        }
+    }
     if($livePrice<=0) $livePrice = 0.0;
-
 
     // ensure sufficient balance for pending buy orders
     if($type!=='market' && $side==='buy'){
@@ -132,16 +148,33 @@ try {
         if(!$result['ok']){ $pdo->rollBack(); http_response_code(400); echo json_encode(['status'=>'error','message'=>$result['msg']]); return; }
         $pdo->commit();
         require_once __DIR__.'/../utils/poll.php';
+        $price   = $result['price'];
+        $profit  = $result['profit'];
+        $opNum   = $result['operation'];
         pushEvent('balance_updated', ['newBalance' => $result['balance']], $userId);
-        pushEvent('order_filled', [
-            'pair' => $pair,
-            'side' => $side,
-            'quantity' => $qty,
-            'price' => $result['price']
-        ], $userId);
+        if($side==='buy'){
+            pushEvent('new_trade', [
+                'operation_number' => $opNum,
+                'pair' => $pair,
+                'side' => $side,
+                'quantity' => $qty,
+                'price' => $price,
+                'target_price' => $price,
+                'profit_loss' => $profit
+            ], $userId);
+        } else {
+            pushEvent('order_filled', [
+                'order_id' => ltrim($opNum,'T'),
+                'pair' => $pair,
+                'side' => $side,
+                'quantity' => $qty,
+                'price' => $price,
+                'profit_loss' => $profit
+            ], $userId);
+        }
         echo json_encode([
             'status'=>'ok',
-            'price'=>$result['price'],
+            'price'=>$price,
             'new_balance'=>$result['balance']
         ]);
         return;
