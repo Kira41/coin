@@ -56,14 +56,46 @@ $stmt = $pdo->prepare('SELECT profile_pic FROM personal_data WHERE user_id = ?')
 $stmt->execute([$adminId]);
 $result['profile_pic'] = $stmt->fetchColumn();
 
-if ((int)$admin['is_admin'] === 1) {
-    $stmt = $pdo->prepare('SELECT id,email,is_admin,created_by FROM admins_agents WHERE created_by = ?');
-    $stmt->execute([$adminId]);
-    $result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} elseif ((int)$admin['is_admin'] === 2) {
-    $stmt = $pdo->query('SELECT id,email,is_admin,created_by FROM admins_agents');
-    $result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-}
+    // Helper to fetch users created by a specific admin/agent with optional date filter
+    function fetchUsersByCreator(PDO $pdo, int $creatorId, ?string $startDate = null) {
+        $sql = 'SELECT * FROM personal_data WHERE linked_to_id = ?';
+        $params = [$creatorId];
+        if ($startDate) {
+            $sql .= ' AND STR_TO_DATE(created_at, "%Y-%m-%d") >= STR_TO_DATE(?, "%Y-%m-%d")';
+            $params[] = $startDate;
+        }
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // Recursively gather agents/admins created by the current admin
+    function gatherHierarchy(PDO $pdo, int $rootId, ?string $startDate = null) {
+        $allAgents = [];
+        $allUsers = fetchUsersByCreator($pdo, $rootId, $startDate);
+        $queue = [$rootId];
+        $visited = [];
+        while ($queue) {
+            $current = array_shift($queue);
+            if (isset($visited[$current])) {
+                continue;
+            }
+            $visited[$current] = true;
+            $stmt = $pdo->prepare('SELECT id,email,is_admin,created_by FROM admins_agents WHERE created_by = ?');
+            $stmt->execute([$current]);
+            $subs = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach ($subs as $sub) {
+                $allAgents[] = $sub;
+                // fetch users created by this sub account
+                $allUsers = array_merge($allUsers, fetchUsersByCreator($pdo, (int)$sub['id'], $startDate));
+                // if this sub account is an admin (not an agent), traverse further
+                if ((int)$sub['is_admin'] !== 0) {
+                    $queue[] = (int)$sub['id'];
+                }
+            }
+        }
+        return [$allAgents, $allUsers];
+    }
 
 $period = isset($_GET['period']) ? strtolower($_GET['period']) : 'all';
 $startDate = null;
@@ -79,26 +111,40 @@ switch ($period) {
         break;
 }
 
-$userSql = 'SELECT * FROM personal_data';
-$userParams = [];
-if ((int)$admin['is_admin'] !== 2) {
-    $userSql .= ' WHERE linked_to_id = ?';
-    $userParams[] = $adminId;
+if ((int)$admin['is_admin'] === 2) {
+    // Super admin sees all agents and users
+    $stmt = $pdo->query('SELECT id,email,is_admin,created_by FROM admins_agents');
+    $result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $userSql = 'SELECT * FROM personal_data';
+    $params = [];
+    if ($startDate) {
+        $userSql .= ' WHERE STR_TO_DATE(created_at, "%Y-%m-%d") >= STR_TO_DATE(?, "%Y-%m-%d")';
+        $params[] = $startDate;
+    }
+    $stmt = $pdo->prepare($userSql);
+    $stmt->execute($params);
+    $result['users'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    // Regular admin: gather hierarchy of agents/admins and their users
+    [$agents, $users] = gatherHierarchy($pdo, $adminId, $startDate);
+    $result['agents'] = $agents;
+    $result['users'] = $users;
 }
-if ($startDate) {
-    $userSql .= (strpos($userSql, 'WHERE') === false ? ' WHERE' : ' AND') .
-        ' STR_TO_DATE(created_at, "%Y-%m-%d") >= STR_TO_DATE(?, "%Y-%m-%d")';
-    $userParams[] = $startDate;
-}
-$stmt = $pdo->prepare($userSql);
-$stmt->execute($userParams);
-$result['users'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 if ((int)$admin['is_admin'] === 2) {
     $stmt = $pdo->query('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE k.status = "pending"');
 } else {
-    $stmt = $pdo->prepare('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id = ? AND k.status = "pending"');
-    $stmt->execute([$adminId]);
+    $userIdsForKyc = array_column($result['users'], 'user_id');
+    if ($userIdsForKyc) {
+        $place = implode(',', array_fill(0, count($userIdsForKyc), '?'));
+        $sql = "SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE k.status = 'pending' AND k.user_id IN ($place)";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($userIdsForKyc);
+    } else {
+        $stmt = $pdo->prepare('SELECT 1 WHERE 0');
+        $stmt->execute();
+    }
 }
 $result['kyc'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
