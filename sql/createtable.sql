@@ -42,20 +42,6 @@ CREATE TABLE personal_data (
     profile_pic MEDIUMTEXT
 ) ENGINE=InnoDB;
 
-CREATE TABLE wallets (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id BIGINT NOT NULL,
-    currency VARCHAR(10) NOT NULL,
-    amount DECIMAL(20,10) NOT NULL DEFAULT 0,
-    purchase_price DECIMAL(20,10) DEFAULT 0,
-    usd_value DECIMAL(20,10) DEFAULT 0,
-    network TEXT,
-    address TEXT,
-    label TEXT,
-    UNIQUE(user_id, currency),
-    FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB;
-
 CREATE TABLE transactions (
     id BIGINT PRIMARY KEY AUTO_INCREMENT,
     user_id BIGINT,
@@ -222,7 +208,10 @@ CREATE TABLE trades (
     price DECIMAL(20,10),
     total_value DECIMAL(20,10),
     fee DECIMAL(20,10) DEFAULT 0,
-    profit_loss DECIMAL(20,10),
+    profit_loss DECIMAL(20,10) DEFAULT 0,
+    status ENUM('open','closed') DEFAULT 'open',
+    close_price DECIMAL(20,10),
+    closed_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL,
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE

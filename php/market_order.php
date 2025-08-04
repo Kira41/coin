@@ -61,7 +61,6 @@ try {
 
     require_once __DIR__.'/../utils/poll.php';
     pushEvent('balance_updated', ['newBalance' => $newBalance], $userId);
-    pushEvent('wallet_updated', [], $userId);
     pushEvent('new_trade', [
         'operation_number' => $opNum,
         'pair' => $pair,
@@ -74,13 +73,11 @@ try {
     $actionMsg = $side === 'buy'
         ? "Achat de {$quantity} {$base} au prix du march\xC3\xA9 pour {$total} {$quote}"
         : "Vente de {$quantity} {$base} au prix du march\xC3\xA9 pour {$total} {$quote}";
-    $wallets = getUserWallets($pdo, $userId);
     echo json_encode([
         'status' => 'ok',
         'message' => $actionMsg,
         'price' => $price,
-        'new_balance' => $newBalance,
-        'wallets' => $wallets
+        'new_balance' => $newBalance
     ]);
 } catch (Throwable $e) {
     if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack();
