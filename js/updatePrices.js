@@ -1353,7 +1353,7 @@ function initializeUI() {
                         <td>${formatDollar(trade.prix)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutClass)}">${escapeHtml(trade.statut)}</span></td>
                         <td class="${escapeHtml(profitCls)}" data-profit>${profitText}</td>
-                        <td>${trade.statut==='En cours' ? (trade.blocked ? '<i class="fas fa-lock text-muted" title="Bloqué"></i>' : `<button class="btn btn-sm btn-danger cancel-order-btn" data-op="${escapeHtml(trade.operationNumber)}" title="Annuler"><i class="fas fa-ban"></i></button>`) : '-'}</td>
+                        <td>${trade.statut==='En cours' && trade.order_type==='market' ? (trade.blocked ? '<i class="fas fa-lock text-muted" title="Bloqué"></i>' : `<button class="btn btn-sm btn-danger cancel-order-btn" data-op="${escapeHtml(trade.operationNumber)}" title="Annuler"><i class="fas fa-ban"></i></button>`) : '-'}</td>
                     </tr>`);
             });
             if (openTrades.length) updateOpenTradeProfits(openTrades);
@@ -1723,7 +1723,7 @@ function initializeUI() {
         const op = $btn.data('op');
         const trade = (dashboardData.tradingHistory || []).find(t => t.operationNumber === op);
         const orderId = trade?.details?.order_id ?? trade?.order_id;
-        if (trade && trade.statut === 'En cours' && orderId) {
+        if (trade && trade.statut === 'En cours' && trade.order_type === 'market' && orderId) {
             const openTrade = (dashboardData.openTrades || []).find(t => t.id == orderId);
             try {
                 if (openTrade) {

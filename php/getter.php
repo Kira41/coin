@@ -109,7 +109,7 @@ foreach ($openTrades as &$t) {
     $t['unrealized_pnl'] = ($current - $t['price']) * $t['quantity'] * $sign;
 }
 unset($t);
-$blockStmt = $pdo->prepare('SELECT blocked FROM orders WHERE id = ?');
+$blockStmt = $pdo->prepare('SELECT blocked,type FROM orders WHERE id = ?');
 
 $data = [
     'personalData' => $personal,
@@ -125,7 +125,11 @@ $data = [
         }
         if (!empty($r['order_id'])) {
             $blockStmt->execute([$r['order_id']]);
-            $r['blocked'] = (int)$blockStmt->fetchColumn();
+            $row = $blockStmt->fetch(PDO::FETCH_ASSOC);
+            $r['blocked'] = (int)($row['blocked'] ?? 0);
+            if (isset($row['type'])) {
+                $r['order_type'] = $row['type'];
+            }
         }
         unset($r['details']);
         return $r;
