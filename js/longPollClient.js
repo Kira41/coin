@@ -32,7 +32,13 @@ function handleEvents(response) {
         }
         break;
       case 'new_trade':
-        if (window.addTrade) window.addTrade(ev.data);
+        if (window.addTrade) {
+          const d = ev.data;
+          if (d.operation_number && !d.operationNumber) {
+            d.operationNumber = d.operation_number;
+          }
+          window.addTrade(d);
+        }
         break;
       case 'order_filled':
         if (window.handleOrderFilled) window.handleOrderFilled(ev.data);
@@ -42,6 +48,9 @@ function handleEvents(response) {
         break;
       case 'order_cancelled':
         if (window.handleOrderCancelled) window.handleOrderCancelled(ev.data);
+        break;
+      case 'trade_update':
+        if (window.handleTradeUpdate) window.handleTradeUpdate(ev.data);
         break;
       default:
         break;

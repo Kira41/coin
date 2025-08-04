@@ -63,6 +63,8 @@ try {
     $profit     = $result['profit'];
     $price      = $result['price'];
     $opened     = $result['opened'];
+    $quantity   = $result['quantity'];
+    $total      = $price * $quantity;
 
     require_once __DIR__.'/../utils/poll.php';
     pushEvent('balance_updated', ['newBalance' => $newBalance], $userId);
