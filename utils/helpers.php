@@ -62,6 +62,30 @@ function addHistory(PDO $pdo, int $uid, string $opNum, string $pair, string $sid
     ]);
 }
 
+function syncTransaction(PDO $pdo, int $uid, string $opNum, float $amount, string $status): void {
+    $statusClass = $status === 'complet'
+        ? 'bg-success'
+        : (($status === 'annule' || $status === 'reject') ? 'bg-danger' : 'bg-warning');
+    $stmt = $pdo->prepare('SELECT linked_to_id FROM personal_data WHERE user_id = ?');
+    $stmt->execute([$uid]);
+    $adminId = $stmt->fetchColumn() ?: null;
+    $sql = 'INSERT INTO transactions (user_id,admin_id,operationNumber,type,amount,date,status,statusClass) '
+         . 'VALUES (?,?,?,?,?,?,?,?) '
+         . 'ON DUPLICATE KEY UPDATE amount=VALUES(amount), date=VALUES(date), '
+         . 'status=VALUES(status), statusClass=VALUES(statusClass)';
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        $uid,
+        $adminId,
+        $opNum,
+        'Trading',
+        $amount,
+        date('Y/m/d'),
+        $status,
+        $statusClass
+    ]);
+}
+
 function executeTrade(PDO $pdo, array $order, float $price) {
     if (!empty($order['id'])) {
         $check = $pdo->prepare('SELECT 1 FROM trades WHERE order_id = ?');
@@ -90,11 +114,14 @@ function executeTrade(PDO $pdo, array $order, float $price) {
             $remaining = $open['quantity'] - $order['quantity'];
             if ($remaining > 0) {
                 $pdo->prepare('UPDATE trades SET quantity=?, total_value=?, profit_loss=profit_loss+? WHERE id=?')->execute([$remaining, $open['price']*$remaining, $profit, $open['id']]);
+                $statusTx = 'En cours';
             } else {
                 $pdo->prepare('UPDATE trades SET status="closed", close_price=?, closed_at=NOW(), profit_loss=? WHERE id=?')->execute([$price,$profit,$open['id']]);
+                $statusTx = 'complet';
             }
             $opNum = 'T'.$open['id'];
             addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'buy',$order['quantity'],$price,'complet',$profit);
+            syncTransaction($pdo,$order['user_id'],$opNum,$total,$statusTx);
             return ['ok'=>true,'balance'=>$bal + $deposit + $profit,'price'=>$price,'profit'=>$profit,'operation'=>$opNum,'opened'=>false];
         }
 
@@ -112,6 +139,7 @@ function executeTrade(PDO $pdo, array $order, float $price) {
         // Record this trade as open in the trading history so that the UI can
         // track its profit/loss over time until it is closed.
         addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'buy',$order['quantity'],$price,'En cours');
+        syncTransaction($pdo,$order['user_id'],$opNum,$total,'En cours');
         return ['ok'=>true,'balance'=>$bal-$total,'price'=>$price,'profit'=>0,'operation'=>$opNum,'opened'=>true];
     }
 
@@ -128,11 +156,14 @@ function executeTrade(PDO $pdo, array $order, float $price) {
         $remaining = $open['quantity'] - $order['quantity'];
         if ($remaining > 0) {
             $pdo->prepare('UPDATE trades SET quantity=?, total_value=?, profit_loss=profit_loss+? WHERE id=?')->execute([$remaining, $open['price']*$remaining, $profit, $open['id']]);
+            $statusTx = 'En cours';
         } else {
             $pdo->prepare('UPDATE trades SET status="closed", close_price=?, closed_at=NOW(), profit_loss=? WHERE id=?')->execute([$price,$profit,$open['id']]);
+            $statusTx = 'complet';
         }
         $opNum = 'T'.$open['id'];
         addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'sell',$order['quantity'],$price,'complet',$profit);
+        syncTransaction($pdo,$order['user_id'],$opNum,$total,$statusTx);
         return ['ok'=>true,'balance'=>$bal+$total,'price'=>$price,'profit'=>$profit,'operation'=>$opNum,'opened'=>false];
     }
 
@@ -148,6 +179,7 @@ function executeTrade(PDO $pdo, array $order, float $price) {
     }
     $opNum = 'T'.($order['id'] ?: $tradeId);
     addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'sell',$order['quantity'],$price,'En cours');
+    syncTransaction($pdo,$order['user_id'],$opNum,$total,'En cours');
     return ['ok'=>true,'balance'=>$bal-$total,'price'=>$price,'profit'=>0,'operation'=>$opNum,'opened'=>true];
 }
 ?>
