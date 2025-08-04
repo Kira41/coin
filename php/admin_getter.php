@@ -7,6 +7,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
 try {
     require_once __DIR__.'/../config/db_connection.php';
     $pdo = db();
+    require_once __DIR__.'/../utils/permissions.php';
 
     function formatTimeAgoFromDate($dateStr) {
         $ts = strtotime($dateStr);
@@ -56,13 +57,20 @@ $stmt = $pdo->prepare('SELECT profile_pic FROM personal_data WHERE user_id = ?')
 $stmt->execute([$adminId]);
 $result['profile_pic'] = $stmt->fetchColumn();
 
-if ((int)$admin['is_admin'] === 1) {
-    $stmt = $pdo->prepare('SELECT id,email,is_admin,created_by FROM admins_agents WHERE created_by = ?');
-    $stmt->execute([$adminId]);
-    $result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} elseif ((int)$admin['is_admin'] === 2) {
+$descendantAdminIds = getDescendantAdminIds($pdo, $adminId);
+if ((int)$admin['is_admin'] === 2) {
     $stmt = $pdo->query('SELECT id,email,is_admin,created_by FROM admins_agents');
     $result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} else {
+    $agentIds = array_diff($descendantAdminIds, [$adminId]);
+    if ($agentIds) {
+        $placeholders = implode(',', array_fill(0, count($agentIds), '?'));
+        $stmt = $pdo->prepare("SELECT id,email,is_admin,created_by FROM admins_agents WHERE id IN ($placeholders)");
+        $stmt->execute($agentIds);
+        $result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } else {
+        $result['agents'] = [];
+    }
 }
 
 $period = isset($_GET['period']) ? strtolower($_GET['period']) : 'all';
@@ -82,8 +90,9 @@ switch ($period) {
 $userSql = 'SELECT * FROM personal_data';
 $userParams = [];
 if ((int)$admin['is_admin'] !== 2) {
-    $userSql .= ' WHERE linked_to_id = ?';
-    $userParams[] = $adminId;
+    $placeholders = implode(',', array_fill(0, count($descendantAdminIds), '?'));
+    $userSql .= " WHERE linked_to_id IN ($placeholders)";
+    $userParams = $descendantAdminIds;
 }
 if ($startDate) {
     $userSql .= (strpos($userSql, 'WHERE') === false ? ' WHERE' : ' AND') .
@@ -94,11 +103,16 @@ $stmt = $pdo->prepare($userSql);
 $stmt->execute($userParams);
 $result['users'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+$stmt = null;
 if ((int)$admin['is_admin'] === 2) {
     $stmt = $pdo->query('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE k.status = "pending"');
 } else {
-    $stmt = $pdo->prepare('SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status FROM kyc k JOIN personal_data p ON k.user_id=p.user_id WHERE p.linked_to_id = ? AND k.status = "pending"');
-    $stmt->execute([$adminId]);
+    $placeholders = implode(',', array_fill(0, count($descendantAdminIds), '?'));
+    $sql = 'SELECT k.file_id,k.user_id,p.fullName,p.emailaddress,k.file_name,k.file_type,k.created_at,k.status '
+        . 'FROM kyc k JOIN personal_data p ON k.user_id=p.user_id '
+        . "WHERE p.linked_to_id IN ($placeholders) AND k.status = \"pending\"";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($descendantAdminIds);
 }
 $result['kyc'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
