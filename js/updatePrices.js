@@ -377,9 +377,9 @@ function stopAutoRefresh() {
     }
 }
 
-function startPricePolling() {
+function startPricePolling(fetchPriceFn) {
     if (priceInterval) return;
-    priceInterval = setInterval(() => fetchPrice(selectedPairVal), 1000);
+    priceInterval = setInterval(() => fetchPriceFn(selectedPairVal), 1000);
 }
 
 function stopPricePolling() {
@@ -1731,7 +1731,7 @@ function initializeUI() {
     });
 
     fetchPrice(selectedPairVal);
-    startPricePolling();
+    startPricePolling(fetchPrice);
     renderTradingHistory();
 
     const $loginHistoryBody = $('#loginHistoryBody');
