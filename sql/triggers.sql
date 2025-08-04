@@ -100,24 +100,6 @@ BEGIN
   END IF;
 END//
 
-CREATE TRIGGER trg_orders_after_insert
-AFTER INSERT ON orders
-FOR EACH ROW
-BEGIN
-  DECLARE op VARCHAR(50);
-  DECLARE orderPrice DECIMAL(20,10);
-  DECLARE adminId BIGINT;
-  SET op = CONCAT('T', NEW.id);
-  SELECT linked_to_id INTO adminId FROM personal_data WHERE user_id = NEW.user_id;
-  SET orderPrice = COALESCE(NEW.target_price, NEW.stop_price, NEW.trail_price, 0);
-  INSERT INTO transactions
-    (user_id, admin_id, operationNumber, type, amount, date, status, statusClass)
-  VALUES
-    (NEW.user_id, adminId, op, 'Trading',
-     orderPrice * NEW.quantity,
-     DATE_FORMAT(NOW(), '%Y/%m/%d'), 'En cours', 'bg-warning');
-END//
-
 CREATE TRIGGER trg_trades_after_insert
 AFTER INSERT ON trades
 FOR EACH ROW

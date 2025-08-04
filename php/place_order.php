@@ -181,13 +181,67 @@ try {
         return;
     }
 
-    // For pending orders just record
-    $stmt=$pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,target_price,stop_price,trailing_percentage,stop_percentage,stop_time,trail_price,related_order_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,NULL)');
-    $trailPrice = $livePrice>0 ? $livePrice : null;
-    $stmt->execute([$userId,$pair,$type,$side,$qty,$limit,$stop,$trailPerc,$stopPercent,$stopTime,$trailPrice]);
-    $id=$pdo->lastInsertId();
+    // Handle other order types
+    if ($type === 'limit') {
+        // [LIMIT ORDER LOGIC]
+        $amount = $limit * $qty;
+        $stmt = $pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,amount,target_price,stop_price,trailing_percentage,stop_percentage,stop_time,trail_price,related_order_id,profit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,0)');
+        $stmt->execute([$userId,$pair,'limit',$side,$qty,$amount,$limit,null,null,null,null,null,null]);
+        $id = $pdo->lastInsertId();
+    } else if ($type === 'stop') {
+        // [STOP ORDER LOGIC]
+        $amount = $stop * $qty;
+        $stmt = $pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,amount,target_price,stop_price,trailing_percentage,stop_percentage,stop_time,trail_price,related_order_id,profit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,0)');
+        $stmt->execute([$userId,$pair,'stop',$side,$qty,$amount,null,$stop,null,null,null,null,null]);
+        $id = $pdo->lastInsertId();
+    } else if ($type === 'stop_limit') {
+        // [STOP-LIMIT ORDER LOGIC]
+        $amount = $limit * $qty;
+        $stmt = $pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,amount,target_price,stop_price,trailing_percentage,stop_percentage,stop_time,trail_price,related_order_id,profit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,0)');
+        $stmt->execute([$userId,$pair,'stop_limit',$side,$qty,$amount,$limit,$stop,null,null,null,null,null]);
+        $id = $pdo->lastInsertId();
+    } else if ($type === 'trailing_stop') {
+        // [TRAILING STOP ORDER LOGIC]
+        $trailPrice = $livePrice > 0 ? $livePrice : null;
+        $amount = ($trailPrice ?? 0) * $qty;
+        $stmt = $pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,amount,target_price,stop_price,trailing_percentage,stop_percentage,stop_time,trail_price,related_order_id,profit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,0)');
+        $stmt->execute([$userId,$pair,'trailing_stop',$side,$qty,$amount,null,null,$trailPerc,null,null,$trailPrice,null]);
+        $id = $pdo->lastInsertId();
+    } else if ($type === 'percentage_stop') {
+        // [PERCENTAGE STOP ORDER LOGIC]
+        $trailPrice = $livePrice > 0 ? $livePrice : null;
+        $amount = ($trailPrice ?? 0) * $qty;
+        $stmt = $pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,amount,target_price,stop_price,trailing_percentage,stop_percentage,stop_time,trail_price,related_order_id,profit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,0)');
+        $stmt->execute([$userId,$pair,'percentage_stop',$side,$qty,$amount,null,null,null,$stopPercent,null,$trailPrice,null]);
+        $id = $pdo->lastInsertId();
+    } else if ($type === 'time_stop') {
+        // [TIME STOP ORDER LOGIC]
+        $trailPrice = $livePrice > 0 ? $livePrice : null;
+        $amount = ($trailPrice ?? 0) * $qty;
+        $stmt = $pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,amount,target_price,stop_price,trailing_percentage,stop_percentage,stop_time,trail_price,related_order_id,profit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,0)');
+        $stmt->execute([$userId,$pair,'time_stop',$side,$qty,$amount,null,null,null,null,$stopTime,$trailPrice,null]);
+        $id = $pdo->lastInsertId();
+    } else if ($type === 'oco') {
+        // [OCO ORDER LOGIC]
+        $amount = $limit * $qty;
+        $stmt = $pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,amount,target_price,stop_price,trailing_percentage,stop_percentage,stop_time,trail_price,related_order_id,profit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,0)');
+        $stmt->execute([$userId,$pair,'limit',$side,$qty,$amount,$limit,null,null,null,null,null,null]);
+        $id = $pdo->lastInsertId();
+        // create second order for stop limit part using provided stop_limit_price
+        $amount2 = $stopLimit * $qty;
+        $stopLimitOrder=$pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,amount,target_price,stop_price,trailing_percentage,stop_percentage,stop_time,trail_price,related_order_id,profit) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,0)');
+        $stopLimitOrder->execute([$userId,$pair,'stop_limit',$side,$qty,$amount2,$stopLimit,$stop,null,null,null,null,$id]);
+        $secondId=$pdo->lastInsertId();
+        $pdo->prepare('UPDATE orders SET related_order_id=? WHERE id=?')->execute([$secondId,$id]);
+    } else {
+        http_response_code(400);
+        echo json_encode(['status'=>'error','message'=>'Unsupported order type']);
+        return;
+    }
+
     $opNum = 'T'.$id;
-    addHistory($pdo,$userId,$opNum,$pair,$side,$qty,$limit ?? $livePrice,'En cours');
+    $priceRef = $limit ?? $stop ?? $livePrice;
+    addHistory($pdo,$userId,$opNum,$pair,$side,$qty,$priceRef,'En cours');
 
     require_once __DIR__.'/../utils/poll.php';
     pushEvent('new_order', [
@@ -202,14 +256,6 @@ try {
         'stop_percentage' => $stopPercent,
         'stop_time' => $stopTime
     ], $userId);
-
-    if($type==='oco'){
-        // create second order for stop limit part using provided stop_limit_price
-        $stopLimitOrder=$pdo->prepare('INSERT INTO orders (user_id,pair,type,side,quantity,target_price,stop_price,related_order_id) VALUES (?,?,?,?,?,?,?,?)');
-        $stopLimitOrder->execute([$userId,$pair,'stop_limit',$side,$qty,$stopLimit,$stop,$id]);
-        $secondId=$pdo->lastInsertId();
-        $pdo->prepare('UPDATE orders SET related_order_id=? WHERE id=?')->execute([$secondId,$id]);
-    }
 
     [$base] = explode('/', strtoupper($pair));
     $typeLabel = str_replace('_', ' ', $type);
