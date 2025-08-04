@@ -66,7 +66,7 @@ if ((int)$admin['is_admin'] === 2) {
     if ($agentIds) {
         $placeholders = implode(',', array_fill(0, count($agentIds), '?'));
         $stmt = $pdo->prepare("SELECT id,email,is_admin,created_by FROM admins_agents WHERE id IN ($placeholders)");
-        $stmt->execute($agentIds);
+        $stmt->execute(array_values($agentIds));
         $result['agents'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
         $result['agents'] = [];
@@ -93,7 +93,7 @@ $userParams = [];
 if ((int)$admin['is_admin'] !== 2) {
     $placeholders = implode(',', array_fill(0, count($descendantAdminIds), '?'));
     $userSql .= " WHERE linked_to_id IN ($placeholders)";
-    $userParams = $descendantAdminIds;
+    $userParams = array_values($descendantAdminIds);
 }
 if ($startDate) {
     $userSql .= (strpos($userSql, 'WHERE') === false ? ' WHERE' : ' AND') .
@@ -101,7 +101,7 @@ if ($startDate) {
     $userParams[] = $startDate;
 }
 $stmt = $pdo->prepare($userSql);
-$stmt->execute($userParams);
+$stmt->execute(array_values($userParams));
 $result['users'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 $stmt = null;
@@ -113,7 +113,7 @@ if ((int)$admin['is_admin'] === 2) {
         . 'FROM kyc k JOIN personal_data p ON k.user_id=p.user_id '
         . "WHERE p.linked_to_id IN ($placeholders) AND k.status = \"pending\"";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($descendantAdminIds);
+    $stmt->execute(array_values($descendantAdminIds));
 }
 $result['kyc'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -132,7 +132,7 @@ if ($userIds) {
         $params[] = $startDate;
     }
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
+    $stmt->execute(array_values($params));
     foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
         $sumDeposits += (float)$row['amount'];
         $depositCount++;
@@ -168,7 +168,7 @@ if ((int)$admin['is_admin'] === 2) {
             ORDER BY n.id DESC
             LIMIT 10";
     $stmt = $pdo->prepare($sql);
-    $stmt->execute($userIds);
+    $stmt->execute(array_values($userIds));
     $notifications = $stmt->fetchAll(PDO::FETCH_ASSOC);
     foreach ($notifications as &$n) {
         $n['time'] = formatTimeAgoFromDate($n['time']);
