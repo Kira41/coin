@@ -22,77 +22,102 @@ function fillOrder(PDO $pdo, array $o, float $price): void {
     }
 }
 
-// fetch open and triggered orders
-$orders = $pdo->query("SELECT * FROM orders WHERE status IN ('open','triggered')")->fetchAll(PDO::FETCH_ASSOC);
+// ---- Order condition helpers ----
+
+function shouldFillLimit(array $o, float $price): bool {
+    return ($o['side'] === 'buy' && $price <= $o['target_price'])
+        || ($o['side'] === 'sell' && $price >= $o['target_price']);
+}
+
+function shouldFillStop(array $o, float $price): bool {
+    return ($o['side'] === 'buy' && $price >= $o['stop_price'])
+        || ($o['side'] === 'sell' && $price <= $o['stop_price']);
+}
+
+function shouldFillStopLimit(PDO $pdo, array &$o, float $price): bool {
+    if ($o['status'] === 'open' && shouldFillStop($o, $price)) {
+        $pdo->prepare("UPDATE orders SET status='triggered' WHERE id=?")
+            ->execute([$o['id']]);
+        $o['status'] = 'triggered';
+    }
+    return $o['status'] === 'triggered' && shouldFillLimit($o, $price);
+}
+
+function shouldFillTrailing(PDO $pdo, array &$o, float $price): bool {
+    if ($o['side'] === 'sell') {
+        if ($price > $o['trail_price']) {
+            $pdo->prepare('UPDATE orders SET trail_price=? WHERE id=?')
+                ->execute([$price, $o['id']]);
+            $o['trail_price'] = $price;
+        }
+        return $price <= $o['trail_price'] * (1 - $o['trailing_percentage'] / 100);
+    }
+    if ($price < $o['trail_price']) {
+        $pdo->prepare('UPDATE orders SET trail_price=? WHERE id=?')
+            ->execute([$price, $o['id']]);
+        $o['trail_price'] = $price;
+    }
+    return $price >= $o['trail_price'] * (1 + $o['trailing_percentage'] / 100);
+}
+
+function shouldFillPercentage(array $o, float $price): bool {
+    $threshold = $o['trail_price'];
+    if ($o['side'] === 'sell') {
+        $threshold *= (1 - $o['stop_percentage'] / 100);
+        return $price <= $threshold;
+    }
+    $threshold *= (1 + $o['stop_percentage'] / 100);
+    return $price >= $threshold;
+}
+
+function shouldFillTime(array $o): bool {
+    return strtotime($o['stop_time']) <= time();
+}
+
+function shouldFillOco(array $o, float $price): bool {
+    // limit part of the OCO pair
+    return shouldFillLimit($o, $price);
+}
+
+// ---- Main evaluation loop ----
+
+$orders = $pdo->query("SELECT * FROM orders WHERE status IN ('open','triggered')")
+    ->fetchAll(PDO::FETCH_ASSOC);
+
 foreach ($orders as $o) {
     $price = getLivePrice($o['pair']);
-    if ($price <= 0) continue;
+    if ($price <= 0) {
+        continue;
+    }
 
+    $shouldFill = false;
     switch ($o['type']) {
         case 'limit':
-            if (($o['side']=='buy' && $price <= $o['target_price']) || ($o['side']=='sell' && $price >= $o['target_price'])) {
-                fillOrder($pdo, $o, $price);
-            }
-            break;
-        case 'percentage_stop':
-            $threshold = $o['trail_price'];
-            if ($o['side']=='sell') {
-                $threshold *= (1 - $o['stop_percentage']/100);
-                if ($price <= $threshold) {
-                    fillOrder($pdo, $o, $price);
-                }
-            } else {
-                $threshold *= (1 + $o['stop_percentage']/100);
-                if ($price >= $threshold) {
-                    fillOrder($pdo, $o, $price);
-                }
-            }
-            break;
-        case 'time_stop':
-            if (strtotime($o['stop_time']) <= time()) {
-                fillOrder($pdo, $o, $price);
-            }
-            break;
-        case 'oco':
-            if (($o['side']=='buy' && $price <= $o['target_price']) || ($o['side']=='sell' && $price >= $o['target_price'])) {
-                fillOrder($pdo, $o, $price);
-            }
+            $shouldFill = shouldFillLimit($o, $price);
             break;
         case 'stop':
-            if (($o['side']=='buy' && $price >= $o['stop_price']) || ($o['side']=='sell' && $price <= $o['stop_price'])) {
-                fillOrder($pdo, $o, $price);
-            }
+            $shouldFill = shouldFillStop($o, $price);
             break;
         case 'stop_limit':
-            if ($o['status']=='open') {
-                if (($o['side']=='buy' && $price >= $o['stop_price']) || ($o['side']=='sell' && $price <= $o['stop_price'])) {
-                    $pdo->prepare("UPDATE orders SET status='triggered' WHERE id=?")->execute([$o['id']]);
-                    $o['status']='triggered';
-                }
-            }
-            if ($o['status']=='triggered') {
-                if (($o['side']=='buy' && $price <= $o['target_price']) || ($o['side']=='sell' && $price >= $o['target_price'])) {
-                    fillOrder($pdo, $o, $price);
-                }
-            }
+            $shouldFill = shouldFillStopLimit($pdo, $o, $price);
             break;
         case 'trailing_stop':
-            if ($o['side']=='sell') {
-                if ($price > $o['trail_price']) {
-                    $pdo->prepare('UPDATE orders SET trail_price=? WHERE id=?')->execute([$price,$o['id']]);
-                    $o['trail_price']=$price;
-                } elseif ($price <= $o['trail_price']*(1-$o['trailing_percentage']/100)) {
-                    fillOrder($pdo, $o, $price);
-                }
-            } else {
-                if ($price < $o['trail_price']) {
-                    $pdo->prepare('UPDATE orders SET trail_price=? WHERE id=?')->execute([$price,$o['id']]);
-                    $o['trail_price']=$price;
-                } elseif ($price >= $o['trail_price']*(1+$o['trailing_percentage']/100)) {
-                    fillOrder($pdo, $o, $price);
-                }
-            }
+            $shouldFill = shouldFillTrailing($pdo, $o, $price);
+            break;
+        case 'percentage_stop':
+            $shouldFill = shouldFillPercentage($o, $price);
+            break;
+        case 'time_stop':
+            $shouldFill = shouldFillTime($o);
+            break;
+        case 'oco':
+            $shouldFill = shouldFillOco($o, $price);
             break;
     }
+
+    if ($shouldFill) {
+        fillOrder($pdo, $o, $price);
+    }
 }
+
 ?>
