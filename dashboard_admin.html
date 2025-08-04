@@ -627,7 +627,6 @@
                             <select class="form-select" id="agentRole">
                                 <option value="0">Agent</option>
                                 <option value="1">Administrateur</option>
-                                <option value="2">Super Administrateur</option>
                             </select>
                         </div>
                     </form>
@@ -660,7 +659,6 @@
                             <select class="form-select" id="editAgentRole">
                                 <option value="0">Agent</option>
                                 <option value="1">Administrateur</option>
-                                <option value="2">Super Administrateur</option>
                             </select>
                         </div>
                         <div class="mb-3">
@@ -807,7 +805,7 @@
                         <div class="col-md-6">
                             <h6>Document Soumis</h6>
                             <div class="mb-3 text-center">
-                                <img id="kycModalImage" src="" class="img-fluid border rounded" alt="Document">
+                                <img id="kycModalImage" src="about:blank" class="img-fluid border rounded" alt="Document">
                                 <p class="mt-2"><small id="kycModalFilename"></small></p>
                             </div>
                         </div>
@@ -1269,9 +1267,6 @@
                 const allBtn = document.getElementById('showAllDocsButton');
                 if (allBtn) allBtn.style.display = IS_SUPER_ADMIN ? 'inline-block' : 'none';
 
-                if (!IS_SUPER_ADMIN) {
-                    document.querySelectorAll('#agentRole option[value="2"], #editAgentRole option[value="2"]').forEach(el => el.remove());
-                }
 
                 const tbody = document.getElementById('usersTableBody');
                 tbody.innerHTML = '';
@@ -1435,8 +1430,7 @@
                 action: 'create_admin',
                 email: email,
                 password: md5(pass),
-                is_admin: isAdminVal,
-                created_by: ADMIN_ID
+                is_admin: isAdminVal
             };
             try {
                 const res = await fetchWithAuth('php/admin_setter.php', {

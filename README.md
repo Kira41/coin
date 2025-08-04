@@ -38,6 +38,11 @@ following levels:
 * `1` – admin who can manage their own agents and users
 * `2` – super admin with full access to all users and agents
 
+New admin accounts are restricted to levels `0` and `1`; the super admin level
+(`2`) is reserved and cannot be assigned through the dashboard or API. The
+`created_by` column is automatically populated with the ID of the admin creating
+the account.
+
 The `personal_data` table now includes a `linked_to_id` column storing the
 `admins_agents.id` of the creator. When inserting or updating these records via
 `admin_setter.php`, make sure the password you send is pre-hashed on the client
