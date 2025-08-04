@@ -7,6 +7,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
 try {
     require_once __DIR__.'/../config/db_connection.php';
     $pdo = db();
+    require_once __DIR__.'/../utils/permissions.php';
 
     $adminId = null;
     session_start();
@@ -49,14 +50,7 @@ if ($filterAll) {
         $params[] = '%' . $search . '%';
     }
 } else {
-    $placeholders = [];
-    $linkedIds = [$targetId];
-    $agentsStmt = $pdo->prepare('SELECT id FROM admins_agents WHERE created_by = ?');
-    $agentsStmt->execute([$targetId]);
-    $agentIds = $agentsStmt->fetchAll(PDO::FETCH_COLUMN);
-    if ($agentIds) {
-        $linkedIds = array_merge($linkedIds, $agentIds);
-    }
+    $linkedIds = getDescendantAdminIds($pdo, $targetId);
     $placeholders = implode(',', array_fill(0, count($linkedIds), '?'));
 
     $baseSql = "FROM transactions AS t
