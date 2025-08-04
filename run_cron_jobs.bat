@@ -4,5 +4,6 @@ cd /d "%~dp0"
 
 :loop
 php cron\cron_process_orders.php
+php cron\update_open_trades.php
 timeout /t 3 >nul
 goto loop

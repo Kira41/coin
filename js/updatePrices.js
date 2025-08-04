@@ -1518,6 +1518,15 @@ function initializeUI() {
         }
     };
 
+    window.handleTradeUpdate = function(data) {
+        const order = (dashboardData.tradingHistory || []).find(t => t.operationNumber === data.operation_number);
+        if (order) {
+            order.profitPerte = data.profit_loss;
+            order.profitClass = data.profit_loss >= 0 ? 'text-success' : 'text-danger';
+            renderTradingHistory();
+        }
+    };
+
     function finalizeOrder(order, exitPrice) {
         const priceValue = parseFloat(order.prix);
         const qty = parseFloat(order.montant);
