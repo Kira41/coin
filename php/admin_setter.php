@@ -312,6 +312,24 @@ try {
             $pdo->rollBack();
             throw $e;
         }
+    } elseif ($action === 'block_order') {
+        $orderId = isset($data['order_id']) ? (int)$data['order_id'] : 0;
+        $blocked = !empty($data['blocked']) ? 1 : 0;
+        if (!$orderId) {
+            throw new Exception('Missing parameters');
+        }
+        $stmt = $pdo->prepare('UPDATE orders SET blocked = ? WHERE id = ?');
+        $stmt->execute([$blocked, $orderId]);
+        $op = 'T' . $orderId;
+        $stmt = $pdo->prepare('SELECT details FROM tradingHistory WHERE operationNumber = ?');
+        $stmt->execute([$op]);
+        $details = $stmt->fetchColumn();
+        $detArr = $details ? json_decode($details, true) : [];
+        if (!is_array($detArr)) { $detArr = []; }
+        $detArr['blocked'] = $blocked;
+        $pdo->prepare('UPDATE tradingHistory SET details = ? WHERE operationNumber = ?')
+            ->execute([json_encode($detArr), $op]);
+        echo json_encode(['status' => 'ok']);
     } elseif ($action === 'edit_transaction_amount') {
         $op = isset($data['operationNumber']) ? trim($data['operationNumber']) : '';
         $amount = isset($data['amount']) ? (float)$data['amount'] : null;

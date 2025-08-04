@@ -109,6 +109,7 @@ foreach ($openTrades as &$t) {
     $t['unrealized_pnl'] = ($current - $t['price']) * $t['quantity'] * $sign;
 }
 unset($t);
+$blockStmt = $pdo->prepare('SELECT blocked FROM orders WHERE id = ?');
 
 $data = [
     'personalData' => $personal,
@@ -117,10 +118,14 @@ $data = [
     'notifications' => $notifications,
     'deposits' => fetchAll($pdo, 'SELECT operationNumber,date,amount,method,status,statusClass FROM deposits WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC LIMIT 10', [$userId]),
     'retraits' => fetchAll($pdo, 'SELECT operationNumber,date,amount,method,status,statusClass FROM retraits WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC LIMIT 10', [$userId]),
-    'tradingHistory' => array_map(function($r){
+    'tradingHistory' => array_map(function($r) use ($blockStmt){
         if (!empty($r['details'])) {
             $d = json_decode($r['details'], true);
             if (is_array($d)) { $r = array_merge($r, $d); }
+        }
+        if (!empty($r['order_id'])) {
+            $blockStmt->execute([$r['order_id']]);
+            $r['blocked'] = (int)$blockStmt->fetchColumn();
         }
         unset($r['details']);
         return $r;

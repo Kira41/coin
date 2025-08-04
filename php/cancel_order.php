@@ -29,6 +29,12 @@ try{
         echo json_encode(['status'=>'error','message'=>'Order not cancellable']);
         exit;
     }
+    if(!empty($order['blocked'])){
+        $pdo->rollBack();
+        http_response_code(403);
+        echo json_encode(['status'=>'error','message'=>'Order blocked']);
+        exit;
+    }
     $pdo->prepare('UPDATE orders SET status="cancelled" WHERE id=?')->execute([$orderId]);
     if (!empty($order['related_order_id'])) {
         $pdo->prepare("UPDATE orders SET status='cancelled' WHERE id=? AND status IN ('open','triggered')")
