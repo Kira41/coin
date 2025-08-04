@@ -44,7 +44,7 @@ try {
 
     $pdo->beginTransaction();
     $order = [
-        'id' => 0,
+        'id' => null,
         'user_id' => $userId,
         'pair' => $pair,
         'side' => $side,
