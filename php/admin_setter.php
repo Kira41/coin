@@ -260,6 +260,7 @@ try {
         if ($op === '' || $profit === null) {
             throw new Exception('Missing parameters');
         }
+        $tradeId = (int)substr($op, 1);
         $pdo->beginTransaction();
         try {
             $stmt = $pdo->prepare('SELECT prix, profitPerte FROM tradingHistory WHERE operationNumber = ? FOR UPDATE');
@@ -270,10 +271,29 @@ try {
             }
             $oldPrice = (float)$row['prix'];
             $oldProfit = (float)$row['profitPerte'];
-            $newPrice = $oldPrice + ($profit - $oldProfit);
+
+            $tStmt = $pdo->prepare('SELECT user_id, status FROM trades WHERE id = ? FOR UPDATE');
+            $tStmt->execute([$tradeId]);
+            $trade = $tStmt->fetch(PDO::FETCH_ASSOC);
+            if (!$trade) {
+                throw new Exception('Trade not found');
+            }
+
+            $newPrice   = $oldPrice + ($profit - $oldProfit);
             $profitClass = $profit >= 0 ? 'text-success' : 'text-danger';
+            $delta      = $profit - $oldProfit;
+
             $upd = $pdo->prepare('UPDATE tradingHistory SET profitPerte = ?, prix = ?, profitClass = ? WHERE operationNumber = ?');
             $upd->execute([$profit, $newPrice, $profitClass, $op]);
+
+            $pdo->prepare('UPDATE trades SET profit_loss = ?, close_price = ? WHERE id = ?')
+                ->execute([$profit, $newPrice, $tradeId]);
+
+            if ($trade['status'] === 'closed' && $delta != 0) {
+                $pdo->prepare('UPDATE personal_data SET balance = balance + ? WHERE user_id = ?')
+                    ->execute([$delta, $trade['user_id']]);
+            }
+
             $pdo->commit();
             echo json_encode(['status' => 'ok', 'prix' => $newPrice, 'profitClass' => $profitClass]);
         } catch (Exception $e) {
@@ -299,36 +319,81 @@ try {
             $pdo->beginTransaction();
             try {
                 $id = (int)substr($op, 1);
-                $stmt = $pdo->prepare('SELECT order_id FROM trades WHERE id = ?');
-                $stmt->execute([$id]);
-                $trade = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($trade) {
-                    $pdo->prepare('DELETE FROM trades WHERE id = ?')->execute([$id]);
-                    $pdo->prepare('DELETE FROM transactions WHERE operationNumber = ?')->execute([$op]);
-                    if (!empty($trade['order_id'])) {
-                        $oid = (int)$trade['order_id'];
-                        $pdo->prepare('DELETE FROM orders WHERE id = ?')->execute([$oid]);
-                        $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute(['T' . $oid]);
+                if (!empty($data['delete'])) {
+                    $stmt = $pdo->prepare('SELECT order_id FROM trades WHERE id = ?');
+                    $stmt->execute([$id]);
+                    $trade = $stmt->fetch(PDO::FETCH_ASSOC);
+                    if ($trade) {
+                        $pdo->prepare('DELETE FROM trades WHERE id = ?')->execute([$id]);
+                        $pdo->prepare('DELETE FROM transactions WHERE operationNumber = ?')->execute([$op]);
+                        if (!empty($trade['order_id'])) {
+                            $oid = (int)$trade['order_id'];
+                            $pdo->prepare('DELETE FROM orders WHERE id = ?')->execute([$oid]);
+                            $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute(['T' . $oid]);
+                        } else {
+                            $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute([$op]);
+                        }
                     } else {
+                        $stmt = $pdo->prepare('SELECT id FROM orders WHERE id = ?');
+                        $stmt->execute([$id]);
+                        $order = $stmt->fetch(PDO::FETCH_ASSOC);
+                        if (!$order) {
+                            throw new Exception('Transaction not found');
+                        }
+                        $pdo->prepare('DELETE FROM orders WHERE id = ?')->execute([$id]);
                         $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute([$op]);
+                        $tstmt = $pdo->prepare('SELECT id FROM trades WHERE order_id = ?');
+                        $tstmt->execute([$id]);
+                        $tids = $tstmt->fetchAll(PDO::FETCH_COLUMN);
+                        if ($tids) {
+                            $in = implode(',', array_fill(0, count($tids), '?'));
+                            $pdo->prepare("DELETE FROM trades WHERE id IN ($in)")->execute($tids);
+                            foreach ($tids as $tid) {
+                                $pdo->prepare('DELETE FROM transactions WHERE operationNumber = ?')->execute(['T' . $tid]);
+                            }
+                        }
                     }
                 } else {
-                    $stmt = $pdo->prepare('SELECT id FROM orders WHERE id = ?');
-                    $stmt->execute([$id]);
-                    $order = $stmt->fetch(PDO::FETCH_ASSOC);
-                    if (!$order) {
+                    $status = $data['status'] ?? null;
+                    $class  = $data['statusClass'] ?? null;
+                    if ($status === null || $class === null) {
+                        throw new Exception('Missing status');
+                    }
+                    $tStmt = $pdo->prepare('SELECT user_id, total_value, status FROM trades WHERE id = ? FOR UPDATE');
+                    $tStmt->execute([$id]);
+                    $trade = $tStmt->fetch(PDO::FETCH_ASSOC);
+                    if (!$trade) {
                         throw new Exception('Transaction not found');
                     }
-                    $pdo->prepare('DELETE FROM orders WHERE id = ?')->execute([$id]);
-                    $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute([$op]);
-                    $tstmt = $pdo->prepare('SELECT id FROM trades WHERE order_id = ?');
-                    $tstmt->execute([$id]);
-                    $tids = $tstmt->fetchAll(PDO::FETCH_COLUMN);
-                    if ($tids) {
-                        $in = implode(',', array_fill(0, count($tids), '?'));
-                        $pdo->prepare("DELETE FROM trades WHERE id IN ($in)")->execute($tids);
-                        foreach ($tids as $tid) {
-                            $pdo->prepare('DELETE FROM transactions WHERE operationNumber = ?')->execute(['T' . $tid]);
+                    $hStmt = $pdo->prepare('SELECT profitPerte, prix FROM tradingHistory WHERE operationNumber = ? FOR UPDATE');
+                    $hStmt->execute([$op]);
+                    $hist = $hStmt->fetch(PDO::FETCH_ASSOC);
+                    $profit = (float)($hist['profitPerte'] ?? 0);
+                    $price  = (float)($hist['prix'] ?? 0);
+                    $oldStatus = $trade['status'];
+                    $txStmt = $pdo->prepare('SELECT status FROM transactions WHERE operationNumber = ? FOR UPDATE');
+                    $txStmt->execute([$op]);
+                    $txOldStatus = $txStmt->fetchColumn() ?: '';
+                    $pdo->prepare('UPDATE transactions SET status = ?, statusClass = ? WHERE operationNumber = ?')
+                        ->execute([$status, $class, $op]);
+                    if ($txOldStatus !== 'complet' && $status === 'complet') {
+                        $credit = $trade['total_value'] + $profit;
+                        $pdo->prepare('UPDATE personal_data SET balance = balance + ? WHERE user_id = ?')
+                            ->execute([$credit, $trade['user_id']]);
+                        $pdo->prepare('UPDATE trades SET status = "closed", close_price = ?, closed_at = NOW(), profit_loss = ? WHERE id = ?')
+                            ->execute([$price, $profit, $id]);
+                        $profitClass = $profit >= 0 ? 'text-success' : 'text-danger';
+                        $pdo->prepare('UPDATE tradingHistory SET statut = ?, statutClass = ?, profitClass = ?, profitPerte = ?, prix = ? WHERE operationNumber = ?')
+                            ->execute(['complet', 'bg-success', $profitClass, $profit, $price, $op]);
+                    } else {
+                        $pdo->prepare('UPDATE tradingHistory SET statut = ?, statutClass = ? WHERE operationNumber = ?')
+                            ->execute([$status, $class, $op]);
+                        if ($txOldStatus === 'complet' && $status !== 'complet') {
+                            $credit = $trade['total_value'] + $profit;
+                            $pdo->prepare('UPDATE personal_data SET balance = balance - ? WHERE user_id = ?')
+                                ->execute([$credit, $trade['user_id']]);
+                            $pdo->prepare('UPDATE trades SET status = "open", close_price = NULL, closed_at = NULL, profit_loss = 0 WHERE id = ?')
+                                ->execute([$id]);
                         }
                     }
                 }
