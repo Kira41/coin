@@ -356,6 +356,7 @@ async function fetchDashboardData() {
             window.refreshUI();
         }
     } catch (err) {
+        if (err.name === 'AbortError' || err.message === 'Failed to fetch') return;
         console.error("Failed to load dashboard data", err.message || err);
         alert("Erreur : Impossible de charger les données utilisateur.");
     }
