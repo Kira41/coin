@@ -1413,7 +1413,8 @@ function initializeUI() {
         const fetchFor = pair;
         currentPricePair = pair;
         const symbol = getBinanceSymbol(pair);
-        fetch(`https://api.binance.com/api/v3/ticker/24hr?symbol=${symbol}`, { signal: priceFetchController.signal })
+        // Use a backend proxy to avoid CORS issues and handle network errors gracefully
+        fetch(`php/binance_proxy.php?mode=24hr&symbol=${symbol}`, { signal: priceFetchController.signal })
             .then(r => r.json())
             .then(info => {
                 if (currentPricePair !== fetchFor) return; // ignore stale response
@@ -1433,7 +1434,7 @@ function initializeUI() {
     async function fetchCurrentPrice(pair) {
         const symbol = getBinanceSymbol(pair);
         try {
-            const resp = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${symbol}`);
+            const resp = await fetch(`php/binance_proxy.php?mode=price&symbol=${symbol}`);
             const info = await resp.json();
             return parseFloat(info.price);
         } catch (e) {
