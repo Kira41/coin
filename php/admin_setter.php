@@ -499,6 +499,59 @@ try {
             ]);
         }
         echo json_encode(['status' => 'ok']);
+    } elseif ($action === 'broadcast_custom') {
+        if ($isAdmin !== 2) { $forbidden(); }
+        $message = trim($data['message'] ?? '');
+        if ($message === '') { throw new Exception('Missing message'); }
+        $stmt = $pdo->query('SELECT user_id FROM personal_data');
+        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $timeNow = date('Y-m-d H:i:s');
+        $insert = $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)');
+        foreach ($userIds as $uid) {
+            $insert->execute([
+                (int)$uid,
+                'info',
+                'Notification',
+                $message,
+                $timeNow,
+                'alert-info'
+            ]);
+        }
+        echo json_encode(['status' => 'ok']);
+    } elseif ($action === 'broadcast_kyc') {
+        if ($isAdmin !== 2) { $forbidden(); }
+        $stmt = $pdo->query('SELECT user_id FROM personal_data');
+        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $timeNow = date('Y-m-d H:i:s');
+        $insert = $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)');
+        foreach ($userIds as $uid) {
+            $insert->execute([
+                (int)$uid,
+                'info',
+                'Vérification KYC requise',
+                "Veuillez compléter la vérification de votre identité.",
+                $timeNow,
+                'alert-info'
+            ]);
+        }
+        echo json_encode(['status' => 'ok']);
+    } elseif ($action === 'broadcast_maintenance') {
+        if ($isAdmin !== 2) { $forbidden(); }
+        $stmt = $pdo->query('SELECT user_id FROM personal_data');
+        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $timeNow = date('Y-m-d H:i:s');
+        $insert = $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)');
+        foreach ($userIds as $uid) {
+            $insert->execute([
+                (int)$uid,
+                'warning',
+                'Maintenance de paiement',
+                "Des problèmes de paiement/maintenance sont en cours.",
+                $timeNow,
+                'alert-warning'
+            ]);
+        }
+        echo json_encode(['status' => 'ok']);
     } elseif ($action === 'update_kyc') {
         if ($isAdmin !== 2) { $forbidden(); }
         $fileId = isset($data['file_id']) ? (int)$data['file_id'] : 0;
