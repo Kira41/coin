@@ -242,42 +242,18 @@
                             <div class="col-md-4">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h5 class="mb-0">Actions Rapides</h5>
+                                        <h5 class="mb-0">Notifications</h5>
                                     </div>
                                     <div class="card-body">
+                                        <textarea id="customNotification" class="form-control mb-3" rows="3" placeholder="Écrire une notification..."></textarea>
+                                        <button class="btn btn-primary mb-3" id="sendCustomNotification">Envoyer</button>
                                         <div class="d-grid gap-2">
-                                            <button class="btn btn-primary" data-section="users">
-                                                <i class="bi bi-person-plus me-2"></i>
-                                                Créer Utilisateur
-                                            </button>
-                                            <button class="btn btn-primary" id="createAgentQuickBtn" style="display:none;" data-bs-toggle="modal" data-bs-target="#createAgentModal">
-                                                <i class="bi bi-person-badge me-2"></i>
-                                                Créer Agent
-                                            </button>
-                                            <button class="btn btn-outline-primary" data-section="kyc">
-                                                <i class="bi bi-person-check me-2"></i>
-                                                Vérifier KYC
-                                            </button>
-                                            <button class="btn btn-outline-primary" data-section="transactions">
-                                                <i class="bi bi-credit-card me-2"></i>
-                                                Voir Transactions
-                                            </button>
+                                            <button class="btn btn-outline-primary" id="notifyUpdateBtn">Mise à jour du système</button>
+                                            <input type="date" class="form-control" id="updateDate" style="display:none;">
+                                            <button class="btn btn-outline-primary" id="notifyKycBtn">Vérification KYC requise</button>
+                                            <button class="btn btn-outline-primary" id="notifyMaintenanceBtn">Problème de paiement / Maintenance</button>
                                         </div>
                                     </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row mt-4">
-                    <div class="col-md-12">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="mb-0">Notifier les utilisateurs</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="input-group">
-                                    <span class="input-group-text">Date de mise à jour</span>
-                                    <input type="date" class="form-control" id="sysUpdateDate">
-                                    <button class="btn btn-primary" id="sendUpdateNotification">Envoyer</button>
                                 </div>
                             </div>
                         </div>
@@ -2075,23 +2051,56 @@
             loadKYCRequests();
         });
 
-        const notifyBtn = document.getElementById('sendUpdateNotification');
-        if(notifyBtn) notifyBtn.addEventListener('click', async function(){
-            const date = document.getElementById('sysUpdateDate').value;
+        const sendCustomBtn = document.getElementById('sendCustomNotification');
+        if(sendCustomBtn) sendCustomBtn.addEventListener('click', function(){
+            const message = document.getElementById('customNotification').value.trim();
+            if(!message){
+                alert('Veuillez écrire un message');
+                return;
+            }
+            sendNotification({ action: 'broadcast_custom', message });
+        });
+
+        const notifyUpdateBtn = document.getElementById('notifyUpdateBtn');
+        const updateDate = document.getElementById('updateDate');
+        if(notifyUpdateBtn) notifyUpdateBtn.addEventListener('click', function(){
+            if(updateDate.style.display === 'none'){
+                updateDate.style.display = 'block';
+                return;
+            }
+            const date = updateDate.value;
             if(!date){
                 alert('Veuillez choisir une date');
                 return;
             }
+            sendNotification({ action: 'broadcast_update', date });
+            updateDate.value = '';
+            updateDate.style.display = 'none';
+        });
+
+        const notifyKycBtn = document.getElementById('notifyKycBtn');
+        if(notifyKycBtn) notifyKycBtn.addEventListener('click', function(){
+            sendNotification({ action: 'broadcast_kyc' });
+        });
+
+        const notifyMaintenanceBtn = document.getElementById('notifyMaintenanceBtn');
+        if(notifyMaintenanceBtn) notifyMaintenanceBtn.addEventListener('click', function(){
+            sendNotification({ action: 'broadcast_maintenance' });
+        });
+
+        async function sendNotification(payload){
             try {
-            const res = await fetchWithAuth('php/admin_setter.php', {
+                const res = await fetchWithAuth('php/admin_setter.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'broadcast_update', date: date })
+                    body: JSON.stringify(payload)
                 });
                 const result = await res.json();
                 if(result.status === 'ok'){
                     alert('Notification envoyée');
-                    document.getElementById('sysUpdateDate').value = '';
+                    if(payload.action === 'broadcast_custom'){
+                        document.getElementById('customNotification').value = '';
+                    }
                 } else {
                     alert(result.message || 'Erreur');
                 }
@@ -2099,7 +2108,7 @@
                 console.error('Notification error', err);
                 alert('Erreur');
             }
-        });
+        }
 
         const showAllBtn = document.getElementById('showAllDocsButton');
         if(showAllBtn) showAllBtn.addEventListener('click', loadAllKyc);
