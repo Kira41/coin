@@ -784,7 +784,7 @@ function initializeUI() {
                 <div class="alert ${escapeHtml(n.alertClass)}">
                     <strong>${escapeHtml(n.title)}</strong>
                     <p class="mb-0">${escapeHtml(n.message)}</p>
-                    <small>${escapeHtml(n.time)}</small>
+                    <div class="notification-time text-muted small">${escapeHtml(n.time)}</div>
                 </div>`);
         });
     } else {
@@ -885,7 +885,7 @@ function initializeUI() {
                             <div class="flex-grow-1 ms-3">
                                 <div class="fw-bold">${escapeHtml(notification.title)}</div>
                                 <div class="small text-muted">${escapeHtml(notification.message)}</div>
-                                <div class="small text-muted">${escapeHtml(notification.time)}</div>
+                                <div class="notification-time small text-muted">${escapeHtml(notification.time)}</div>
                             </div>
                         </div>
                     </a>

@@ -1310,9 +1310,9 @@
                         };
                         notifs.forEach(n => {
                             const icon = icons[n.type] || 'info-circle';
-                            const item = `<div class="list-group-item d-flex justify-content-between align-items-center">
+                            const item = `<div class="list-group-item">
                                 <div><i class="bi bi-${icon} me-2"></i>${escapeHtml(n.title)} - ${escapeHtml(n.message)} (${escapeHtml(n.fullName || '')})</div>
-                                <small class="text-muted">${escapeHtml(n.time)}</small>
+                                <div class="notification-time text-muted small">${escapeHtml(n.time)}</div>
                             </div>`;
                             activity.insertAdjacentHTML('beforeend', item);
                         });

@@ -218,7 +218,14 @@
                 transition: all 0.3s;
               }
 
-              .upload-area:hover {
-                border-color: var(--primary-color);
-                background-color: rgba(52, 152, 219, 0.05);
-              }
+.upload-area:hover {
+    border-color: var(--primary-color);
+    background-color: rgba(52, 152, 219, 0.05);
+}
+
+.notification-time {
+  display: block;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  color: #6c757d;
+}
