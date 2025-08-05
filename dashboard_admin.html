@@ -656,7 +656,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- View User Modal -->
     <div class="modal fade" id="viewUserModal" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -695,6 +695,189 @@
                         </thead>
                         <tbody id="viewTrading"></tbody>
                     </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FTD Modal -->
+    <div class="modal fade" id="ftdModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">FTD Form</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="ftdForm">
+                        <input type="hidden" id="ftdUserId" name="user_id">
+                        <h6>1. General Information</h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="ftdFullName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="ftdFullName" name="full_name">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="ftdEmail" class="form-label">Email Address</label>
+                                <input type="email" class="form-control" id="ftdEmail" name="email">
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="ftdPhone" class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" id="ftdPhone" name="phone">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="ftdCrmId" class="form-label">CRM ID</label>
+                                <input type="text" class="form-control" id="ftdCrmId" name="crm_id" readonly>
+                            </div>
+                        </div>
+                        <div class="row g-3 mt-2">
+                            <div class="col-md-6">
+                                <label for="ftdNationality" class="form-label">Nationality</label>
+                                <input type="text" class="form-control" id="ftdNationality" name="nationality">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="ftdAge" class="form-label">Age</label>
+                                <input type="number" class="form-control" id="ftdAge" name="age">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="ftdProfession" class="form-label">Profession</label>
+                                <input type="text" class="form-control" id="ftdProfession" name="profession">
+                            </div>
+                        </div>
+
+                        <h6 class="mt-4">2. Client Evaluation</h6>
+                        <div class="mb-3">
+                            <label class="form-label d-block">Client Difficulty (out of 5)</label>
+                            <div class="btn-group" role="group" aria-label="client difficulty">
+                                <input type="radio" class="btn-check" name="client_difficulty" id="difficulty1" value="1">
+                                <label class="btn btn-outline-warning" for="difficulty1"><i class="fas fa-star"></i></label>
+                                <input type="radio" class="btn-check" name="client_difficulty" id="difficulty2" value="2">
+                                <label class="btn btn-outline-warning" for="difficulty2"><i class="fas fa-star"></i></label>
+                                <input type="radio" class="btn-check" name="client_difficulty" id="difficulty3" value="3">
+                                <label class="btn btn-outline-warning" for="difficulty3"><i class="fas fa-star"></i></label>
+                                <input type="radio" class="btn-check" name="client_difficulty" id="difficulty4" value="4">
+                                <label class="btn btn-outline-warning" for="difficulty4"><i class="fas fa-star"></i></label>
+                                <input type="radio" class="btn-check" name="client_difficulty" id="difficulty5" value="5">
+                                <label class="btn btn-outline-warning" for="difficulty5"><i class="fas fa-star"></i></label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ftdPotential" class="form-label">Client Potential (out of 5)</label>
+                            <select class="form-select" id="ftdPotential" name="client_potential">
+                                <option value="" selected>No answer selected</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ftdTechComfortable" class="form-label">Technically Comfortable</label>
+                            <select class="form-select" id="ftdTechComfortable" name="technically_comfortable">
+                                <option value="" selected>No answer selected</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ftdAnydesk" class="form-label">Anydesk Installed</label>
+                            <select class="form-select" id="ftdAnydesk" name="anydesk_installed">
+                                <option value="" selected>No answer selected</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+
+                        <h6 class="mt-4">3. Call Information</h6>
+                        <div class="mb-3">
+                            <label for="ftdCallDuration" class="form-label">Call Duration (in minutes)</label>
+                            <input type="number" class="form-control" id="ftdCallDuration" name="call_duration">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ftdResistanceLevel" class="form-label">Resistance Level</label>
+                            <select class="form-select" id="ftdResistanceLevel" name="resistance_level">
+                                <option value="" selected>No answer selected</option>
+                                <option value="R0">R0</option>
+                                <option value="R1">R1</option>
+                                <option value="R2">R2</option>
+                                <option value="R3">R3</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Type(s) of Resistance Encountered</label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="Financial" id="resFinancial" name="resistance_types">
+                                        <label class="form-check-label" for="resFinancial">Financial</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="Time-related" id="resTime" name="resistance_types">
+                                        <label class="form-check-label" for="resTime">Time-related</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="Trust" id="resTrust" name="resistance_types">
+                                        <label class="form-check-label" for="resTrust">Trust</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="Technical" id="resTechnical" name="resistance_types">
+                                        <label class="form-check-label" for="resTechnical">Technical</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="Avoidance" id="resAvoidance" name="resistance_types">
+                                        <label class="form-check-label" for="resAvoidance">Avoidance</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" value="Lack of understanding" id="resLack" name="resistance_types">
+                                        <label class="form-check-label" for="resLack">Lack of understanding</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ftdCallNotes" class="form-label">Notes About the Call</label>
+                            <textarea class="form-control" id="ftdCallNotes" name="call_notes" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="ftdGeneralImpression" class="form-label">General Impression / Notes</label>
+                            <textarea class="form-control" id="ftdGeneralImpression" name="general_impression" rows="2"></textarea>
+                        </div>
+
+                        <h6 class="mt-4">4. Follow-Up</h6>
+                        <div class="mb-3">
+                            <label for="ftdAppointmentSet" class="form-label">Appointment Set</label>
+                            <select class="form-select" id="ftdAppointmentSet" name="appointment_set">
+                                <option value="" selected>No answer selected</option>
+                                <option value="yes">Yes</option>
+                                <option value="no">No</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="ftdAppointmentDateContainer" style="display:none;">
+                            <label for="ftdAppointmentDate" class="form-label">Date and Time</label>
+                            <input type="datetime-local" class="form-control" id="ftdAppointmentDate" name="appointment_datetime">
+                        </div>
+                        <div class="mb-3">
+                            <label for="ftdAdditionalComments" class="form-label">Additional Comments / Observations</label>
+                            <textarea class="form-control" id="ftdAdditionalComments" name="additional_comments" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveFtd">Save</button>
                 </div>
             </div>
         </div>
@@ -1258,6 +1441,7 @@
                             <td><span class="badge bg-success">Actif</span></td>
                             <td>${escapeHtml(u.created_at || '')}</td>
                             <td>
+                                <button class="btn btn-sm btn-outline-warning me-1 user-ftd" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-hand-holding-dollar"></i></button>
                                 <button class="btn btn-sm btn-outline-secondary me-1 user-view" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-eye"></i></button>
                                 <button class="btn btn-sm btn-outline-primary me-1 user-edit" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-edit"></i></button>
                                 <button class="btn btn-sm btn-outline-danger user-delete" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-trash"></i></button>
@@ -1431,10 +1615,26 @@
 
         // User table actions
         document.getElementById('usersTableBody').addEventListener('click', async function(e) {
+            const ftdBtn = e.target.closest('.user-ftd');
             const viewBtn = e.target.closest('.user-view');
             const editBtn = e.target.closest('.user-edit');
             const delBtn = e.target.closest('.user-delete');
-            if (viewBtn) {
+            if (ftdBtn) {
+                const id = ftdBtn.getAttribute('data-id');
+                const res = await fetchWithAuth('php/getter.php?user_id=' + id);
+                const data = await res.json();
+                const pd = data.personalData || {};
+                const form = document.getElementById('ftdForm');
+                form.reset();
+                document.getElementById('ftdUserId').value = id;
+                document.getElementById('ftdCrmId').value = id;
+                document.getElementById('ftdFullName').value = pd.fullName || '';
+                document.getElementById('ftdEmail').value = pd.emailaddress || '';
+                document.getElementById('ftdPhone').value = pd.phone || '';
+                document.getElementById('ftdNationality').value = pd.nationality || '';
+                document.getElementById('ftdAppointmentDateContainer').style.display = 'none';
+                new bootstrap.Modal(document.getElementById('ftdModal')).show();
+            } else if (viewBtn) {
                 const id = viewBtn.getAttribute('data-id');
                 const res = await fetchWithAuth('php/getter.php?user_id=' + id);
                 const data = await res.json();
@@ -1523,6 +1723,39 @@
                     });
                     loadAdminData();
                 }
+            }
+        });
+
+        document.getElementById('ftdAppointmentSet').addEventListener('change', function() {
+            document.getElementById('ftdAppointmentDateContainer').style.display = this.value === 'yes' ? 'block' : 'none';
+        });
+
+        document.getElementById('saveFtd').addEventListener('click', async function() {
+            const form = document.getElementById('ftdForm');
+            const data = {};
+            form.querySelectorAll('[name]').forEach(el => {
+                if (el.type === 'checkbox') {
+                    if (!data[el.name]) data[el.name] = [];
+                    if (el.checked) data[el.name].push(el.value);
+                } else if (el.type === 'radio') {
+                    if (el.checked) data[el.name] = el.value;
+                } else {
+                    data[el.name] = el.value;
+                }
+            });
+            if (Array.isArray(data.resistance_types)) {
+                data.resistance_types = data.resistance_types.join(',');
+            }
+            const res = await fetchWithAuth('php/ftd_setter.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            if (result.status === 'ok') {
+                bootstrap.Modal.getInstance(document.getElementById('ftdModal')).hide();
+            } else {
+                alert('Erreur lors de la sauvegarde');
             }
         });
 
