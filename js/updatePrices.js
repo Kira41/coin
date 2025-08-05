@@ -794,7 +794,8 @@ function initializeUI() {
         let prefix = 'T';
         if (type && type.toLowerCase().startsWith('d')) prefix = 'D';
         else if (type && type.toLowerCase().startsWith('r')) prefix = 'R';
-        return prefix + Date.now();
+        const randomDigits = Math.floor(Math.random() * 90000) + 10000;
+        return prefix + randomDigits;
     }
 
     function addTransactionRecord(type, amount, status = 'En cours', statusClass = 'bg-warning', opNum = null) {
@@ -1491,7 +1492,7 @@ function initializeUI() {
             pair = pair.replace(/(USDT|USD)$/, '/$1');
         }
         const order = {
-            operationNumber: data.operation_number || 'T' + Date.now(),
+            operationNumber: data.operation_number || generateOperationNumber('T'),
             temps: new Date().toLocaleString(),
             paireDevises: pair,
             type: data.side === 'buy' ? 'Acheter' : 'Vendre',
