@@ -1305,11 +1305,14 @@ function initializeUI() {
         const $tbodyDeposits = $('#historiqueDepots');
         $tbodyDeposits.empty();
         if (dashboardData.deposits?.length > 0) {
-            dashboardData.deposits.sort((a, b) => new Date(b.date) - new Date(a.date));
+            dashboardData.deposits.sort((a, b) => {
+                const numA = parseInt((a.operationNumber || '').replace(/\D/g, ''), 10);
+                const numB = parseInt((b.operationNumber || '').replace(/\D/g, ''), 10);
+                return numB - numA;
+            });
             dashboardData.deposits.slice(0, 10).forEach(d => {
                 $tbodyDeposits.append(`
                     <tr>
-                        <td>${escapeHtml(d.date)}</td>
                         <td>${escapeHtml(d.operationNumber)}</td>
                         <td>${formatDollar(d.amount)}</td>
                         <td>${escapeHtml(d.method)}</td>
@@ -1317,7 +1320,7 @@ function initializeUI() {
                     </tr>`);
             });
         } else {
-            $tbodyDeposits.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
+            $tbodyDeposits.html('<tr><td colspan="4" class="text-center">Aucune donnée disponible</td></tr>');
         }
     }
 
@@ -1325,11 +1328,14 @@ function initializeUI() {
         const $tbodyRetraits = $('#historiqueRetraits');
         $tbodyRetraits.empty();
         if (dashboardData.retraits?.length > 0) {
-            dashboardData.retraits.sort((a, b) => new Date(b.date) - new Date(a.date));
+            dashboardData.retraits.sort((a, b) => {
+                const numA = parseInt((a.operationNumber || '').replace(/\D/g, ''), 10);
+                const numB = parseInt((b.operationNumber || '').replace(/\D/g, ''), 10);
+                return numB - numA;
+            });
             dashboardData.retraits.slice(0, 10).forEach(r => {
                 $tbodyRetraits.append(`
                     <tr>
-                        <td>${escapeHtml(r.date)}</td>
                         <td>${escapeHtml(r.operationNumber)}</td>
                         <td>${formatDollar(r.amount)}</td>
                         <td>${escapeHtml(r.method)}</td>
@@ -1337,7 +1343,7 @@ function initializeUI() {
                     </tr>`);
             });
         } else {
-            $tbodyRetraits.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
+            $tbodyRetraits.html('<tr><td colspan="4" class="text-center">Aucune donnée disponible</td></tr>');
         }
     }
 
