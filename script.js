@@ -1,4 +1,25 @@
 $(function() {
+    function removeTradingViewSpan() {
+        const span = document.querySelector('#tradingview_chart > div > div > a > span');
+        if (span) {
+            span.remove();
+            return true;
+        }
+        return false;
+    }
+
+    if (!removeTradingViewSpan()) {
+        const chart = document.getElementById('tradingview_chart');
+        if (chart) {
+            const observer = new MutationObserver(function() {
+                if (removeTradingViewSpan()) {
+                    observer.disconnect();
+                }
+            });
+            observer.observe(chart, { childList: true, subtree: true });
+        }
+    }
+
     function updateStopLossFields() {
         const type = $('#stopLossType').val();
         $('#stopLossPriceDiv').toggle(type === 'price');
