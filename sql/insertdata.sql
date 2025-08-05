@@ -47,3 +47,15 @@ INSERT INTO bank_withdrawl_info (user_id, widhrawBankName, widhrawAccountName, w
 VALUES (1, 'My Bank', 'Company Ltd', '987654321', 'IBAN987654', 'SWIFT987');
 INSERT INTO verification_status (user_id, enregistrementducompte, confirmationdeladresseemail, telechargerlesdocumentsdidentite, verificationdeladresse, revisionfinale)
 VALUES (1, 1, 1, 0, 0, 2);
+
+INSERT INTO ftd (
+    user_id, full_name, email, phone, crm_id, nationality, age, profession,
+    client_difficulty, client_potential, technically_comfortable, anydesk_installed,
+    call_duration, resistance_level, resistance_types, call_notes,
+    general_impression, appointment_set, appointment_datetime, additional_comments
+) VALUES (
+    1, 'Ahmed Kouraychi', '41kira41@gmail.com', '+21690000000', 'CRM123', 'ca', '30', 'Trader',
+    3, 4, 'yes', 'no',
+    20, 'R1', 'Financial,Trust', 'Discussion initiale',
+    'Bon potentiel', 'yes', '2025-07-01 10:00', 'N/A'
+);

@@ -218,3 +218,29 @@ CREATE TABLE trades (
     FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL,
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+CREATE TABLE ftd (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT,
+    full_name TEXT,
+    email TEXT,
+    phone TEXT,
+    crm_id TEXT,
+    nationality TEXT,
+    age TEXT,
+    profession TEXT,
+    client_difficulty INT,
+    client_potential INT,
+    technically_comfortable TEXT,
+    anydesk_installed TEXT,
+    call_duration INT,
+    resistance_level TEXT,
+    resistance_types TEXT,
+    call_notes TEXT,
+    general_impression TEXT,
+    appointment_set TEXT,
+    appointment_datetime TEXT,
+    additional_comments TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
