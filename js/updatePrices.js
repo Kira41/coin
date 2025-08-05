@@ -1310,13 +1310,14 @@ function initializeUI() {
                 $tbodyDeposits.append(`
                     <tr>
                         <td>${escapeHtml(d.date)}</td>
+                        <td>${escapeHtml(d.operationNumber)}</td>
                         <td>${formatDollar(d.amount)}</td>
                         <td>${escapeHtml(d.method)}</td>
                         <td><span class="badge ${escapeHtml(d.statusClass)}">${escapeHtml(d.status)}</span></td>
                     </tr>`);
             });
         } else {
-            $tbodyDeposits.html('<tr><td colspan="4" class="text-center">Aucune donnée disponible</td></tr>');
+            $tbodyDeposits.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
         }
     }
 
@@ -1329,13 +1330,14 @@ function initializeUI() {
                 $tbodyRetraits.append(`
                     <tr>
                         <td>${escapeHtml(r.date)}</td>
+                        <td>${escapeHtml(r.operationNumber)}</td>
                         <td>${formatDollar(r.amount)}</td>
                         <td>${escapeHtml(r.method)}</td>
                         <td><span class="badge ${escapeHtml(r.statusClass)}">${escapeHtml(r.status)}</span></td>
                     </tr>`);
             });
         } else {
-            $tbodyRetraits.html('<tr><td colspan="4" class="text-center">Aucune donnée disponible</td></tr>');
+            $tbodyRetraits.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
         }
     }
 
