@@ -5,7 +5,12 @@ function getLivePrice(string $pair): float {
         $symbol = substr($symbol, 0, -3) . 'USDT';
     }
     $url = 'https://api.binance.com/api/v3/ticker/price?symbol=' . $symbol;
-    $data = @json_decode(file_get_contents($url), true);
+    $context = stream_context_create(['http' => ['timeout' => 3]]);
+    $json = @file_get_contents($url, false, $context);
+    if ($json === false) {
+        return 0.0;
+    }
+    $data = json_decode($json, true);
     return isset($data['price']) ? (float)$data['price'] : 0.0;
 }
 
