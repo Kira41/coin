@@ -34,12 +34,12 @@ try {
     $isAdmin = (int)$stmt->fetchColumn();
 
     if ($isAdmin === 2) {
-        $stmt = $pdo->prepare('SELECT profitPerte, prix FROM tradingHistory WHERE operationNumber = ?');
+        $stmt = $pdo->prepare('SELECT profitPerte, prix, montant FROM tradingHistory WHERE operationNumber = ?');
         $stmt->execute([$op]);
     } else {
         $linkedIds = getDescendantAdminIds($pdo, $adminId);
         $placeholders = implode(',', array_fill(0, count($linkedIds), '?'));
-        $sql = 'SELECT th.profitPerte, th.prix FROM tradingHistory th '
+        $sql = 'SELECT th.profitPerte, th.prix, th.montant FROM tradingHistory th '
             . 'JOIN personal_data p ON p.user_id = th.user_id '
             . 'WHERE th.operationNumber = ? AND p.linked_to_id IN (' . $placeholders . ')';
         $params = array_merge([$op], $linkedIds);

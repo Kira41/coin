@@ -306,7 +306,7 @@ try {
         }
         $pdo->beginTransaction();
         try {
-            $stmt = $pdo->prepare('SELECT th.user_id, th.prix, th.profitPerte, p.linked_to_id FROM tradingHistory th JOIN personal_data p ON p.user_id = th.user_id WHERE th.operationNumber = ? FOR UPDATE');
+            $stmt = $pdo->prepare('SELECT th.user_id, th.prix, th.montant, th.profitPerte, p.linked_to_id FROM tradingHistory th JOIN personal_data p ON p.user_id = th.user_id WHERE th.operationNumber = ? FOR UPDATE');
             $stmt->execute([$op]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$row) {
@@ -322,8 +322,9 @@ try {
             }
             $oldPrice = (float)$row['prix'];
             $oldProfit = (float)$row['profitPerte'];
+            $qty = (float)$row['montant'];
             $diff = $profit - $oldProfit;
-            $newPrice = $oldPrice + $diff;
+            $newPrice = $qty != 0 ? $oldPrice + ($diff / $qty) : $oldPrice;
             $profitClass = $profit >= 0 ? 'text-success' : 'text-danger';
             $pdo->prepare('UPDATE tradingHistory SET profitPerte = ?, prix = ?, profitClass = ? WHERE operationNumber = ?')->execute([$profit, $newPrice, $profitClass, $op]);
             $pdo->prepare('UPDATE transactions SET amount = ? WHERE operationNumber = ?')->execute([$profit, $op]);

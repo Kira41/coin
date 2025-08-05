@@ -867,6 +867,7 @@
                     <input type="hidden" id="editTxId">
                     <input type="hidden" id="editTxOldProfit">
                     <input type="hidden" id="editTxOldPrice">
+                    <input type="hidden" id="editTxQuantity">
                     <div class="mb-3">
                         <label for="editTxProfit" class="form-label">Profit/Perte</label>
                         <input type="number" step="0.01" class="form-control" id="editTxProfit" required>
@@ -1910,6 +1911,7 @@
                     document.getElementById('editTxPrice').value = trade.prix ?? '';
                     document.getElementById('editTxOldProfit').value = trade.profitPerte ?? '';
                     document.getElementById('editTxOldPrice').value = trade.prix ?? '';
+                    document.getElementById('editTxQuantity').value = trade.montant ?? 1;
                     if (profitLabel) profitLabel.textContent = 'Profit/Perte';
                     priceGroup.style.display = '';
                 } catch (err) {
@@ -1921,6 +1923,7 @@
                 profitInput.classList.remove('text-success','text-danger');
                 document.getElementById('editTxOldProfit').value = tx.amount ?? '';
                 document.getElementById('editTxOldPrice').value = '';
+                document.getElementById('editTxQuantity').value = 1;
                 if (profitLabel) profitLabel.textContent = 'Montant';
                 priceGroup.style.display = 'none';
             }
@@ -1974,7 +1977,8 @@
             if (CURRENT_TX_TYPE === 'Trading') {
                 const oldProfit = parseFloat(document.getElementById('editTxOldProfit').value) || 0;
                 const oldPrice = parseFloat(document.getElementById('editTxOldPrice').value) || 0;
-                const newPrice = oldPrice + (val - oldProfit);
+                const qty = parseFloat(document.getElementById('editTxQuantity').value) || 1;
+                const newPrice = oldPrice + (val - oldProfit) / qty;
                 document.getElementById('editTxPrice').value = newPrice.toFixed(2);
             }
         });
