@@ -705,40 +705,40 @@
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">FTD Form</h5>
+                    <h5 class="modal-title">Formulaire FTD</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <form id="ftdForm">
                         <input type="hidden" id="ftdUserId" name="user_id">
-                        <h6>1. General Information</h6>
+                        <h6>1. Informations générales</h6>
                         <div class="row g-3">
                             <div class="col-md-6">
-                                <label for="ftdFullName" class="form-label">Full Name</label>
+                                <label for="ftdFullName" class="form-label">Nom complet</label>
                                 <input type="text" class="form-control" id="ftdFullName" name="full_name">
                             </div>
                             <div class="col-md-6">
-                                <label for="ftdEmail" class="form-label">Email Address</label>
+                                <label for="ftdEmail" class="form-label">Adresse e-mail</label>
                                 <input type="email" class="form-control" id="ftdEmail" name="email">
                             </div>
                         </div>
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
-                                <label for="ftdPhone" class="form-label">Phone Number</label>
+                                <label for="ftdPhone" class="form-label">Numéro de téléphone</label>
                                 <input type="text" class="form-control" id="ftdPhone" name="phone">
                             </div>
                             <div class="col-md-6">
-                                <label for="ftdCrmId" class="form-label">CRM ID</label>
+                                <label for="ftdCrmId" class="form-label">ID CRM</label>
                                 <input type="text" class="form-control" id="ftdCrmId" name="crm_id">
                             </div>
                         </div>
                         <div class="row g-3 mt-2">
                             <div class="col-md-6">
-                                <label for="ftdNationality" class="form-label">Nationality</label>
+                                <label for="ftdNationality" class="form-label">Nationalité</label>
                                 <input type="text" class="form-control" id="ftdNationality" name="nationality">
                             </div>
                             <div class="col-md-3">
-                                <label for="ftdAge" class="form-label">Age</label>
+                                <label for="ftdAge" class="form-label">Âge</label>
                                 <input type="number" class="form-control" id="ftdAge" name="age">
                             </div>
                             <div class="col-md-3">
@@ -747,10 +747,10 @@
                             </div>
                         </div>
 
-                        <h6 class="mt-4">2. Client Evaluation</h6>
+                        <h6 class="mt-4">2. Évaluation du client</h6>
                         <div class="mb-3">
-                            <label class="form-label d-block">Client Difficulty (out of 5)</label>
-                            <div class="btn-group" role="group" aria-label="client difficulty">
+                            <label class="form-label d-block">Difficulté du client (sur 5)</label>
+                            <div class="btn-group" role="group" aria-label="difficulté du client">
                                 <input type="radio" class="btn-check" name="client_difficulty" id="difficulty1" value="1">
                                 <label class="btn btn-outline-warning" for="difficulty1"><i class="fas fa-star"></i></label>
                                 <input type="radio" class="btn-check" name="client_difficulty" id="difficulty2" value="2">
@@ -764,9 +764,9 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="ftdPotential" class="form-label">Client Potential (out of 5)</label>
+                            <label for="ftdPotential" class="form-label">Potentiel du client (sur 5)</label>
                             <select class="form-select" id="ftdPotential" name="client_potential">
-                                <option value="" selected>No answer selected</option>
+                                <option value="" selected>Aucune réponse sélectionnée</option>
                                 <option value="1">1</option>
                                 <option value="2">2</option>
                                 <option value="3">3</option>
@@ -775,31 +775,31 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="ftdTechComfortable" class="form-label">Technically Comfortable</label>
+                            <label for="ftdTechComfortable" class="form-label">À l'aise techniquement</label>
                             <select class="form-select" id="ftdTechComfortable" name="technically_comfortable">
-                                <option value="" selected>No answer selected</option>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
+                                <option value="" selected>Aucune réponse sélectionnée</option>
+                                <option value="yes">Oui</option>
+                                <option value="no">Non</option>
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label for="ftdAnydesk" class="form-label">Anydesk Installed</label>
+                            <label for="ftdAnydesk" class="form-label">Anydesk installé</label>
                             <select class="form-select" id="ftdAnydesk" name="anydesk_installed">
-                                <option value="" selected>No answer selected</option>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
+                                <option value="" selected>Aucune réponse sélectionnée</option>
+                                <option value="yes">Oui</option>
+                                <option value="no">Non</option>
                             </select>
                         </div>
 
-                        <h6 class="mt-4">3. Call Information</h6>
+                        <h6 class="mt-4">3. Informations sur l'appel</h6>
                         <div class="mb-3">
-                            <label for="ftdCallDuration" class="form-label">Call Duration (in minutes)</label>
+                            <label for="ftdCallDuration" class="form-label">Durée de l'appel (en minutes)</label>
                             <input type="number" class="form-control" id="ftdCallDuration" name="call_duration">
                         </div>
                         <div class="mb-3">
-                            <label for="ftdResistanceLevel" class="form-label">Resistance Level</label>
+                            <label for="ftdResistanceLevel" class="form-label">Niveau de résistance</label>
                             <select class="form-select" id="ftdResistanceLevel" name="resistance_level">
-                                <option value="" selected>No answer selected</option>
+                                <option value="" selected>Aucune réponse sélectionnée</option>
                                 <option value="R0">R0</option>
                                 <option value="R1">R1</option>
                                 <option value="R2">R2</option>
@@ -807,77 +807,77 @@
                             </select>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Type(s) of Resistance Encountered</label>
+                            <label class="form-label">Type(s) de résistance rencontré(s)</label>
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="Financial" id="resFinancial" name="resistance_types">
-                                        <label class="form-check-label" for="resFinancial">Financial</label>
+                                        <label class="form-check-label" for="resFinancial">Financière</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="Time-related" id="resTime" name="resistance_types">
-                                        <label class="form-check-label" for="resTime">Time-related</label>
+                                        <label class="form-check-label" for="resTime">Liée au temps</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="Trust" id="resTrust" name="resistance_types">
-                                        <label class="form-check-label" for="resTrust">Trust</label>
+                                        <label class="form-check-label" for="resTrust">Confiance</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="Technical" id="resTechnical" name="resistance_types">
-                                        <label class="form-check-label" for="resTechnical">Technical</label>
+                                        <label class="form-check-label" for="resTechnical">Technique</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="Avoidance" id="resAvoidance" name="resistance_types">
-                                        <label class="form-check-label" for="resAvoidance">Avoidance</label>
+                                        <label class="form-check-label" for="resAvoidance">Évitement</label>
                                     </div>
                                 </div>
                                 <div class="col-md-4">
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" value="Lack of understanding" id="resLack" name="resistance_types">
-                                        <label class="form-check-label" for="resLack">Lack of understanding</label>
+                                        <label class="form-check-label" for="resLack">Manque de compréhension</label>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <div class="mb-3">
-                            <label for="ftdCallNotes" class="form-label">Notes About the Call</label>
+                            <label for="ftdCallNotes" class="form-label">Notes sur l'appel</label>
                             <textarea class="form-control" id="ftdCallNotes" name="call_notes" rows="2"></textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="ftdGeneralImpression" class="form-label">General Impression / Notes</label>
+                            <label for="ftdGeneralImpression" class="form-label">Impression générale / Notes</label>
                             <textarea class="form-control" id="ftdGeneralImpression" name="general_impression" rows="2"></textarea>
                         </div>
 
-                        <h6 class="mt-4">4. Follow-Up</h6>
+                        <h6 class="mt-4">4. Suivi</h6>
                         <div class="mb-3">
-                            <label for="ftdAppointmentSet" class="form-label">Appointment Set</label>
+                            <label for="ftdAppointmentSet" class="form-label">Rendez-vous fixé</label>
                             <select class="form-select" id="ftdAppointmentSet" name="appointment_set">
-                                <option value="" selected>No answer selected</option>
-                                <option value="yes">Yes</option>
-                                <option value="no">No</option>
+                                <option value="" selected>Aucune réponse sélectionnée</option>
+                                <option value="yes">Oui</option>
+                                <option value="no">Non</option>
                             </select>
                         </div>
                         <div class="mb-3" id="ftdAppointmentDateContainer" style="display:none;">
-                            <label for="ftdAppointmentDate" class="form-label">Date and Time</label>
+                            <label for="ftdAppointmentDate" class="form-label">Date et heure</label>
                             <input type="datetime-local" class="form-control" id="ftdAppointmentDate" name="appointment_datetime">
                         </div>
                         <div class="mb-3">
-                            <label for="ftdAdditionalComments" class="form-label">Additional Comments / Observations</label>
+                            <label for="ftdAdditionalComments" class="form-label">Commentaires / Observations supplémentaires</label>
                             <textarea class="form-control" id="ftdAdditionalComments" name="additional_comments" rows="2"></textarea>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="saveFtd">Save</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-primary" id="saveFtd">Enregistrer</button>
                 </div>
             </div>
         </div>
