@@ -29,7 +29,7 @@ try{
         echo json_encode(['status'=>'error','message'=>'Order not cancellable']);
         exit;
     }
-    $bstmt=$pdo->prepare('SELECT blocked FROM transactions WHERE operationNumber=?');
+    $bstmt=$pdo->prepare('SELECT blocked FROM transactions WHERE operationNumber=? FOR UPDATE');
     $bstmt->execute(['T'.$orderId]);
     if((int)$bstmt->fetchColumn()===1){
         $pdo->rollBack();
