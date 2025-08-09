@@ -241,6 +241,22 @@ try {
 
     $opNum = 'T'.$id;
     $priceRef = $limit ?? $stop ?? $livePrice;
+    // Record this pending order in transactions so it shows in history
+    $adminStmt = $pdo->prepare('SELECT linked_to_id FROM personal_data WHERE user_id = ?');
+    $adminStmt->execute([$userId]);
+    $adminId = $adminStmt->fetchColumn();
+    $tStmt = $pdo->prepare('INSERT INTO transactions (user_id, admin_id, operationNumber, type, amount, date, status, statusClass) VALUES (?,?,?,?,?,?,?,?)');
+    $tStmt->execute([
+        $userId,
+        $adminId,
+        $opNum,
+        'Trading',
+        $amount,
+        date('Y/m/d'),
+        'En cours',
+        'bg-warning'
+    ]);
+
     addHistory($pdo,$userId,$opNum,$pair,$side,$qty,$priceRef,'En cours');
 
     require_once __DIR__.'/../utils/poll.php';
