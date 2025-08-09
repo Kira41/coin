@@ -1388,7 +1388,7 @@ function initializeUI() {
                         <td>${formatDollar(trade.prix)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutClass)}">${escapeHtml(trade.statut)}</span></td>
                         <td class="${escapeHtml(profitCls)}" data-profit>${profitText}</td>
-                        <td>${trade.statut==='En cours' && !trade.blocked ?`<button class="btn btn-sm btn-danger cancel-order-btn" data-op="${escapeHtml(trade.operationNumber)}" title="Annuler"><i class="fas fa-ban"></i></button>`:'-'}</td>
+                        <td><button class="btn btn-sm btn-danger cancel-order-btn" data-op="${escapeHtml(trade.operationNumber)}" title="Annuler" ${trade.blocked ? 'disabled' : ''}><i class="fas fa-ban"></i></button></td>
                     </tr>`);
             });
             if (openTrades.length) updateOpenTradeProfits(openTrades);
@@ -1761,9 +1761,13 @@ function initializeUI() {
 
     $('#tradingHistory').on('click', '.cancel-order-btn', async function() {
         const $btn = $(this);
-        $btn.prop('disabled', true);
         const op = $btn.data('op');
         const trade = (dashboardData.tradingHistory || []).find(t => t.operationNumber === op);
+        if (trade?.blocked) {
+            showBootstrapAlert('cancelOrderAlert', 'Cet ordre ne peut pas être annulé.', 'warning');
+            return;
+        }
+        $btn.prop('disabled', true);
         const orderId = trade?.details?.order_id ?? trade?.order_id;
         if (trade && trade.statut === 'En cours' && orderId) {
             const openTrade = (dashboardData.openTrades || []).find(t => t.id == orderId);
