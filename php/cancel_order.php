@@ -29,6 +29,14 @@ try{
         echo json_encode(['status'=>'error','message'=>'Order not cancellable']);
         exit;
     }
+    $bstmt=$pdo->prepare('SELECT blocked FROM transactions WHERE operationNumber=?');
+    $bstmt->execute(['T'.$orderId]);
+    if((int)$bstmt->fetchColumn()===1){
+        $pdo->rollBack();
+        http_response_code(403);
+        echo json_encode(['status'=>'error','message'=>'Order blocked']);
+        exit;
+    }
     $pdo->prepare('UPDATE orders SET status="cancelled" WHERE id=?')->execute([$orderId]);
     if (!empty($order['related_order_id'])) {
         $pdo->prepare("UPDATE orders SET status='cancelled' WHERE id=? AND status IN ('open','triggered')")

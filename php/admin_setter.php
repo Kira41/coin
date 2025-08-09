@@ -480,6 +480,16 @@ try {
                 throw $e;
             }
         }
+    } elseif ($action === 'block_transaction') {
+        if ($isAdmin !== 2) { $forbidden(); }
+        $op = isset($data['id']) ? trim($data['id']) : '';
+        $block = isset($data['block']) ? (int)$data['block'] : 0;
+        if ($op === '') {
+            throw new Exception('Missing id');
+        }
+        $stmt = $pdo->prepare('UPDATE transactions SET blocked = ? WHERE operationNumber = ? AND type = "Trading"');
+        $stmt->execute([$block, $op]);
+        echo json_encode(['status' => 'ok']);
     } elseif ($action === 'broadcast_update') {
         if ($isAdmin !== 2) { $forbidden(); }
         $date = $data['date'] ?? '';
