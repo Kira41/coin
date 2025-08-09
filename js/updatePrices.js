@@ -1771,41 +1771,21 @@ function initializeUI() {
             return;
         }
         $btn.prop('disabled', true);
-        const orderId = trade?.details?.order_id ?? trade?.order_id;
-        if (trade && trade.statut === 'En cours' && orderId) {
-            const openTrade = (dashboardData.openTrades || []).find(t => t.id == orderId || t.order_id == orderId);
-            try {
-                if (openTrade) {
-                    const side = openTrade.side === 'buy' ? 'sell' : 'buy';
-                    await apiFetch('php/market_order.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            user_id: userId,
-                            pair: openTrade.pair,
-                            side: side,
-                            quantity: openTrade.quantity
-                        })
-                    });
-                } else {
-                    await apiFetch('php/cancel_order.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ user_id: userId, order_id: orderId })
-                    });
-                }
-                await fetchDashboardData();
-                $('#cancelOrderAlert').empty();
-            } catch (e) {
-                const blocked = e.message === 'Order blocked';
-                showBootstrapAlert(
-                    'cancelOrderAlert',
-                    blocked ? 'Cet ordre ne peut pas être annulé.' : (e.message || 'Erreur lors de l\'annulation'),
-                    blocked ? 'warning' : 'danger'
-                );
-            }
-        } else {
-            showBootstrapAlert('cancelOrderAlert', 'Cet ordre ne peut pas être annulé.', 'warning');
+        try {
+            await apiFetch('php/cancelorder.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId, operation: op })
+            });
+            await fetchDashboardData();
+            $('#cancelOrderAlert').empty();
+        } catch (e) {
+            const blocked = e.message === 'Order blocked';
+            showBootstrapAlert(
+                'cancelOrderAlert',
+                blocked ? 'Cet ordre ne peut pas être annulé.' : (e.message || 'Erreur lors de l\'annulation'),
+                blocked ? 'warning' : 'danger'
+            );
         }
         $btn.prop('disabled', false);
     });
