@@ -51,6 +51,15 @@ try {
         echo json_encode(['status'=>'ok','message'=>'Limit order placed']);
         return;
     }
+    $stopPrice=null;
+    if($type==='stop'){
+        $stopPrice=isset($input['stop_price'])?(float)$input['stop_price']:0.0;
+        if($stopPrice<=0){
+            http_response_code(400);
+            echo json_encode(['status'=>'error','message'=>'Invalid stop price']);
+            return;
+        }
+    }
     $livePrice=getLivePrice($pair);
     if($livePrice<=0){
         http_response_code(500);
@@ -73,6 +82,11 @@ try {
         http_response_code(400);
         echo json_encode(['status'=>'error','message'=>$result['msg']]);
         return;
+    }
+    if($type==='stop' && $result['opened']){
+        $tradeId=(int)ltrim($result['operation'],'T');
+        $stmt=$pdo->prepare('UPDATE trades SET stop_price=? WHERE id=?');
+        $stmt->execute([$stopPrice,$tradeId]);
     }
     $pdo->commit();
     require_once __DIR__.'/../utils/poll.php';

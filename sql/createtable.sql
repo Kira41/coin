@@ -186,6 +186,7 @@ CREATE TABLE trades (
     profit_loss DECIMAL(20,10) DEFAULT 0,
     status ENUM('open','closed','pending') DEFAULT 'open',
     type_order ENUM('market','limit') DEFAULT 'market',
+    stop_price DECIMAL(20,10),
     close_price DECIMAL(20,10),
     closed_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
