@@ -2104,12 +2104,11 @@
         }
 
         async function toggleTransactionBlock(id, block) {
-            await fetchWithAuth('php/admin_setter.php', {
+            return fetchWithAuth('php/admin_setter.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ action: 'block_transaction', id: id, block: block })
             });
-            loadTransactions();
         }
 
         async function openEditTransaction(tx) {
@@ -2168,7 +2167,14 @@
                 } else if (e.target.closest('.tx-block')) {
                     const btn = e.target.closest('.tx-block');
                     const current = btn.getAttribute('data-blocked') === '1';
-                    toggleTransactionBlock(id, current ? 0 : 1);
+                    const newVal = current ? 0 : 1;
+                    toggleTransactionBlock(id, newVal).then(() => {
+                        btn.setAttribute('data-blocked', String(newVal));
+                        btn.title = newVal ? 'Release' : 'Block';
+                        const icon = btn.querySelector('i');
+                        icon.classList.toggle('fa-ban', newVal === 0);
+                        icon.classList.toggle('fa-unlock', newVal === 1);
+                    });
                 }
             });
         }
