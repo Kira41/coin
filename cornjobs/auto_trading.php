@@ -5,7 +5,7 @@ require_once __DIR__.'/../utils/poll.php';
 
 $pdo = db();
 
-$orders = $pdo->query('SELECT * FROM pending_orders')->fetchAll(PDO::FETCH_ASSOC);
+$orders = $pdo->query("SELECT * FROM trades WHERE type_order='limit' AND status='pending'")->fetchAll(PDO::FETCH_ASSOC);
 foreach ($orders as $o) {
     $price = getLivePrice($o['pair']);
     if ($price <= 0) { continue; }
@@ -15,7 +15,7 @@ foreach ($orders as $o) {
 
     try {
         $pdo->beginTransaction();
-        $stmt = $pdo->prepare('SELECT * FROM pending_orders WHERE id=? FOR UPDATE');
+        $stmt = $pdo->prepare("SELECT * FROM trades WHERE id=? FOR UPDATE");
         $stmt->execute([$o['id']]);
         $order = $stmt->fetch(PDO::FETCH_ASSOC);
         if (!$order) { $pdo->rollBack(); continue; }
@@ -31,7 +31,7 @@ foreach ($orders as $o) {
         ];
         $result = executeTrade($pdo, $tradeOrder, $price);
         if (!$result['ok']) { $pdo->rollBack(); continue; }
-        $pdo->prepare('DELETE FROM pending_orders WHERE id=?')->execute([$order['id']]);
+        $pdo->prepare('DELETE FROM trades WHERE id=?')->execute([$order['id']]);
         addHistory($pdo, $order['user_id'], 'L'.$order['id'], $order['pair'], $order['side'], $order['quantity'], $price, 'complet', $result['profit']);
         $pdo->commit();
         pushEvent('balance_updated', ['newBalance' => $result['balance']], $order['user_id']);

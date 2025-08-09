@@ -184,7 +184,8 @@ CREATE TABLE trades (
     total_value DECIMAL(20,10),
     fee DECIMAL(20,10) DEFAULT 0,
     profit_loss DECIMAL(20,10) DEFAULT 0,
-    status ENUM('open','closed') DEFAULT 'open',
+    status ENUM('open','closed','pending') DEFAULT 'open',
+    type_order ENUM('market','limit') DEFAULT 'market',
     close_price DECIMAL(20,10),
     closed_at DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -217,14 +218,3 @@ CREATE TABLE ftd (
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE pending_orders (
-    id BIGINT PRIMARY KEY AUTO_INCREMENT,
-    user_id BIGINT NOT NULL,
-    pair VARCHAR(20),
-    side ENUM('buy','sell'),
-    quantity DECIMAL(20,10),
-    price DECIMAL(20,10),
-    type VARCHAR(20),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE
-) ENGINE=InnoDB;

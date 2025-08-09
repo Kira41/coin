@@ -43,8 +43,9 @@ try {
             echo json_encode(['status'=>'error','message'=>'Invalid amount']);
             return;
         }
-        $stmt=$pdo->prepare('INSERT INTO pending_orders (user_id,pair,side,quantity,price,type,created_at) VALUES (?,?,?,?,?,?,NOW())');
-        $stmt->execute([$userId,$pair,$side,$qty,$limitPrice,'limit']);
+        $total=$limitPrice*$qty;
+        $stmt=$pdo->prepare('INSERT INTO trades (user_id,pair,side,quantity,price,total_value,fee,profit_loss,status,type_order) VALUES (?,?,?,?,?,?,0,0,"pending","limit")');
+        $stmt->execute([$userId,$pair,$side,$qty,$limitPrice,$total]);
         $orderId=$pdo->lastInsertId();
         addHistory($pdo,$userId,'L'.$orderId,$pair,$side,$qty,$limitPrice,'En attente');
         echo json_encode(['status'=>'ok','message'=>'Limit order placed']);
