@@ -1378,6 +1378,7 @@ function initializeUI() {
                 const profitCls = trade.profitClass || '';
                 const isOpen = trade.statut === 'En cours' && trade.profitPerte == null;
                 if (isOpen) openTrades.push(trade);
+                const fixedAttr = trade.profitPerte != null ? ' data-profit-fixed="1"' : '';
                 $tbodyTrading.append(`
                     <tr data-op="${escapeHtml(trade.operationNumber)}">
                         <td>${escapeHtml(trade.operationNumber)}</td>
@@ -1387,7 +1388,7 @@ function initializeUI() {
                         <td>${formatCryptoFixed(trade.montant)} ${escapeHtml((trade.paireDevises||'').split('/')[0])}</td>
                         <td>${formatDollar(trade.prix)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutClass)}">${escapeHtml(trade.statut)}</span></td>
-                        <td class="${escapeHtml(profitCls)}" data-profit>${profitText}</td>
+                        <td class="${escapeHtml(profitCls)}" data-profit${fixedAttr}>${profitText}</td>
                         <td>${trade.statut==='En cours'?`<button class="btn btn-sm btn-danger cancel-order-btn" data-op="${escapeHtml(trade.operationNumber)}" title="Annuler"><i class="fas fa-ban"></i></button>`:'-'}</td>
                     </tr>`);
             });
@@ -1444,6 +1445,8 @@ function initializeUI() {
     }
 
     async function updateOpenTradeProfits(trades) {
+        // Ensure only trades without fixed profit are processed
+        trades = trades.filter(t => t.profitPerte == null);
         const uniquePairs = {};
         for (const t of trades) {
             uniquePairs[t.paireDevises] = null;
@@ -1465,7 +1468,9 @@ function initializeUI() {
             }
             const cls = profit >= 0 ? 'text-success' : 'text-danger';
             const $row = $(`#tradingHistory tr[data-op="${escapeHtml(t.operationNumber)}"]`);
-            $row.find('[data-profit]')
+            const $cell = $row.find('[data-profit]');
+            if ($cell.is('[data-profit-fixed]')) return;
+            $cell
                 .text(formatDollar(profit))
                 .removeClass('text-success text-danger')
                 .addClass(cls);
