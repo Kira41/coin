@@ -85,12 +85,13 @@ function executeTrade(PDO $pdo, array $order, float $price) {
     // BUY orders either open a long position or close an existing short
     if ($order['side'] === 'buy') {
         // First check for open short positions to close
-        $stOpen = $pdo->prepare('SELECT id,price,quantity FROM trades WHERE user_id=? AND pair=? AND side="sell" AND status="open" ORDER BY id ASC LIMIT 1');
+        $stOpen = $pdo->prepare('SELECT id,order_id,price,quantity FROM trades WHERE user_id=? AND pair=? AND side="sell" AND status="open" ORDER BY id ASC LIMIT 1');
         $stOpen->execute([$order['user_id'],$order['pair']]);
         $open = $stOpen->fetch(PDO::FETCH_ASSOC);
         if ($open) {
+            $opNum = 'T' . ($open['order_id'] ?: $open['id']);
             $bstmt = $pdo->prepare('SELECT blocked FROM transactions WHERE operationNumber=? FOR UPDATE');
-            $bstmt->execute(['T' . $open['id']]);
+            $bstmt->execute([$opNum]);
             if ((int)$bstmt->fetchColumn() === 1) {
                 return ['ok'=>false,'msg'=>'Order blocked'];
             }
@@ -109,8 +110,9 @@ function executeTrade(PDO $pdo, array $order, float $price) {
                 $pdo->prepare('UPDATE orders SET status="filled", price_at_execution=?, executed_at=NOW(), amount=?, profit=? WHERE id=?')
                     ->execute([$price, $executedAmount, $profit, $orderId]);
             }
-            $opNum = 'T'.$open['id'];
             addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'buy',$order['quantity'],$price,'complet',$profit);
+            $pdo->prepare('UPDATE transactions SET status = ?, statusClass = ? WHERE operationNumber = ?')
+                ->execute(['complet', 'bg-success', $opNum]);
             return ['ok'=>true,'balance'=>$bal + $deposit + $profit,'price'=>$price,'profit'=>$profit,'operation'=>$opNum,'opened'=>false];
         }
 
@@ -133,14 +135,15 @@ function executeTrade(PDO $pdo, array $order, float $price) {
     }
 
     // SELL orders either close a long position or open a new short
-    $stOpen = $pdo->prepare('SELECT id,price,quantity,side FROM trades WHERE user_id=? AND pair=? AND status="open" ORDER BY id ASC LIMIT 1');
+    $stOpen = $pdo->prepare('SELECT id,order_id,price,quantity,side FROM trades WHERE user_id=? AND pair=? AND status="open" ORDER BY id ASC LIMIT 1');
     $stOpen->execute([$order['user_id'],$order['pair']]);
     $open = $stOpen->fetch(PDO::FETCH_ASSOC);
 
     if ($open && $open['side'] === 'buy') {
         // Closing a long position
+        $opNum = 'T' . ($open['order_id'] ?: $open['id']);
         $bstmt = $pdo->prepare('SELECT blocked FROM transactions WHERE operationNumber=? FOR UPDATE');
-        $bstmt->execute(['T' . $open['id']]);
+        $bstmt->execute([$opNum]);
         if ((int)$bstmt->fetchColumn() === 1) {
             return ['ok'=>false,'msg'=>'Order blocked'];
         }
@@ -158,8 +161,9 @@ function executeTrade(PDO $pdo, array $order, float $price) {
             $pdo->prepare('UPDATE orders SET status="filled", price_at_execution=?, executed_at=NOW(), amount=?, profit=? WHERE id=?')
                 ->execute([$price, $executedAmount, $profit, $orderId]);
         }
-        $opNum = 'T'.$open['id'];
         addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'sell',$order['quantity'],$price,'complet',$profit);
+        $pdo->prepare('UPDATE transactions SET status = ?, statusClass = ? WHERE operationNumber = ?')
+            ->execute(['complet', 'bg-success', $opNum]);
         return ['ok'=>true,'balance'=>$bal+$total,'price'=>$price,'profit'=>$profit,'operation'=>$opNum,'opened'=>false];
     }
 
