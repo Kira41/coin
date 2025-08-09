@@ -1388,7 +1388,7 @@ function initializeUI() {
                         <td>${formatDollar(trade.prix)}</td>
                         <td><span class="badge ${escapeHtml(trade.statutClass)}">${escapeHtml(trade.statut)}</span></td>
                         <td class="${escapeHtml(profitCls)}" data-profit>${profitText}</td>
-                        <td><button class="btn btn-sm btn-danger cancel-order-btn" data-op="${escapeHtml(trade.operationNumber)}" title="Annuler" ${trade.blocked ? 'disabled' : ''}><i class="fas fa-ban"></i></button></td>
+                        <td><button class="btn btn-sm btn-danger cancel-order-btn" data-op="${escapeHtml(trade.operationNumber)}" title="Annuler"><i class="fas fa-ban"></i></button></td>
                     </tr>`);
             });
             if (openTrades.length) updateOpenTradeProfits(openTrades);
