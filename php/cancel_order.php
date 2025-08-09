@@ -10,8 +10,8 @@ try{
         exit;
     }
     $userId=(int)($data['user_id'] ?? 0);
-    $orderId=(int)($data['order_id'] ?? 0);
-    if(!$userId || !$orderId){
+    $tradeId=(int)($data['order_id'] ?? 0);
+    if(!$userId || !$tradeId){
         http_response_code(400);
         echo json_encode(['status'=>'error','message'=>'Missing parameters']);
         exit;
@@ -20,26 +20,40 @@ try{
     require_once __DIR__.'/../utils/helpers.php';
     $pdo=db();
     $pdo->beginTransaction();
-    $stmt=$pdo->prepare('SELECT * FROM orders WHERE id=? AND user_id=? FOR UPDATE');
-    $stmt->execute([$orderId,$userId]);
-    $order=$stmt->fetch(PDO::FETCH_ASSOC);
-    if(!$order || !in_array($order['status'],['open','triggered'])){
+    $stmt=$pdo->prepare('SELECT * FROM trades WHERE id=? AND user_id=? FOR UPDATE');
+    $stmt->execute([$tradeId,$userId]);
+    $trade=$stmt->fetch(PDO::FETCH_ASSOC);
+    if(!$trade){
         $pdo->rollBack();
         http_response_code(404);
-        echo json_encode(['status'=>'error','message'=>'Order not cancellable']);
+        echo json_encode(['status'=>'error','message'=>'Trade not found']);
         exit;
     }
-    $pdo->prepare('UPDATE orders SET status="cancelled" WHERE id=?')->execute([$orderId]);
-    if (!empty($order['related_order_id'])) {
-        $pdo->prepare("UPDATE orders SET status='cancelled' WHERE id=? AND status IN ('open','triggered')")
-            ->execute([$order['related_order_id']]);
+    $price=getLivePrice($trade['pair']);
+    if($price<=0){
+        $price=$trade['price'];
     }
-    $price = isset($order['target_price']) ? $order['target_price'] : 0;
-    addHistory($pdo,$userId,'T'.$orderId,$order['pair'],$order['side'],$order['quantity'],$price,'annule');
+    if($trade['side']==='buy'){
+        $profit=($price-$trade['price'])*$trade['quantity'];
+    }else{
+        $profit=($trade['price']-$price)*$trade['quantity'];
+    }
+    if($profit<0) $profit=-$profit;
+    $deposit=$trade['price']*$trade['quantity']+$profit;
+    $pdo->prepare('UPDATE personal_data SET balance=balance+? WHERE user_id=?')->execute([$deposit,$userId]);
+    $pdo->prepare('UPDATE trades SET status="closed", close_price=?, closed_at=NOW(), profit_loss=? WHERE id=?')
+        ->execute([$price,$profit,$tradeId]);
+    $adminStmt=$pdo->prepare('SELECT linked_to_id FROM personal_data WHERE user_id=?');
+    $adminStmt->execute([$userId]);
+    $adminId=$adminStmt->fetchColumn();
+    $op='T'.$tradeId;
+    addHistory($pdo,$userId,$op,$trade['pair'],$trade['side'],$trade['quantity'],$price,'complet',$profit);
+    $stmt=$pdo->prepare('INSERT INTO transactions (user_id,admin_id,operationNumber,type,amount,date,status,statusClass) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE amount=VALUES(amount), date=VALUES(date), status=VALUES(status), statusClass=VALUES(statusClass)');
+    $stmt->execute([$userId,$adminId,$op,'Trading',$deposit,date('Y/m/d'),'complet','bg-success']);
     $pdo->commit();
     require_once __DIR__.'/../utils/poll.php';
-    pushEvent('order_cancelled',['order_id'=>$orderId],$userId);
-    echo json_encode(['status'=>'ok']);
+    pushEvent('order_cancelled',['order_id'=>$tradeId],$userId);
+    echo json_encode(['status'=>'ok','profit'=>$profit]);
 }catch(Throwable $e){
     if(isset($pdo)&&$pdo->inTransaction()) $pdo->rollBack();
     http_response_code(500);

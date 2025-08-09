@@ -80,13 +80,8 @@ try {
         ], $userId);
     } else {
         // Closing an existing trade
-        pushEvent('order_filled', [
-            'order_id' => ltrim($opNum, 'T'),
-            'pair' => $pair,
-            'side' => $side,
-            'quantity' => $quantity,
-            'price' => $price,
-            'profit_loss' => $profit
+        pushEvent('order_cancelled', [
+            'order_id' => ltrim($opNum, 'T')
         ], $userId);
     }
 
