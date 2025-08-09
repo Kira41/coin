@@ -1773,7 +1773,7 @@ function initializeUI() {
         $btn.prop('disabled', true);
         const orderId = trade?.details?.order_id ?? trade?.order_id;
         if (trade && trade.statut === 'En cours' && orderId) {
-            const openTrade = (dashboardData.openTrades || []).find(t => t.id == orderId);
+            const openTrade = (dashboardData.openTrades || []).find(t => t.id == orderId || t.order_id == orderId);
             try {
                 if (openTrade) {
                     const side = openTrade.side === 'buy' ? 'sell' : 'buy';

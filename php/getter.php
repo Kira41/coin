@@ -84,7 +84,7 @@ if ($verify) {
     }
 }
 
-$openTrades = fetchAll($pdo, 'SELECT id,pair,side,quantity,price FROM trades WHERE user_id = ? AND status="open"', [$userId]);
+$openTrades = fetchAll($pdo, 'SELECT id,order_id,pair,side,quantity,price FROM trades WHERE user_id = ? AND status="open"', [$userId]);
 foreach ($openTrades as &$t) {
     $current = getLivePrice($t['pair']);
     $t['current_price'] = $current;
