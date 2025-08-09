@@ -71,7 +71,7 @@ $total = (int)$countStmt->fetchColumn();
     // MySQL doesn't allow binding parameters for LIMIT/OFFSET reliably when
     // using emulated prepares. Since the values are cast to integers above
     // it is safe to directly inject them into the SQL string.
-    $sql = "SELECT t.operationNumber, t.user_id, t.type, t.amount, t.status, t.date, t.statusClass
+    $sql = "SELECT t.operationNumber, t.user_id, t.type, t.amount, t.status, t.date, t.statusClass, t.blocked
         $baseSql
         ORDER BY STR_TO_DATE(t.date, '%Y/%m/%d') DESC
         LIMIT $pageSize OFFSET $offset";

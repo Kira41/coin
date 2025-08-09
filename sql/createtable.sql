@@ -52,6 +52,7 @@ CREATE TABLE transactions (
     date TEXT,
     status TEXT,
     statusClass TEXT,
+    blocked TINYINT(1) DEFAULT 0,
     UNIQUE(operationNumber),
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id)
         ON DELETE CASCADE ON UPDATE CASCADE,

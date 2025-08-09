@@ -1974,6 +1974,9 @@
                     const hideAccept = normalizedStatus === 'complet';
                     const acceptBtn = hideAccept ? ''
                         : `<button class="btn btn-sm btn-outline-success tx-accept" title="Complete"><i class="fas fa-check"></i></button>`;
+                    const blockBtn = t.type === 'Trading'
+                        ? `<button class="btn btn-sm btn-outline-warning me-1 tx-block" data-blocked="${t.blocked ? 1 : 0}" title="${t.blocked ? 'Release' : 'Block'}"><i class="fas ${t.blocked ? 'fa-unlock' : 'fa-ban'}"></i></button>`
+                        : '';
                     const row = `<tr data-id="${escapeHtml(t.operationNumber)}">`
                     + `<td class="text-muted fw-bold">${escapeHtml(t.operationNumber)}</td>`
                     + `<td>${escapeHtml(t.user_id)}</td>`
@@ -1982,6 +1985,7 @@
                     + `<td><span class="badge ${escapeHtml(t.statusClass || 'bg-secondary')}">${escapeHtml(t.status || '')}</span></td>`
                     + `<td>${escapeHtml(t.date || '')}</td>`
                     + `<td class="text-nowrap">`
+                    + blockBtn
                     + `<button class="btn btn-sm btn-outline-primary me-1 tx-edit" title="Edit"><i class="fas fa-edit"></i></button>`
                     + `<button class="btn btn-sm btn-outline-danger me-1 tx-reject" title="Reject"><i class="fas fa-times"></i></button>`
                     + `<button class="btn btn-sm btn-outline-secondary me-1 tx-remove" title="Remove"><i class="fas fa-trash-alt"></i></button>`
@@ -2099,6 +2103,15 @@
             loadTransactions();
         }
 
+        async function toggleTransactionBlock(id, block) {
+            await fetchWithAuth('php/admin_setter.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'block_transaction', id: id, block: block })
+            });
+            loadTransactions();
+        }
+
         async function openEditTransaction(tx) {
             const id = tx.operationNumber;
             CURRENT_TX_TYPE = tx.type || 'Autre';
@@ -2152,6 +2165,10 @@
                     if (confirm('Supprimer cette transaction ?')) {
                         updateTransaction(id, '', '', true);
                     }
+                } else if (e.target.closest('.tx-block')) {
+                    const btn = e.target.closest('.tx-block');
+                    const current = btn.getAttribute('data-blocked') === '1';
+                    toggleTransactionBlock(id, current ? 0 : 1);
                 }
             });
         }
