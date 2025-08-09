@@ -52,3 +52,36 @@ foreach ($orders as $o) {
         if ($pdo->inTransaction()) $pdo->rollBack();
     }
 }
+
+$stopOrders = $pdo->query("SELECT * FROM trades WHERE status='open' AND stop_price IS NOT NULL ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC);
+foreach ($stopOrders as $t) {
+    $price = getLivePrice($t['pair']);
+    if ($price <= 0) { continue; }
+    $trigger = ($t['side'] === 'buy' && $price <= $t['stop_price']) ||
+               ($t['side'] === 'sell' && $price >= $t['stop_price']);
+    if (!$trigger) continue;
+    try {
+        $pdo->beginTransaction();
+        $stmt = $pdo->prepare("SELECT * FROM trades WHERE id=? FOR UPDATE");
+        $stmt->execute([$t['id']]);
+        $trade = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$trade) { $pdo->rollBack(); continue; }
+        $price = getLivePrice($trade['pair']);
+        $trigger = ($trade['side'] === 'buy' && $price <= $trade['stop_price']) ||
+                   ($trade['side'] === 'sell' && $price >= $trade['stop_price']);
+        if (!$trigger) { $pdo->rollBack(); continue; }
+        $closeOrder = [
+            'user_id' => $trade['user_id'],
+            'pair' => $trade['pair'],
+            'side' => $trade['side'] === 'buy' ? 'sell' : 'buy',
+            'quantity' => $trade['quantity']
+        ];
+        $result = executeTrade($pdo, $closeOrder, $price);
+        if (!$result['ok']) { $pdo->rollBack(); continue; }
+        $pdo->commit();
+        pushEvent('balance_updated', ['newBalance' => $result['balance']], $trade['user_id']);
+        pushEvent('order_cancelled', ['order_id' => ltrim($result['operation'], 'T')], $trade['user_id']);
+    } catch (Throwable $e) {
+        if ($pdo->inTransaction()) $pdo->rollBack();
+    }
+}
