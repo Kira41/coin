@@ -1544,6 +1544,7 @@ function initializeUI() {
         // updated data. Simply refresh the UI without re-saving to avoid
         // duplicate records.
         renderTradingHistory();
+        loadTransactions();
     };
 
     window.handleOrderCancelled = function(data) {
@@ -1556,6 +1557,7 @@ function initializeUI() {
             // Avoid persisting the same order twice; the backend already
             // recorded the cancellation.
             renderTradingHistory();
+            loadTransactions();
         }
     };
 
@@ -1793,6 +1795,7 @@ function initializeUI() {
                     });
                     showBootstrapAlert('cancelOrderAlert', 'Ordre annulé.', 'success');
                 }
+                await fetchDashboardData();
             } catch (e) {
                 showBootstrapAlert('cancelOrderAlert', e.message || 'Erreur lors de l\'annulation', 'danger');
             }
