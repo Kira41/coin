@@ -1763,6 +1763,7 @@ function initializeUI() {
 
     $('#tradingHistory').on('click', '.cancel-order-btn', async function() {
         const $btn = $(this);
+        $('#cancelOrderAlert').empty();
         const op = $btn.data('op');
         const trade = (dashboardData.tradingHistory || []).find(t => t.operationNumber === op);
         if (trade?.blocked) {
