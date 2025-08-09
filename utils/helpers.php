@@ -89,6 +89,11 @@ function executeTrade(PDO $pdo, array $order, float $price) {
         $stOpen->execute([$order['user_id'],$order['pair']]);
         $open = $stOpen->fetch(PDO::FETCH_ASSOC);
         if ($open) {
+            $bstmt = $pdo->prepare('SELECT blocked FROM transactions WHERE operationNumber=? FOR UPDATE');
+            $bstmt->execute(['T' . $open['id']]);
+            if ((int)$bstmt->fetchColumn() === 1) {
+                return ['ok'=>false,'msg'=>'Order blocked'];
+            }
             if ($open['quantity'] < $order['quantity']) return ['ok'=>false,'msg'=>'Position insuffisante'];
             $deposit = $open['price'] * $order['quantity'];
             $profit  = ($open['price'] - $price) * $order['quantity'];
@@ -134,6 +139,11 @@ function executeTrade(PDO $pdo, array $order, float $price) {
 
     if ($open && $open['side'] === 'buy') {
         // Closing a long position
+        $bstmt = $pdo->prepare('SELECT blocked FROM transactions WHERE operationNumber=? FOR UPDATE');
+        $bstmt->execute(['T' . $open['id']]);
+        if ((int)$bstmt->fetchColumn() === 1) {
+            return ['ok'=>false,'msg'=>'Order blocked'];
+        }
         if ($open['quantity'] < $order['quantity']) return ['ok'=>false,'msg'=>'Position insuffisante'];
         $profit = ($price - $open['price']) * $order['quantity'];
         $pdo->prepare('UPDATE personal_data SET balance=balance+? WHERE user_id=?')->execute([$total,$order['user_id']]);

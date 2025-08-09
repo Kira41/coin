@@ -53,7 +53,7 @@ try {
     $result = executeTrade($pdo, $order, $price);
     if (!$result['ok']) {
         $pdo->rollBack();
-        http_response_code(400);
+        http_response_code($result['msg'] === 'Order blocked' ? 403 : 400);
         echo json_encode(['status' => 'error', 'message' => $result['msg']]);
         return;
     }
