@@ -14,6 +14,7 @@ try {
     $qty=isset($input['quantity'])?(float)$input['quantity']:0.0;
     $amount=isset($input['amount'])?(float)$input['amount']:0.0;
     $side=strtolower($input['side']??'buy');
+    $type=strtolower($input['type']??'market');
     if(!$userId || !$pair || !in_array($side,['buy','sell'])){
         http_response_code(400);
         echo json_encode(['status'=>'error','message'=>'Missing parameters']);
@@ -27,6 +28,28 @@ try {
     require_once __DIR__.'/../config/db_connection.php';
     require_once __DIR__.'/../utils/helpers.php';
     $pdo=db();
+    if($type==='limit'){
+        $limitPrice=isset($input['limit_price'])?(float)$input['limit_price']:0.0;
+        if($limitPrice<=0){
+            http_response_code(400);
+            echo json_encode(['status'=>'error','message'=>'Invalid limit price']);
+            return;
+        }
+        if($qty<=0 && $amount>0){
+            $qty=$amount/$limitPrice;
+        }
+        if($qty<=0){
+            http_response_code(400);
+            echo json_encode(['status'=>'error','message'=>'Invalid amount']);
+            return;
+        }
+        $stmt=$pdo->prepare('INSERT INTO pending_orders (user_id,pair,side,quantity,price,type,created_at) VALUES (?,?,?,?,?,?,NOW())');
+        $stmt->execute([$userId,$pair,$side,$qty,$limitPrice,'limit']);
+        $orderId=$pdo->lastInsertId();
+        addHistory($pdo,$userId,'L'.$orderId,$pair,$side,$qty,$limitPrice,'En attente');
+        echo json_encode(['status'=>'ok','message'=>'Limit order placed']);
+        return;
+    }
     $livePrice=getLivePrice($pair);
     if($livePrice<=0){
         http_response_code(500);

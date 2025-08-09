@@ -216,3 +216,15 @@ CREATE TABLE ftd (
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
+
+CREATE TABLE pending_orders (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    user_id BIGINT NOT NULL,
+    pair VARCHAR(20),
+    side ENUM('buy','sell'),
+    quantity DECIMAL(20,10),
+    price DECIMAL(20,10),
+    type VARCHAR(20),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES personal_data(user_id) ON DELETE CASCADE
+) ENGINE=InnoDB;
