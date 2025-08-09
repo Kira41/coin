@@ -1786,18 +1786,22 @@ function initializeUI() {
                             quantity: openTrade.quantity
                         })
                     });
-                    showBootstrapAlert('cancelOrderAlert', 'Position clôturée.', 'success');
                 } else {
                     await apiFetch('php/cancel_order.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ user_id: userId, order_id: orderId })
                     });
-                    showBootstrapAlert('cancelOrderAlert', 'Ordre annulé.', 'success');
                 }
                 await fetchDashboardData();
+                $('#cancelOrderAlert').empty();
             } catch (e) {
-                showBootstrapAlert('cancelOrderAlert', e.message || 'Erreur lors de l\'annulation', 'danger');
+                const blocked = e.message === 'Order blocked';
+                showBootstrapAlert(
+                    'cancelOrderAlert',
+                    blocked ? 'Cet ordre ne peut pas être annulé.' : (e.message || 'Erreur lors de l\'annulation'),
+                    blocked ? 'warning' : 'danger'
+                );
             }
         } else {
             showBootstrapAlert('cancelOrderAlert', 'Cet ordre ne peut pas être annulé.', 'warning');
