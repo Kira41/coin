@@ -90,7 +90,7 @@ For Windows users, double-click `run_cron_jobs.bat` in the project root to execu
 
 ### Order types
 
-The platform supports a variety of order types. Market orders are executed immediately using the current price returned by Binance. Pending orders (limit, stop, stop‑limit, trailing stop, percentage based stop, time based stop and OCO) are stored in the `orders` table until the `cron_process_orders.php` task evaluates them.
+All trades execute immediately using the current price returned by Binance and are stored directly in the `trades` table. Pending order types such as limit or stop orders are not supported.
 
 When querying Binance for live prices remember that pairs use the `USDT` quote currency. A pair like `ADA/USD` should be converted to `ADAUSDT` before requesting the price.
 
@@ -117,7 +117,7 @@ recordTrade($userId, $pair, $side, $quantity, $price);
 The old WebSocket server has been removed. The dashboard now relies on a
 long polling endpoint (`php/long_poll.php`). Client-side JavaScript keeps
 sending background requests and immediately processes any returned events to
-update balances or orders without reloading the page.
+update balances or trades without reloading the page.
 
 ## Profit/Loss calculation
 

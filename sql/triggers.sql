@@ -105,7 +105,7 @@ AFTER INSERT ON trades
 FOR EACH ROW
 BEGIN
   DECLARE op VARCHAR(50);
-  SET op = CONCAT('T', IFNULL(NEW.order_id, NEW.id));
+  SET op = CONCAT('T', NEW.id);
   INSERT INTO transactions
     (user_id, admin_id, operationNumber, type, amount, date, status, statusClass)
     VALUES (

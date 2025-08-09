@@ -356,39 +356,9 @@ try {
             $pdo->beginTransaction();
             try {
                 $id = (int)substr($op, 1);
-                $stmt = $pdo->prepare('SELECT order_id FROM trades WHERE id = ?');
-                $stmt->execute([$id]);
-                $trade = $stmt->fetch(PDO::FETCH_ASSOC);
-                if ($trade) {
-                    $pdo->prepare('DELETE FROM trades WHERE id = ?')->execute([$id]);
-                    $pdo->prepare('DELETE FROM transactions WHERE operationNumber = ?')->execute([$op]);
-                    if (!empty($trade['order_id'])) {
-                        $oid = (int)$trade['order_id'];
-                        $pdo->prepare('DELETE FROM orders WHERE id = ?')->execute([$oid]);
-                        $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute(['T' . $oid]);
-                    } else {
-                        $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute([$op]);
-                    }
-                } else {
-                    $stmt = $pdo->prepare('SELECT id FROM orders WHERE id = ?');
-                    $stmt->execute([$id]);
-                    $order = $stmt->fetch(PDO::FETCH_ASSOC);
-                    if (!$order) {
-                        throw new Exception('Transaction not found');
-                    }
-                    $pdo->prepare('DELETE FROM orders WHERE id = ?')->execute([$id]);
-                    $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute([$op]);
-                    $tstmt = $pdo->prepare('SELECT id FROM trades WHERE order_id = ?');
-                    $tstmt->execute([$id]);
-                    $tids = $tstmt->fetchAll(PDO::FETCH_COLUMN);
-                    if ($tids) {
-                        $in = implode(',', array_fill(0, count($tids), '?'));
-                        $pdo->prepare("DELETE FROM trades WHERE id IN ($in)")->execute($tids);
-                        foreach ($tids as $tid) {
-                            $pdo->prepare('DELETE FROM transactions WHERE operationNumber = ?')->execute(['T' . $tid]);
-                        }
-                    }
-                }
+                $pdo->prepare('DELETE FROM trades WHERE id = ?')->execute([$id]);
+                $pdo->prepare('DELETE FROM transactions WHERE operationNumber = ?')->execute([$op]);
+                $pdo->prepare('DELETE FROM tradingHistory WHERE operationNumber = ?')->execute([$op]);
                 $pdo->commit();
                 echo json_encode(['status' => 'ok']);
             } catch (Exception $e) {

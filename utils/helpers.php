@@ -42,7 +42,7 @@ function addHistory(PDO $pdo, int $uid, string $opNum, string $pair, string $sid
     $statutClass = $status === 'complet' ? 'bg-success'
         : ($status === 'annule' ? 'bg-danger' : 'bg-warning');
     $profitClass = $profit === null ? '' : ($profit >= 0 ? 'text-success' : 'text-danger');
-    $details = json_encode(['order_id' => ltrim($opNum, 'T')]);
+    $details = json_encode([]);
     $stmt = $pdo->prepare('INSERT INTO tradingHistory '
         . '(user_id, operationNumber, temps, paireDevises, type, statutTypeClass,'
         . ' montant, prix, statut, statutClass, profitPerte, profitClass, details) '
@@ -68,15 +68,6 @@ function addHistory(PDO $pdo, int $uid, string $opNum, string $pair, string $sid
 }
 
 function executeTrade(PDO $pdo, array $order, float $price) {
-    $orderId = $order['id'] ?? null;
-    if ($orderId) {
-        $check = $pdo->prepare('SELECT 1 FROM trades WHERE order_id = ?');
-        $check->execute([$orderId]);
-        if ($check->fetchColumn()) {
-            return ['ok' => false, 'msg' => 'Order already filled'];
-        }
-    }
-
     $st = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id=? FOR UPDATE');
     $st->execute([$order['user_id']]);
     $bal = (float)$st->fetchColumn();
@@ -99,11 +90,6 @@ function executeTrade(PDO $pdo, array $order, float $price) {
             } else {
                 $pdo->prepare('UPDATE trades SET status="closed", close_price=?, closed_at=NOW(), profit_loss=? WHERE id=?')->execute([$price,$profit,$open['id']]);
             }
-            if ($orderId) {
-                $executedAmount = $price * $order['quantity'];
-                $pdo->prepare('UPDATE orders SET status="filled", price_at_execution=?, executed_at=NOW(), amount=?, profit=? WHERE id=?')
-                    ->execute([$price, $executedAmount, $profit, $orderId]);
-            }
             $opNum = 'T'.$open['id'];
             addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'buy',$order['quantity'],$price,'complet',$profit);
             return ['ok'=>true,'balance'=>$bal + $deposit + $profit,'price'=>$price,'profit'=>$profit,'operation'=>$opNum,'opened'=>false];
@@ -112,15 +98,10 @@ function executeTrade(PDO $pdo, array $order, float $price) {
         // No short to close - open a long position
         if ($bal < $total) return ['ok' => false, 'msg' => 'Solde insuffisant'];
         $pdo->prepare('UPDATE personal_data SET balance=balance-? WHERE user_id=?')->execute([$total, $order['user_id']]);
-        $stmt = $pdo->prepare('INSERT INTO trades (user_id,order_id,pair,side,quantity,price,total_value,fee,profit_loss,status) VALUES (?,?,?,?,?,?,?,0,0,"open")');
-        $stmt->execute([$order['user_id'],$orderId,$order['pair'],'buy',$order['quantity'],$price,$total]);
+        $stmt = $pdo->prepare('INSERT INTO trades (user_id,pair,side,quantity,price,total_value,fee,profit_loss,status) VALUES (?,?,?,?,?,?,0,0,"open")');
+        $stmt->execute([$order['user_id'],$order['pair'],'buy',$order['quantity'],$price,$total]);
         $tradeId = $pdo->lastInsertId();
-        if ($orderId) {
-            $executedAmount = $price * $order['quantity'];
-            $pdo->prepare('UPDATE orders SET status="filled", price_at_execution=?, executed_at=NOW(), amount=?, profit=? WHERE id=?')
-                ->execute([$price, $executedAmount, 0, $orderId]);
-        }
-        $opNum = 'T'.($order['id'] ?: $tradeId);
+        $opNum = 'T'.$tradeId;
         // Record this trade as open in the trading history so that the UI can
         // track its profit/loss over time until it is closed.
         addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'buy',$order['quantity'],$price,'En cours');
@@ -143,11 +124,6 @@ function executeTrade(PDO $pdo, array $order, float $price) {
         } else {
             $pdo->prepare('UPDATE trades SET status="closed", close_price=?, closed_at=NOW(), profit_loss=? WHERE id=?')->execute([$price,$profit,$open['id']]);
         }
-        if ($orderId) {
-            $executedAmount = $price * $order['quantity'];
-            $pdo->prepare('UPDATE orders SET status="filled", price_at_execution=?, executed_at=NOW(), amount=?, profit=? WHERE id=?')
-                ->execute([$price, $executedAmount, $profit, $orderId]);
-        }
         $opNum = 'T'.$open['id'];
         addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'sell',$order['quantity'],$price,'complet',$profit);
         return ['ok'=>true,'balance'=>$bal+$total,'price'=>$price,'profit'=>$profit,'operation'=>$opNum,'opened'=>false];
@@ -156,15 +132,10 @@ function executeTrade(PDO $pdo, array $order, float $price) {
     // No long position to close - open a short position
     if ($bal < $total) return ['ok' => false, 'msg' => 'Solde insuffisant'];
     $pdo->prepare('UPDATE personal_data SET balance=balance-? WHERE user_id=?')->execute([$total, $order['user_id']]);
-    $stmt = $pdo->prepare('INSERT INTO trades (user_id,order_id,pair,side,quantity,price,total_value,fee,profit_loss,status) VALUES (?,?,?,?,?,?,?,0,0,"open")');
-    $stmt->execute([$order['user_id'],$orderId,$order['pair'],'sell',$order['quantity'],$price,$total]);
+    $stmt = $pdo->prepare('INSERT INTO trades (user_id,pair,side,quantity,price,total_value,fee,profit_loss,status) VALUES (?,?,?,?,?,?,0,0,"open")');
+    $stmt->execute([$order['user_id'],$order['pair'],'sell',$order['quantity'],$price,$total]);
     $tradeId = $pdo->lastInsertId();
-    if ($orderId) {
-        $executedAmount = $price * $order['quantity'];
-        $pdo->prepare('UPDATE orders SET status="filled", price_at_execution=?, executed_at=NOW(), amount=?, profit=? WHERE id=?')
-            ->execute([$price, $executedAmount, 0, $orderId]);
-    }
-    $opNum = 'T'.($order['id'] ?: $tradeId);
+    $opNum = 'T'.$tradeId;
     addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'sell',$order['quantity'],$price,'En cours');
     return ['ok'=>true,'balance'=>$bal-$total,'price'=>$price,'profit'=>0,'operation'=>$opNum,'opened'=>true];
 }
