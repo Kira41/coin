@@ -1702,7 +1702,7 @@ function initializeUI() {
         }
 
         try {
-            const url = orderType === 'market' ? 'php/market_order.php' : 'php/place_order.php';
+            const url = 'php/place_order.php';
             resp = await apiFetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
