@@ -481,7 +481,7 @@ try {
             }
         }
     } elseif ($action === 'block_transaction') {
-        if ($isAdmin !== 2) { $forbidden(); }
+        if ($isAdmin < 1) { $forbidden(); }
         $op = isset($data['id']) ? trim($data['id']) : '';
         $block = isset($data['block']) ? (int)$data['block'] : 0;
         if ($op === '') {
