@@ -44,11 +44,25 @@ try {
             return;
         }
         $total=$limitPrice*$qty;
+        $pdo->beginTransaction();
+        $st=$pdo->prepare('SELECT balance FROM personal_data WHERE user_id=? FOR UPDATE');
+        $st->execute([$userId]);
+        $bal=(float)$st->fetchColumn();
+        if($bal<$total){
+            $pdo->rollBack();
+            http_response_code(400);
+            echo json_encode(['status'=>'error','message'=>'Insufficient balance']);
+            return;
+        }
+        $pdo->prepare('UPDATE personal_data SET balance=balance-? WHERE user_id=?')->execute([$total,$userId]);
         $stmt=$pdo->prepare('INSERT INTO trades (user_id,pair,side,quantity,price,total_value,fee,profit_loss,status,type_order) VALUES (?,?,?,?,?,?,0,0,"pending","limit")');
         $stmt->execute([$userId,$pair,$side,$qty,$limitPrice,$total]);
         $orderId=$pdo->lastInsertId();
         addHistory($pdo,$userId,'L'.$orderId,$pair,$side,$qty,$limitPrice,'En attente');
-        echo json_encode(['status'=>'ok','message'=>'Limit order placed']);
+        $pdo->commit();
+        require_once __DIR__.'/../utils/poll.php';
+        pushEvent('balance_updated',['newBalance'=>$bal-$total],$userId);
+        echo json_encode(['status'=>'ok','message'=>'Limit order placed','new_balance'=>$bal-$total]);
         return;
     }
     $stopPrice=null;
