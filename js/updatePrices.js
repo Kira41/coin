@@ -11,6 +11,8 @@ userId = userId ? parseInt(userId) : null;
 let dashboardInitialized = false;
 let autoRefreshHandle = null;
 let tradePending = false;
+// Block automatic balance refreshes while a trade is being submitted
+let balanceUpdateLockUntil = 0;
 let lastTradeTime = 0;
 try {
     lastTradeTime = parseInt(localStorage.getItem('last_trade_time')) || 0;
@@ -318,16 +320,20 @@ function updatePlatformBankDetails() {
 async function fetchDashboardData() {
     if (!userId) return;
     try {
-        dashboardData = await apiFetch('php/getter.php?user_id=' + encodeURIComponent(userId));
-        if (dashboardData.personalData) {
-            dashboardData.personalData.balance = parseDollar(dashboardData.personalData.balance);
-            dashboardData.personalData.totalDepots = parseDollar(dashboardData.personalData.totalDepots);
-            dashboardData.personalData.nbTransactions = parseInt(dashboardData.personalData.nbTransactions) || 0;
+        const prevBalance = dashboardData?.personalData?.balance ?? null;
+        const data = await apiFetch('php/getter.php?user_id=' + encodeURIComponent(userId));
+        if (data.personalData) {
+            data.personalData.balance = parseDollar(data.personalData.balance);
+            data.personalData.totalDepots = parseDollar(data.personalData.totalDepots);
+            data.personalData.nbTransactions = parseInt(data.personalData.nbTransactions) || 0;
+            if (Date.now() < balanceUpdateLockUntil && prevBalance !== null) {
+                data.personalData.balance = prevBalance;
+            }
         }
         ['transactions','deposits','retraits'].forEach(t => {
-            (dashboardData[t] || []).forEach(r => { r.amount = parseDollar(r.amount); });
+            (data[t] || []).forEach(r => { r.amount = parseDollar(r.amount); });
         });
-        (dashboardData.tradingHistory || []).forEach(r => {
+        (data.tradingHistory || []).forEach(r => {
             r.montant = parseDollar(r.montant);
             r.prix = parseDollar(r.prix);
             r.profitPerte = r.profitPerte === null || r.profitPerte === '-' ? null : parseFloat(r.profitPerte);
@@ -338,6 +344,7 @@ async function fetchDashboardData() {
                 } catch (e) {}
             }
         });
+        dashboardData = data;
         console.log("Fetched dashboard data", dashboardData);
         const steps = Object.values(dashboardData.defaultKYCStatus || {});
         const completed = steps.filter(s => String(s.status) === '1').length;
@@ -480,6 +487,14 @@ function initializeUI() {
         $('#soldedisponible3').text(bal);
         $('#accountBalance').text(bal);
     }
+
+    window.updateBalance = function(newBal) {
+        if (Date.now() < balanceUpdateLockUntil) return;
+        if (dashboardData?.personalData) {
+            dashboardData.personalData.balance = parseFloat(newBal);
+            updateBalances();
+        }
+    };
 
     function updateCounters() {
         $('#totalDepots').text(formatDollar(dashboardData.personalData.totalDepots));
@@ -1589,6 +1604,8 @@ function initializeUI() {
     $('#buyBtn, #sellBtn').on('click', async function () {
         if (tradePending) return;
         tradePending = true;
+        // Prevent background refreshes from overwriting the balance during the trade
+        balanceUpdateLockUntil = Date.now() + 3000;
         const now = Date.now();
         if (now - lastTradeTime < 60000) {
             alert("Vous ne pouvez passer qu'une seule commande par minute. Veuillez patienter.");
@@ -1689,6 +1706,7 @@ function initializeUI() {
             if (resp.price) price = parseFloat(resp.price);
             if (resp.new_balance !== undefined) {
                 dashboardData.personalData.balance = parseFloat(resp.new_balance);
+                balanceUpdateLockUntil = Date.now() + 3000;
             }
             if (resp.message) alert(resp.message);
         } catch (err) {
@@ -1712,7 +1730,7 @@ function initializeUI() {
                 newBalance += amount * price;
             }
             dashboardData.personalData.balance = newBalance;
-
+            balanceUpdateLockUntil = Date.now() + 3000;
             saveDashboardData();
             updateBalances();
         }
