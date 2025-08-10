@@ -13,6 +13,8 @@ let autoRefreshHandle = null;
 let tradePending = false;
 // Block automatic balance refreshes while a trade is being submitted
 let balanceUpdateLockUntil = 0;
+// Track a balance set locally (e.g. after a trade) until the server confirms it
+let pendingBalance = null;
 let lastTradeTime = 0;
 try {
     lastTradeTime = parseInt(localStorage.getItem('last_trade_time')) || 0;
@@ -326,7 +328,13 @@ async function fetchDashboardData() {
             data.personalData.balance = parseDollar(data.personalData.balance);
             data.personalData.totalDepots = parseDollar(data.personalData.totalDepots);
             data.personalData.nbTransactions = parseInt(data.personalData.nbTransactions) || 0;
-            if (Date.now() < balanceUpdateLockUntil && prevBalance !== null) {
+            if (pendingBalance !== null) {
+                if (Math.abs(data.personalData.balance - pendingBalance) > 1e-8) {
+                    data.personalData.balance = pendingBalance;
+                } else {
+                    pendingBalance = null;
+                }
+            } else if (Date.now() < balanceUpdateLockUntil && prevBalance !== null) {
                 data.personalData.balance = prevBalance;
             }
         }
@@ -489,9 +497,17 @@ function initializeUI() {
     }
 
     window.updateBalance = function(newBal) {
+        const parsed = parseFloat(newBal);
+        if (pendingBalance !== null) {
+            if (Math.abs(parsed - pendingBalance) < 1e-8) {
+                pendingBalance = null;
+            } else {
+                return;
+            }
+        }
         if (Date.now() < balanceUpdateLockUntil) return;
         if (dashboardData?.personalData) {
-            dashboardData.personalData.balance = parseFloat(newBal);
+            dashboardData.personalData.balance = parsed;
             updateBalances();
         }
     };
@@ -1570,6 +1586,7 @@ function initializeUI() {
         let balance = parseDollar(dashboardData.personalData.balance);
         balance += invested + profit;
         dashboardData.personalData.balance = balance;
+        pendingBalance = balance;
         saveDashboardData();
         updateBalances();
         renderTradingHistory();
@@ -1706,6 +1723,7 @@ function initializeUI() {
             if (resp.price) price = parseFloat(resp.price);
             if (resp.new_balance !== undefined) {
                 dashboardData.personalData.balance = parseFloat(resp.new_balance);
+                pendingBalance = dashboardData.personalData.balance;
                 balanceUpdateLockUntil = Date.now() + 3000;
             }
             if (resp.message) alert(resp.message);
@@ -1730,6 +1748,7 @@ function initializeUI() {
                 newBalance += amount * price;
             }
             dashboardData.personalData.balance = newBalance;
+            pendingBalance = newBalance;
             balanceUpdateLockUntil = Date.now() + 3000;
             saveDashboardData();
             updateBalances();
