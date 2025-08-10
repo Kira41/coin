@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__.'/balance.php';
+
 function getLivePrice(string $pair): float {
     $symbol = str_replace('/', '', strtoupper($pair));
     if (!preg_match('/USDT$/', $symbol) && preg_match('/USD$/', $symbol)) {
@@ -81,20 +83,20 @@ function canPlaceOrder(PDO $pdo, int $uid): bool {
 
 /**
  * Deduct funds from the user balance if sufficient.
- * The current balance is passed by reference and updated on success.
+ * The current balance is updated on success.
  */
 function debitBalance(PDO $pdo, int $uid, float $amount, float &$bal): bool {
-    if ($bal < $amount) return false;
-    $pdo->prepare('UPDATE personal_data SET balance=balance-? WHERE user_id=?')->execute([$amount, $uid]);
-    $bal -= $amount;
-    return true;
+    try {
+        $bal = updateBalance($pdo, $uid, -$amount);
+        return true;
+    } catch (Exception $e) {
+        return false;
+    }
 }
 
 function executeTrade(PDO $pdo, array $order, float $price) {
-    $st = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id=? FOR UPDATE');
-    $st->execute([$order['user_id']]);
-    $bal = (float)$st->fetchColumn();
     $total = $price * $order['quantity'];
+    $bal = 0.0;
 
     // BUY orders either open a long position or close an existing short
     if ($order['side'] === 'buy') {
@@ -106,8 +108,7 @@ function executeTrade(PDO $pdo, array $order, float $price) {
             $closeQty = min($order['quantity'], $open['quantity']);
             $deposit = $open['price'] * $closeQty;
             $profit  = ($open['price'] - $price) * $closeQty;
-            $pdo->prepare('UPDATE personal_data SET balance=balance+? WHERE user_id=?')->execute([$deposit + $profit, $order['user_id']]);
-            $bal += $deposit + $profit;
+            $bal = updateBalance($pdo, $order['user_id'], $deposit + $profit);
             $remaining = $open['quantity'] - $closeQty;
             if ($remaining > 0) {
                 $pdo->prepare('UPDATE trades SET quantity=?, total_value=?, profit_loss=profit_loss+? WHERE id=?')->execute([$remaining, $open['price']*$remaining, $profit, $open['id']]);
@@ -151,8 +152,7 @@ function executeTrade(PDO $pdo, array $order, float $price) {
         $closeQty   = min($order['quantity'], $open['quantity']);
         $closeTotal = $price * $closeQty;
         $profit = ($price - $open['price']) * $closeQty;
-        $pdo->prepare('UPDATE personal_data SET balance=balance+? WHERE user_id=?')->execute([$closeTotal,$order['user_id']]);
-        $bal += $closeTotal;
+        $bal = updateBalance($pdo, $order['user_id'], $closeTotal);
         $remaining = $open['quantity'] - $closeQty;
         if ($remaining > 0) {
             $pdo->prepare('UPDATE trades SET quantity=?, total_value=?, profit_loss=profit_loss+? WHERE id=?')->execute([$remaining, $open['price']*$remaining, $profit, $open['id']]);

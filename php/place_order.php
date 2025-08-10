@@ -51,9 +51,6 @@ try {
         }
         $total=$limitPrice*$qty;
         $pdo->beginTransaction();
-        $st=$pdo->prepare('SELECT balance FROM personal_data WHERE user_id=? FOR UPDATE');
-        $st->execute([$userId]);
-        $bal=(float)$st->fetchColumn();
         if (!debitBalance($pdo, $userId, $total, $bal)) {
             $pdo->rollBack();
             http_response_code(400);
