@@ -67,6 +67,29 @@ function addHistory(PDO $pdo, int $uid, string $opNum, string $pair, string $sid
     ]);
 }
 
+/**
+ * Ensure a user is not submitting orders too frequently.
+ * Returns true if the user has not placed an order in the last minute.
+ */
+function canPlaceOrder(PDO $pdo, int $uid): bool {
+    $stmt = $pdo->prepare('SELECT created_at FROM trades WHERE user_id=? ORDER BY id DESC LIMIT 1');
+    $stmt->execute([$uid]);
+    $last = $stmt->fetchColumn();
+    if (!$last) return true;
+    return (time() - strtotime($last)) >= 60;
+}
+
+/**
+ * Deduct funds from the user balance if sufficient.
+ * The current balance is passed by reference and updated on success.
+ */
+function debitBalance(PDO $pdo, int $uid, float $amount, float &$bal): bool {
+    if ($bal < $amount) return false;
+    $pdo->prepare('UPDATE personal_data SET balance=balance-? WHERE user_id=?')->execute([$amount, $uid]);
+    $bal -= $amount;
+    return true;
+}
+
 function executeTrade(PDO $pdo, array $order, float $price) {
     $st = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id=? FOR UPDATE');
     $st->execute([$order['user_id']]);
@@ -96,20 +119,18 @@ function executeTrade(PDO $pdo, array $order, float $price) {
             $remainingOrder = $order['quantity'] - $closeQty;
             if ($remainingOrder > 0) {
                 $totalRemain = $price * $remainingOrder;
-                if ($bal < $totalRemain) return ['ok'=>false,'msg'=>'Solde insuffisant'];
-                $pdo->prepare('UPDATE personal_data SET balance=balance-? WHERE user_id=?')->execute([$totalRemain, $order['user_id']]);
+                if (!debitBalance($pdo, $order['user_id'], $totalRemain, $bal)) return ['ok'=>false,'msg'=>'Solde insuffisant'];
                 $stmt = $pdo->prepare('INSERT INTO trades (user_id,pair,side,quantity,price,total_value,fee,profit_loss,status) VALUES (?,?,?,?,?,?,0,0,"open")');
                 $stmt->execute([$order['user_id'],$order['pair'],'buy',$remainingOrder,$price,$totalRemain]);
                 $tradeId = $pdo->lastInsertId();
                 addHistory($pdo,$order['user_id'],'T'.$tradeId,$order['pair'],'buy',$remainingOrder,$price,'En cours');
-                return ['ok'=>true,'balance'=>$bal-$totalRemain,'price'=>$price,'profit'=>$profit,'operation'=>'T'.$tradeId,'opened'=>true];
+                return ['ok'=>true,'balance'=>$bal,'price'=>$price,'profit'=>$profit,'operation'=>'T'.$tradeId,'opened'=>true];
             }
             return ['ok'=>true,'balance'=>$bal,'price'=>$price,'profit'=>$profit,'operation'=>$opNum,'opened'=>false];
         }
 
         // No short to close - open a long position
-        if ($bal < $total) return ['ok' => false, 'msg' => 'Solde insuffisant'];
-        $pdo->prepare('UPDATE personal_data SET balance=balance-? WHERE user_id=?')->execute([$total, $order['user_id']]);
+        if (!debitBalance($pdo, $order['user_id'], $total, $bal)) return ['ok' => false, 'msg' => 'Solde insuffisant'];
         $stmt = $pdo->prepare('INSERT INTO trades (user_id,pair,side,quantity,price,total_value,fee,profit_loss,status) VALUES (?,?,?,?,?,?,0,0,"open")');
         $stmt->execute([$order['user_id'],$order['pair'],'buy',$order['quantity'],$price,$total]);
         $tradeId = $pdo->lastInsertId();
@@ -117,7 +138,7 @@ function executeTrade(PDO $pdo, array $order, float $price) {
         // Record this trade as open in the trading history so that the UI can
         // track its profit/loss over time until it is closed.
         addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'buy',$order['quantity'],$price,'En cours');
-        return ['ok'=>true,'balance'=>$bal-$total,'price'=>$price,'profit'=>0,'operation'=>$opNum,'opened'=>true];
+        return ['ok'=>true,'balance'=>$bal,'price'=>$price,'profit'=>0,'operation'=>$opNum,'opened'=>true];
     }
 
     // SELL orders either close a long position or open a new short
@@ -143,25 +164,23 @@ function executeTrade(PDO $pdo, array $order, float $price) {
         $remainingOrder = $order['quantity'] - $closeQty;
         if ($remainingOrder > 0) {
             $totalShort = $price * $remainingOrder;
-            if ($bal < $totalShort) return ['ok'=>false,'msg'=>'Solde insuffisant'];
-            $pdo->prepare('UPDATE personal_data SET balance=balance-? WHERE user_id=?')->execute([$totalShort, $order['user_id']]);
+            if (!debitBalance($pdo, $order['user_id'], $totalShort, $bal)) return ['ok'=>false,'msg'=>'Solde insuffisant'];
             $stmt = $pdo->prepare('INSERT INTO trades (user_id,pair,side,quantity,price,total_value,fee,profit_loss,status) VALUES (?,?,?,?,?,?,0,0,"open")');
             $stmt->execute([$order['user_id'],$order['pair'],'sell',$remainingOrder,$price,$totalShort]);
             $tradeId = $pdo->lastInsertId();
             addHistory($pdo,$order['user_id'],'T'.$tradeId,$order['pair'],'sell',$remainingOrder,$price,'En cours');
-            return ['ok'=>true,'balance'=>$bal-$totalShort,'price'=>$price,'profit'=>$profit,'operation'=>'T'.$tradeId,'opened'=>true];
+            return ['ok'=>true,'balance'=>$bal,'price'=>$price,'profit'=>$profit,'operation'=>'T'.$tradeId,'opened'=>true];
         }
         return ['ok'=>true,'balance'=>$bal,'price'=>$price,'profit'=>$profit,'operation'=>$opNum,'opened'=>false];
     }
 
     // No long position to close - open a short position
-    if ($bal < $total) return ['ok' => false, 'msg' => 'Solde insuffisant'];
-    $pdo->prepare('UPDATE personal_data SET balance=balance-? WHERE user_id=?')->execute([$total, $order['user_id']]);
+    if (!debitBalance($pdo, $order['user_id'], $total, $bal)) return ['ok' => false, 'msg' => 'Solde insuffisant'];
     $stmt = $pdo->prepare('INSERT INTO trades (user_id,pair,side,quantity,price,total_value,fee,profit_loss,status) VALUES (?,?,?,?,?,?,0,0,"open")');
     $stmt->execute([$order['user_id'],$order['pair'],'sell',$order['quantity'],$price,$total]);
     $tradeId = $pdo->lastInsertId();
     $opNum = 'T'.$tradeId;
     addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'sell',$order['quantity'],$price,'En cours');
-    return ['ok'=>true,'balance'=>$bal-$total,'price'=>$price,'profit'=>0,'operation'=>$opNum,'opened'=>true];
+    return ['ok'=>true,'balance'=>$bal,'price'=>$price,'profit'=>0,'operation'=>$opNum,'opened'=>true];
 }
 ?>
