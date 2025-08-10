@@ -7,6 +7,7 @@ set_error_handler(function ($severity, $message, $file, $line) {
 try {
     require_once __DIR__.'/../config/db_connection.php';
     require_once __DIR__.'/../utils/permissions.php';
+    require_once __DIR__.'/../utils/poll.php';
     $pdo = db();
 
     $updateVerify = function(int $uid) use ($pdo){
@@ -336,6 +337,12 @@ try {
             }
             $pdo->prepare('UPDATE personal_data SET balance = balance + ? WHERE user_id = ?')->execute([$diff, $userId]);
             $pdo->commit();
+            pushEvent('trade_profit_fixed', [
+                'operation_number' => $op,
+                'profit' => $profit,
+                'price' => $newPrice,
+                'profitClass' => $profitClass
+            ], $userId);
             echo json_encode(['status' => 'ok', 'prix' => $newPrice, 'profitClass' => $profitClass]);
         } catch (Exception $e) {
             $pdo->rollBack();

@@ -1504,6 +1504,29 @@ function initializeUI() {
         }
     };
 
+    window.handleTradeProfitFixed = function(data) {
+        const op = String(data.operation_number || '').trim();
+        const profit = parseFloat(data.profit);
+        const price = parseFloat(data.price);
+        const cls = data.profitClass || (profit >= 0 ? 'text-success' : 'text-danger');
+        const idx = (dashboardData.tradingHistory || []).findIndex(t => t.operationNumber === op);
+        if (idx !== -1) {
+            const trade = dashboardData.tradingHistory[idx];
+            trade.profitPerte = profit;
+            trade.prix = price;
+            trade.profitClass = cls;
+        }
+        const $row = $(`#tradingHistory tr[data-op="${escapeHtml(op)}"]`);
+        if ($row.length) {
+            $row.find('td').eq(5).text(formatDollar(price));
+            $row.find('[data-profit]')
+                .text(formatDollar(profit))
+                .removeClass('text-success text-danger')
+                .addClass(cls)
+                .attr('data-profit-fixed', '1');
+        }
+    };
+
     function finalizeOrder(order, exitPrice) {
         const priceValue = parseFloat(order.prix);
         const qty = parseFloat(order.montant);

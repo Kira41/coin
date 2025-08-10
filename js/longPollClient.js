@@ -43,6 +43,9 @@ function handleEvents(response) {
       case 'order_cancelled':
         if (window.handleOrderCancelled) window.handleOrderCancelled(ev.data);
         break;
+      case 'trade_profit_fixed':
+        if (window.handleTradeProfitFixed) window.handleTradeProfitFixed(ev.data);
+        break;
       default:
         break;
     }
