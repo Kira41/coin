@@ -94,17 +94,18 @@ function debitBalance(PDO $pdo, int $uid, float $amount, float &$bal): bool {
     }
 }
 
-function executeTrade(PDO $pdo, array $order, float $price) {
+function executeTrade(PDO $pdo, array $order, float $price, bool $closePositions = true) {
     $total = $price * $order['quantity'];
     $bal = 0.0;
 
     // BUY orders either open a long position or close an existing short
     if ($order['side'] === 'buy') {
-        // First check for open short positions to close
-        $stOpen = $pdo->prepare('SELECT id,price,quantity FROM trades WHERE user_id=? AND pair=? AND side="sell" AND status="open" ORDER BY id ASC LIMIT 1');
-        $stOpen->execute([$order['user_id'],$order['pair']]);
-        $open = $stOpen->fetch(PDO::FETCH_ASSOC);
-        if ($open) {
+        if ($closePositions) {
+            // First check for open short positions to close
+            $stOpen = $pdo->prepare('SELECT id,price,quantity FROM trades WHERE user_id=? AND pair=? AND side="sell" AND status="open" ORDER BY id ASC LIMIT 1');
+            $stOpen->execute([$order['user_id'],$order['pair']]);
+            $open = $stOpen->fetch(PDO::FETCH_ASSOC);
+            if ($open) {
             $closeQty = min($order['quantity'], $open['quantity']);
             $deposit = $open['price'] * $closeQty;
             $profit  = ($open['price'] - $price) * $closeQty;
@@ -129,6 +130,7 @@ function executeTrade(PDO $pdo, array $order, float $price) {
             }
             return ['ok'=>true,'balance'=>$bal,'price'=>$price,'profit'=>$profit,'operation'=>$opNum,'opened'=>false];
         }
+        }
 
         // No short to close - open a long position
         if (!debitBalance($pdo, $order['user_id'], $total, $bal)) return ['ok' => false, 'msg' => 'Solde insuffisant'];
@@ -143,35 +145,37 @@ function executeTrade(PDO $pdo, array $order, float $price) {
     }
 
     // SELL orders either close a long position or open a new short
-    $stOpen = $pdo->prepare('SELECT id,price,quantity,side FROM trades WHERE user_id=? AND pair=? AND status="open" ORDER BY id ASC LIMIT 1');
-    $stOpen->execute([$order['user_id'],$order['pair']]);
-    $open = $stOpen->fetch(PDO::FETCH_ASSOC);
+    if ($closePositions) {
+        $stOpen = $pdo->prepare('SELECT id,price,quantity,side FROM trades WHERE user_id=? AND pair=? AND status="open" ORDER BY id ASC LIMIT 1');
+        $stOpen->execute([$order['user_id'],$order['pair']]);
+        $open = $stOpen->fetch(PDO::FETCH_ASSOC);
 
-    if ($open && $open['side'] === 'buy') {
-        // Closing a long position
-        $closeQty   = min($order['quantity'], $open['quantity']);
-        $closeTotal = $price * $closeQty;
-        $profit = ($price - $open['price']) * $closeQty;
-        $bal = updateBalance($pdo, $order['user_id'], $closeTotal);
-        $remaining = $open['quantity'] - $closeQty;
-        if ($remaining > 0) {
-            $pdo->prepare('UPDATE trades SET quantity=?, total_value=?, profit_loss=profit_loss+? WHERE id=?')->execute([$remaining, $open['price']*$remaining, $profit, $open['id']]);
-        } else {
-            $pdo->prepare('UPDATE trades SET status="closed", close_price=?, closed_at=NOW(), profit_loss=? WHERE id=?')->execute([$price,$profit,$open['id']]);
+        if ($open && $open['side'] === 'buy') {
+            // Closing a long position
+            $closeQty   = min($order['quantity'], $open['quantity']);
+            $closeTotal = $price * $closeQty;
+            $profit = ($price - $open['price']) * $closeQty;
+            $bal = updateBalance($pdo, $order['user_id'], $closeTotal);
+            $remaining = $open['quantity'] - $closeQty;
+            if ($remaining > 0) {
+                $pdo->prepare('UPDATE trades SET quantity=?, total_value=?, profit_loss=profit_loss+? WHERE id=?')->execute([$remaining, $open['price']*$remaining, $profit, $open['id']]);
+            } else {
+                $pdo->prepare('UPDATE trades SET status="closed", close_price=?, closed_at=NOW(), profit_loss=? WHERE id=?')->execute([$price,$profit,$open['id']]);
+            }
+            $opNum = 'T'.$open['id'];
+            addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'sell',$closeQty,$price,'complet',$profit);
+            $remainingOrder = $order['quantity'] - $closeQty;
+            if ($remainingOrder > 0) {
+                $totalShort = $price * $remainingOrder;
+                if (!debitBalance($pdo, $order['user_id'], $totalShort, $bal)) return ['ok'=>false,'msg'=>'Solde insuffisant'];
+                $stmt = $pdo->prepare('INSERT INTO trades (user_id,pair,side,quantity,price,total_value,fee,profit_loss,status) VALUES (?,?,?,?,?,?,0,0,"open")');
+                $stmt->execute([$order['user_id'],$order['pair'],'sell',$remainingOrder,$price,$totalShort]);
+                $tradeId = $pdo->lastInsertId();
+                addHistory($pdo,$order['user_id'],'T'.$tradeId,$order['pair'],'sell',$remainingOrder,$price,'En cours');
+                return ['ok'=>true,'balance'=>$bal,'price'=>$price,'profit'=>$profit,'operation'=>'T'.$tradeId,'opened'=>true];
+            }
+            return ['ok'=>true,'balance'=>$bal,'price'=>$price,'profit'=>$profit,'operation'=>$opNum,'opened'=>false];
         }
-        $opNum = 'T'.$open['id'];
-        addHistory($pdo,$order['user_id'],$opNum,$order['pair'],'sell',$closeQty,$price,'complet',$profit);
-        $remainingOrder = $order['quantity'] - $closeQty;
-        if ($remainingOrder > 0) {
-            $totalShort = $price * $remainingOrder;
-            if (!debitBalance($pdo, $order['user_id'], $totalShort, $bal)) return ['ok'=>false,'msg'=>'Solde insuffisant'];
-            $stmt = $pdo->prepare('INSERT INTO trades (user_id,pair,side,quantity,price,total_value,fee,profit_loss,status) VALUES (?,?,?,?,?,?,0,0,"open")');
-            $stmt->execute([$order['user_id'],$order['pair'],'sell',$remainingOrder,$price,$totalShort]);
-            $tradeId = $pdo->lastInsertId();
-            addHistory($pdo,$order['user_id'],'T'.$tradeId,$order['pair'],'sell',$remainingOrder,$price,'En cours');
-            return ['ok'=>true,'balance'=>$bal,'price'=>$price,'profit'=>$profit,'operation'=>'T'.$tradeId,'opened'=>true];
-        }
-        return ['ok'=>true,'balance'=>$bal,'price'=>$price,'profit'=>$profit,'operation'=>$opNum,'opened'=>false];
     }
 
     // No long position to close - open a short position
