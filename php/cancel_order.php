@@ -29,17 +29,28 @@ try{
         echo json_encode(['status'=>'error','message'=>'Trade not found']);
         exit;
     }
-    $price=getLivePrice($trade['pair']);
-    if($price<=0){
-        $price=$trade['price'];
+    // If an admin edited the profit for this trade, `profit_loss` will contain the
+    // authoritative value. In that case, use it rather than recalculating from the
+    // live price so the user's view remains consistent after closing the order.
+    $profit = (float)$trade['profit_loss'];
+    if ($profit !== 0.0) {
+        if ($trade['side'] === 'buy') {
+            $price = $trade['price'] + ($profit / $trade['quantity']);
+        } else {
+            $price = $trade['price'] - ($profit / $trade['quantity']);
+        }
+    } else {
+        $price = getLivePrice($trade['pair']);
+        if ($price <= 0) {
+            $price = $trade['price'];
+        }
+        if ($trade['side'] === 'buy') {
+            $profit = ($price - $trade['price']) * $trade['quantity'];
+        } else {
+            $profit = ($trade['price'] - $price) * $trade['quantity'];
+        }
     }
-    if($trade['side']==='buy'){
-        $profit=($price-$trade['price'])*$trade['quantity'];
-    }else{
-        $profit=($trade['price']-$price)*$trade['quantity'];
-    }
-    if($profit<0) $profit=-$profit;
-    $deposit=$trade['price']*$trade['quantity']+$profit;
+    $deposit = $trade['price'] * $trade['quantity'] + $profit;
     $pdo->prepare('UPDATE personal_data SET balance=balance+? WHERE user_id=?')->execute([$deposit,$userId]);
     $pdo->prepare('UPDATE trades SET status="closed", close_price=?, closed_at=NOW(), profit_loss=? WHERE id=?')
         ->execute([$price,$profit,$tradeId]);
