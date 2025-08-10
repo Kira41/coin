@@ -332,10 +332,10 @@ try {
             $pdo->prepare('UPDATE transactions SET amount = ? WHERE operationNumber = ?')->execute([$profit, $op]);
             if (strcasecmp($row['statut'], 'complet') === 0) {
                 $pdo->prepare('UPDATE trades SET profit_loss = ?, close_price = ? WHERE id = ?')->execute([$profit, $newPrice, $tradeId]);
+                $pdo->prepare('UPDATE personal_data SET balance = balance + ? WHERE user_id = ?')->execute([$diff, $userId]);
             } else {
                 $pdo->prepare('UPDATE trades SET profit_loss = ? WHERE id = ?')->execute([$profit, $tradeId]);
             }
-            $pdo->prepare('UPDATE personal_data SET balance = balance + ? WHERE user_id = ?')->execute([$diff, $userId]);
             $pdo->commit();
             pushEvent('trade_profit_fixed', [
                 'operation_number' => $op,
