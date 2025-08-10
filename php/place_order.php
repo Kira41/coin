@@ -92,7 +92,7 @@ try {
     }
     $pdo->beginTransaction();
     $order=['user_id'=>$userId,'pair'=>$pair,'side'=>$side,'quantity'=>$qty];
-    $result=executeTrade($pdo,$order,$livePrice);
+    $result=executeTrade($pdo,$order,$livePrice,false);
     if(!$result['ok']){
         $pdo->rollBack();
         http_response_code(400);

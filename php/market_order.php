@@ -56,7 +56,7 @@ try {
         'side' => $side,
         'quantity' => $quantity
     ];
-    $result = executeTrade($pdo, $order, $price);
+    $result = executeTrade($pdo, $order, $price, false);
     if (!$result['ok']) {
         $pdo->rollBack();
         http_response_code(400);
