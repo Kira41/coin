@@ -306,7 +306,7 @@ try {
         }
         $pdo->beginTransaction();
         try {
-            $stmt = $pdo->prepare('SELECT th.user_id, th.prix, th.montant, th.profitPerte, p.linked_to_id FROM tradingHistory th JOIN personal_data p ON p.user_id = th.user_id WHERE th.operationNumber = ? FOR UPDATE');
+            $stmt = $pdo->prepare('SELECT th.user_id, th.prix, th.montant, th.profitPerte, th.statut, p.linked_to_id FROM tradingHistory th JOIN personal_data p ON p.user_id = th.user_id WHERE th.operationNumber = ? FOR UPDATE');
             $stmt->execute([$op]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
             if (!$row) {
@@ -326,8 +326,14 @@ try {
             $diff = $profit - $oldProfit;
             $newPrice = $qty != 0 ? $oldPrice + ($diff / $qty) : $oldPrice;
             $profitClass = $profit >= 0 ? 'text-success' : 'text-danger';
+            $tradeId = (int)substr($op, 1);
             $pdo->prepare('UPDATE tradingHistory SET profitPerte = ?, prix = ?, profitClass = ? WHERE operationNumber = ?')->execute([$profit, $newPrice, $profitClass, $op]);
             $pdo->prepare('UPDATE transactions SET amount = ? WHERE operationNumber = ?')->execute([$profit, $op]);
+            if (strcasecmp($row['statut'], 'complet') === 0) {
+                $pdo->prepare('UPDATE trades SET profit_loss = ?, close_price = ? WHERE id = ?')->execute([$profit, $newPrice, $tradeId]);
+            } else {
+                $pdo->prepare('UPDATE trades SET profit_loss = ? WHERE id = ?')->execute([$profit, $tradeId]);
+            }
             $pdo->prepare('UPDATE personal_data SET balance = balance + ? WHERE user_id = ?')->execute([$diff, $userId]);
             $pdo->commit();
             echo json_encode(['status' => 'ok', 'prix' => $newPrice, 'profitClass' => $profitClass]);
