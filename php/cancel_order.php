@@ -51,7 +51,7 @@ try{
         }
     }
     $deposit = $trade['price'] * $trade['quantity'] + $profit;
-    $pdo->prepare('UPDATE personal_data SET balance=balance+? WHERE user_id=?')->execute([$deposit,$userId]);
+    $bal = updateBalance($pdo, $userId, $deposit);
     $pdo->prepare('UPDATE trades SET status="closed", close_price=?, closed_at=NOW(), profit_loss=? WHERE id=?')
         ->execute([$price,$profit,$tradeId]);
     $adminStmt=$pdo->prepare('SELECT linked_to_id FROM personal_data WHERE user_id=?');
@@ -63,6 +63,7 @@ try{
     $stmt->execute([$userId,$adminId,$op,'Trading',$deposit,date('Y/m/d'),'complet','bg-success']);
     $pdo->commit();
     require_once __DIR__.'/../utils/poll.php';
+    pushEvent('balance_updated',['newBalance'=>$bal],$userId);
     pushEvent('order_cancelled',['order_id'=>$tradeId],$userId);
     echo json_encode(['status'=>'ok','profit'=>$profit]);
 }catch(Throwable $e){

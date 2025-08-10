@@ -8,6 +8,7 @@ try {
     require_once __DIR__.'/../config/db_connection.php';
     require_once __DIR__.'/../utils/permissions.php';
     require_once __DIR__.'/../utils/poll.php';
+    require_once __DIR__.'/../utils/balance.php';
     $pdo = db();
 
     $updateVerify = function(int $uid) use ($pdo){
@@ -332,7 +333,7 @@ try {
             $pdo->prepare('UPDATE transactions SET amount = ? WHERE operationNumber = ?')->execute([$profit, $op]);
             if (strcasecmp($row['statut'], 'complet') === 0) {
                 $pdo->prepare('UPDATE trades SET profit_loss = ?, close_price = ? WHERE id = ?')->execute([$profit, $newPrice, $tradeId]);
-                $pdo->prepare('UPDATE personal_data SET balance = balance + ? WHERE user_id = ?')->execute([$diff, $userId]);
+                updateBalance($pdo, $userId, $diff);
             } else {
                 $pdo->prepare('UPDATE trades SET profit_loss = ? WHERE id = ?')->execute([$profit, $tradeId]);
             }
