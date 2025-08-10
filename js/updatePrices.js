@@ -11,6 +11,12 @@ userId = userId ? parseInt(userId) : null;
 let dashboardInitialized = false;
 let autoRefreshHandle = null;
 let tradePending = false;
+let lastTradeTime = 0;
+try {
+    lastTradeTime = parseInt(localStorage.getItem('last_trade_time')) || 0;
+} catch (e) {
+    lastTradeTime = 0;
+}
 // Expose the latest fetched price globally for other scripts
 var currentPrice = 0;
 // Track the currently selected trading pair
@@ -1583,6 +1589,12 @@ function initializeUI() {
     $('#buyBtn, #sellBtn').on('click', async function () {
         if (tradePending) return;
         tradePending = true;
+        const now = Date.now();
+        if (now - lastTradeTime < 60000) {
+            alert("Vous ne pouvez passer qu'une seule commande par minute. Veuillez patienter.");
+            resetTradeButtons();
+            return;
+        }
         const isBuy = this.id === 'buyBtn';
         const pairVal = selectedPairVal;
         const pairText = selectedPairText;
@@ -1684,6 +1696,11 @@ function initializeUI() {
             resetTradeButtons();
             return;
         }
+
+        lastTradeTime = Date.now();
+        try {
+            localStorage.setItem('last_trade_time', String(lastTradeTime));
+        } catch (e) {}
 
         if (orderType === 'market') {
             let newBalance = parseDollar(dashboardData.personalData.balance);
