@@ -23,6 +23,9 @@ foreach ($orders as $o) {
         $trigger = ($order['side'] === 'buy' && $price >= $order['price']) ||
                    ($order['side'] === 'sell' && $price <= $order['price']);
         if (!$trigger) { $pdo->rollBack(); continue; }
+        // Funds were reserved when the limit order was placed. Refund them
+        // before executing the trade so executeTrade can debit correctly.
+        updateBalance($pdo, $order['user_id'], $order['total_value']);
         $tradeOrder = [
             'user_id' => $order['user_id'],
             'pair' => $order['pair'],
