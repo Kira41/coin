@@ -29,11 +29,6 @@ try {
     require_once __DIR__.'/../utils/helpers.php';
     $pdo=db();
 
-    if (!canPlaceOrder($pdo, $userId)) {
-        http_response_code(429);
-        echo json_encode(['status'=>'error','message'=>'Please wait before placing another order']);
-        exit;
-    }
     if($type==='limit'){
         $limitPrice=isset($input['limit_price'])?(float)$input['limit_price']:0.0;
         if($limitPrice<=0){
