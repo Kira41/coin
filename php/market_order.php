@@ -30,12 +30,6 @@ try {
 
     $pdo = db();
 
-    if (!canPlaceOrder($pdo, $userId)) {
-        http_response_code(429);
-        echo json_encode(['status' => 'error', 'message' => 'Please wait before placing another order']);
-        exit;
-    }
-
     [$base, $quote] = explode('/', strtoupper($pair));
     $price = getLivePrice($pair);
     if ($price <= 0) {
