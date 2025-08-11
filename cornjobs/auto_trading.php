@@ -31,10 +31,11 @@ foreach ($orders as $o) {
         ];
         $result = executeTrade($pdo, $tradeOrder, $price);
         if (!$result['ok']) { $pdo->rollBack(); continue; }
+        $balance = $result['balance'] ?? 0.0;
         $pdo->prepare('DELETE FROM trades WHERE id=?')->execute([$order['id']]);
         addHistory($pdo, $order['user_id'], 'L'.$order['id'], $order['pair'], $order['side'], $order['quantity'], $price, 'complet', $result['profit']);
         $pdo->commit();
-        pushEvent('balance_updated', ['newBalance' => $result['balance']], $order['user_id']);
+        pushEvent('balance_updated', ['newBalance' => $balance], $order['user_id']);
         if ($result['opened']) {
             pushEvent('new_trade', [
                 'operation_number' => $result['operation'],
@@ -78,8 +79,9 @@ foreach ($stopOrders as $t) {
         ];
         $result = executeTrade($pdo, $closeOrder, $price);
         if (!$result['ok']) { $pdo->rollBack(); continue; }
+        $balance = $result['balance'] ?? 0.0;
         $pdo->commit();
-        pushEvent('balance_updated', ['newBalance' => $result['balance']], $trade['user_id']);
+        pushEvent('balance_updated', ['newBalance' => $balance], $trade['user_id']);
         pushEvent('order_cancelled', ['order_id' => ltrim($result['operation'], 'T')], $trade['user_id']);
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) $pdo->rollBack();

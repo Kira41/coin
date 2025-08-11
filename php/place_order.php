@@ -45,6 +45,7 @@ try {
             return;
         }
         $total=$limitPrice*$qty;
+        $bal=0.0;
         $pdo->beginTransaction();
         if (!debitBalance($pdo, $userId, $total, $bal)) {
             $pdo->rollBack();
