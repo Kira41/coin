@@ -360,7 +360,8 @@ try {
         $stmt->execute([$amount, $op]);
         echo json_encode(['status' => 'ok']);
     } elseif ($action === 'update_transaction') {
-        if ($isAdmin !== 2) { $forbidden(); }
+        // Agents, admins, and superadmins can update transactions.
+        // Ownership checks for non-superadmins are handled below.
         $op = isset($data['id']) ? trim($data['id']) : '';
         if ($op === '') {
             throw new Exception('Missing id');
@@ -389,12 +390,19 @@ try {
             $pdo->beginTransaction();
             try {
                 $stmt = ($historyTable
-                    ? $pdo->prepare("SELECT user_id, amount, status, date FROM $historyTable WHERE operationNumber = ? FOR UPDATE")
-                    : $pdo->prepare("SELECT user_id, amount, status, date FROM transactions WHERE operationNumber = ? FOR UPDATE"));
+                    ? $pdo->prepare("SELECT h.user_id, h.amount, h.status, h.date, p.linked_to_id FROM $historyTable h JOIN personal_data p ON p.user_id = h.user_id WHERE h.operationNumber = ? FOR UPDATE")
+                    : $pdo->prepare("SELECT t.user_id, t.amount, t.status, t.date, p.linked_to_id FROM transactions t JOIN personal_data p ON p.user_id = t.user_id WHERE t.operationNumber = ? FOR UPDATE"));
                 $stmt->execute([$op]);
                 $row = $stmt->fetch(PDO::FETCH_ASSOC);
                 if (!$row) {
                     throw new Exception('Transaction not found');
+                }
+                if ($isAdmin !== 2) {
+                    $allowedIds = getDescendantAdminIds($pdo, $adminId);
+                    if (!in_array((int)$row['linked_to_id'], $allowedIds, true)) {
+                        $pdo->rollBack();
+                        $forbidden();
+                    }
                 }
                 $userId = (int)$row['user_id'];
                 $amount = (float)$row['amount'];
