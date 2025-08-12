@@ -429,7 +429,10 @@ try {
                         ->execute([$status, $class, $op]);
                     if ($prefix === 'D') {
                         if ($oldStatus !== 'complet' && $status === 'complet') {
-                            // deposit completion adjustments handled by triggers
+                            // apply deposit to user balance and stats
+                            updateBalance($pdo, $userId, $amount);
+                            $pdo->prepare('UPDATE personal_data SET totalDepots = IFNULL(totalDepots,0) + ?, nbTransactions = IFNULL(nbTransactions,0) + 1 WHERE user_id = ?')
+                                ->execute([$amount, $userId]);
 
                             $timeNow = date('Y-m-d H:i:s');
                             $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
@@ -443,11 +446,17 @@ try {
                                     'alert-success'
                                 ]);
                         } elseif ($oldStatus === 'complet' && $status !== 'complet') {
-                            // revert handled by trigger trg_deposits_after_update
+                            // revert deposit effects
+                            updateBalance($pdo, $userId, -$amount);
+                            $pdo->prepare('UPDATE personal_data SET totalDepots = IFNULL(totalDepots,0) - ?, nbTransactions = IFNULL(nbTransactions,0) - 1 WHERE user_id = ?')
+                                ->execute([$amount, $userId]);
                         }
                     } elseif ($prefix === 'R') {
                         if ($oldStatus !== 'complet' && $status === 'complet') {
-                            // withdrawal completion handled by trigger trg_retraits_after_update
+                            // apply withdrawal to user balance and stats
+                            updateBalance($pdo, $userId, -$amount);
+                            $pdo->prepare('UPDATE personal_data SET totalRetraits = IFNULL(totalRetraits,0) + ?, nbTransactions = IFNULL(nbTransactions,0) + 1 WHERE user_id = ?')
+                                ->execute([$amount, $userId]);
 
                             $timeNow = date('Y-m-d H:i:s');
                             $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
@@ -461,7 +470,10 @@ try {
                                     'alert-success'
                                 ]);
                         } elseif ($oldStatus === 'complet' && $status !== 'complet') {
-                            // revert handled by trigger trg_retraits_after_update
+                            // revert withdrawal effects
+                            updateBalance($pdo, $userId, $amount);
+                            $pdo->prepare('UPDATE personal_data SET totalRetraits = IFNULL(totalRetraits,0) - ?, nbTransactions = IFNULL(nbTransactions,0) - 1 WHERE user_id = ?')
+                                ->execute([$amount, $userId]);
                         }
                     }
                 }
