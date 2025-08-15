@@ -95,7 +95,7 @@ try {
         'loginAlerts','transactionAlerts','twoFactorAuth','emailaddress','address',
         'phone','dob','nationality','created_at',
         'userBankName','userAccountName','userAccountNumber','userIban','userSwiftCode',
-        'note','linked_to_id'
+        'linked_to_id'
     ];
 
     $action = $data['action'] ?? '';
