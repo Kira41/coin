@@ -105,7 +105,23 @@ AFTER INSERT ON trades
 FOR EACH ROW
 BEGIN
   DECLARE op VARCHAR(50);
+  DECLARE txStatus TEXT;
+  DECLARE txClass  TEXT;
+
   SET op = CONCAT('T', NEW.id);
+
+  SET txStatus = CASE
+      WHEN NEW.status IN ('open', 'pending') THEN 'En cours'
+      WHEN NEW.status = 'closed' THEN 'complet'
+      ELSE NEW.status
+  END;
+
+  SET txClass = CASE
+      WHEN NEW.status IN ('open', 'pending') THEN 'bg-warning'
+      WHEN NEW.status = 'closed' THEN 'bg-success'
+      ELSE 'bg-secondary'
+  END;
+
   INSERT INTO transactions
     (user_id, admin_id, operationNumber, type, amount, date, status, statusClass)
     VALUES (
@@ -115,8 +131,8 @@ BEGIN
       'Trading',
       NEW.total_value,
       DATE_FORMAT(NEW.created_at, '%Y/%m/%d'),
-      'complet',
-      'bg-success'
+      txStatus,
+      txClass
     )
     ON DUPLICATE KEY UPDATE
       amount = VALUES(amount),
