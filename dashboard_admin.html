@@ -530,10 +530,6 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label for="userNote" class="form-label">Note</label>
-                            <textarea class="form-control" id="userNote" rows="3"></textarea>
-                        </div>
                         <h6 class="mt-3">Coordonnées bancaires pour les dépôts</h6>
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -669,8 +665,9 @@
                 <div class="modal-body">
                     <p><strong>Nom:</strong> <span id="viewFullName"></span></p>
                     <p><strong>Email:</strong> <span id="viewEmail"></span></p>
+                    <p><strong>Téléphone:</strong> <span id="viewPhone"></span></p>
                     <p><strong>Date d'inscription:</strong> <span id="viewCreated"></span></p>
-                    <p><strong>Note:</strong> <span id="viewNote"></span></p>
+                    <p><strong>Note FTD:</strong> <span id="viewFtdNote"></span></p>
                     <div class="progress mb-3">
                         <div class="progress-bar" id="viewKycBar" role="progressbar" style="width:0%">0%</div>
                     </div>
@@ -1534,7 +1531,6 @@
             const firstName = document.getElementById('firstName').value.trim();
             const lastName = document.getElementById('lastName').value.trim();
             const email = document.getElementById('email').value.trim();
-            const note = document.getElementById('userNote').value.trim();
             const bankInfo = {
                 widhrawBankName: document.getElementById('createBwBankName').value.trim(),
                 widhrawAccountName: document.getElementById('createBwAccountName').value.trim(),
@@ -1549,7 +1545,6 @@
                     user_id: Date.now(),
                     fullName: firstName + ' ' + lastName,
                     emailaddress: email,
-                    note: note,
                     passwordStrength: strengthLabel(score),
                     passwordStrengthBar: score + '%',
                     password: md5(password),
@@ -1647,8 +1642,10 @@
                 const pd = data.personalData || {};
                 document.getElementById('viewFullName').textContent = pd.fullName || '';
                 document.getElementById('viewEmail').textContent = pd.emailaddress || '';
+                document.getElementById('viewPhone').textContent = pd.phone || '';
                 document.getElementById('viewCreated').textContent = pd.created_at || '';
-                document.getElementById('viewNote').textContent = pd.note || '';
+                const ftd = data.ftd || {};
+                document.getElementById('viewFtdNote').textContent = ftd.call_notes || '';
                 const steps = Object.values(data.defaultKYCStatus || {});
                 const completed = steps.filter(s => String(s.status) === '1').length;
                 const pct = Math.round((completed / steps.length) * 100);

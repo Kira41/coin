@@ -54,6 +54,8 @@ if ($adminLevel !== 2) {
 }
 $bankWithdraw = fetchAll($pdo, 'SELECT * FROM bank_withdrawl_info WHERE user_id = ? LIMIT 1', [$userId]);
 $bankWithdraw = $bankWithdraw ? $bankWithdraw[0] : [];
+$ftdData = fetchAll($pdo, 'SELECT call_notes FROM ftd WHERE user_id = ? ORDER BY id DESC LIMIT 1', [$userId]);
+$ftdData = $ftdData ? $ftdData[0] : new stdClass();
 $notifications = fetchAll($pdo, 'SELECT DISTINCT type,title,message,time,alertClass FROM notifications WHERE user_id = ? ORDER BY id DESC LIMIT 100', [$userId]);
 foreach ($notifications as &$n) {
     $n['time'] = formatTimeAgoFromDate($n['time']);
@@ -129,6 +131,7 @@ $data = [
     }, fetchAll($pdo, 'SELECT operationNumber,temps,paireDevises,type,statutTypeClass,montant,prix,statut,statutClass,profitPerte,profitClass,details FROM tradingHistory WHERE user_id = ? ORDER BY id DESC', [$userId])),
     'loginHistory' => fetchAll($pdo, 'SELECT date,ip,device FROM loginHistory WHERE user_id = ? ORDER BY STR_TO_DATE(date, "%Y/%m/%d") DESC, id DESC LIMIT 100', [$userId]),
     'bankWithdrawInfo' => $bankWithdraw,
+    'ftd' => $ftdData,
     'cryptoDepositAddresses' => fetchAll($pdo, 'SELECT id,crypto_name,wallet_info FROM deposit_crypto_address WHERE user_id = ?', [$userId]),
     'kycDocs' => $kycRows,
     // placeholders for front-end

@@ -8,7 +8,7 @@ INSERT INTO personal_data (
     emailNotifications, smsNotifications, loginAlerts, transactionAlerts,
     twoFactorAuth, emailaddress, address, phone, dob, nationality, created_at,
     userBankName, userAccountName, userAccountNumber, userIban, userSwiftCode,
-    note, linked_to_id, profile_pic
+    linked_to_id, profile_pic
 ) VALUES (
     1, 3500, 3000, 1200, '10',
     'Ahmed Kouraychi', 'Vérifié', '1', 'Niveau 2',
@@ -17,7 +17,7 @@ INSERT INTO personal_data (
     '41kira41@gmail.com', 'Sousse, Tunisie', '+21690000000',
     '2025-06-11', 'ca', '2025-01-01',
     'Bank of Earth', 'Ahmed Kouraychi',
-    'ACC123456', 'IBAN123456', 'SWIFT123', '', 1, NULL
+    'ACC123456', 'IBAN123456', 'SWIFT123', 1, NULL
 );
 
 INSERT INTO deposit_crypto_address (user_id, crypto_name, wallet_info) VALUES
