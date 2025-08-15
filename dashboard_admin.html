@@ -293,6 +293,7 @@
                                                 <th>ID</th>
                                                 <th>Nom</th>
                                                 <th>Email</th>
+                                                <th id="linkedToHeader" style="display:none;">Lié à</th>
                                                 <th>Rôle</th>
                                                 <th>Statut</th>
                                                 <th>Date d'inscription</th>
@@ -1402,6 +1403,9 @@
                 IS_ADMIN = parseInt(data.is_admin || 0);
                 const IS_SUPER_ADMIN = IS_ADMIN === 2;
 
+                const linkedHeader = document.getElementById('linkedToHeader');
+                if (linkedHeader) linkedHeader.style.display = IS_SUPER_ADMIN ? '' : 'none';
+
                 if (data.profile_pic) {
                     document.querySelectorAll('.user-avatar').forEach(img => {
                         img.src = 'data:image/*;base64,' + data.profile_pic;
@@ -1429,14 +1433,17 @@
                 const tbody = document.getElementById('usersTableBody');
                 tbody.innerHTML = '';
                 const users = data.users || [];
+                const noDataColspan = IS_SUPER_ADMIN ? 8 : 7;
                 if (users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="7" class="text-center">Aucune donnée disponible</td></tr>';
+                    tbody.innerHTML = `<tr><td colspan="${noDataColspan}" class="text-center">Aucune donnée disponible</td></tr>`;
                 } else {
                     users.forEach(u => {
+                        const linkedCol = IS_SUPER_ADMIN ? `<td>${escapeHtml(u.linked_to_id || '')}</td>` : '';
                         const row = `<tr>
                             <td>${escapeHtml(u.user_id)}</td>
                             <td>${escapeHtml(u.fullName || '')}</td>
                             <td>${escapeHtml(u.emailaddress || '')}</td>
+                            ${linkedCol}
                             <td><span class="badge bg-primary">Utilisateur</span></td>
                             <td><span class="badge bg-success">Actif</span></td>
                             <td>${escapeHtml(u.created_at || '')}</td>
