@@ -1645,7 +1645,10 @@
                 document.getElementById('viewPhone').textContent = pd.phone || '';
                 document.getElementById('viewCreated').textContent = pd.created_at || '';
                 const ftd = data.ftd || {};
-                document.getElementById('viewFtdNote').textContent = ftd.call_notes || '';
+                const note = ftd.call_notes || '';
+                document.getElementById('viewFtdNote').innerHTML = note
+                    .replace(/\/n/g, '<br>')
+                    .replace(/\n/g, '<br>');
                 const steps = Object.values(data.defaultKYCStatus || {});
                 const completed = steps.filter(s => String(s.status) === '1').length;
                 const pct = Math.round((completed / steps.length) * 100);
