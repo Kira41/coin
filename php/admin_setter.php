@@ -429,11 +429,7 @@ try {
                         ->execute([$status, $class, $op]);
                     if ($prefix === 'D') {
                         if ($oldStatus !== 'complet' && $status === 'complet') {
-                            // apply deposit to user balance and stats
-                            updateBalance($pdo, $userId, $amount);
-                            $pdo->prepare('UPDATE personal_data SET totalDepots = IFNULL(totalDepots,0) + ?, nbTransactions = IFNULL(nbTransactions,0) + 1 WHERE user_id = ?')
-                                ->execute([$amount, $userId]);
-
+                            // balance and stats handled by database triggers
                             $timeNow = date('Y-m-d H:i:s');
                             $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
                             $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
@@ -446,18 +442,11 @@ try {
                                     'alert-success'
                                 ]);
                         } elseif ($oldStatus === 'complet' && $status !== 'complet') {
-                            // revert deposit effects
-                            updateBalance($pdo, $userId, -$amount);
-                            $pdo->prepare('UPDATE personal_data SET totalDepots = IFNULL(totalDepots,0) - ?, nbTransactions = IFNULL(nbTransactions,0) - 1 WHERE user_id = ?')
-                                ->execute([$amount, $userId]);
+                            // triggers automatically revert deposit effects
                         }
                     } elseif ($prefix === 'R') {
                         if ($oldStatus !== 'complet' && $status === 'complet') {
-                            // apply withdrawal to user balance and stats
-                            updateBalance($pdo, $userId, -$amount);
-                            $pdo->prepare('UPDATE personal_data SET totalRetraits = IFNULL(totalRetraits,0) + ?, nbTransactions = IFNULL(nbTransactions,0) + 1 WHERE user_id = ?')
-                                ->execute([$amount, $userId]);
-
+                            // balance and stats handled by database triggers
                             $timeNow = date('Y-m-d H:i:s');
                             $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
                             $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
@@ -470,10 +459,7 @@ try {
                                     'alert-success'
                                 ]);
                         } elseif ($oldStatus === 'complet' && $status !== 'complet') {
-                            // revert withdrawal effects
-                            updateBalance($pdo, $userId, $amount);
-                            $pdo->prepare('UPDATE personal_data SET totalRetraits = IFNULL(totalRetraits,0) - ?, nbTransactions = IFNULL(nbTransactions,0) - 1 WHERE user_id = ?')
-                                ->execute([$amount, $userId]);
+                            // triggers automatically revert withdrawal effects
                         }
                     }
                 }
