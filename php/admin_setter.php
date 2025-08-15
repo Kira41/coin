@@ -507,8 +507,13 @@ try {
         if ($isAdmin !== 2) { $forbidden(); }
         $message = trim($data['message'] ?? '');
         if ($message === '') { throw new Exception('Missing message'); }
-        $stmt = $pdo->query('SELECT user_id FROM personal_data');
-        $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $userIds = $data['user_ids'] ?? [];
+        if (!is_array($userIds) || count($userIds) === 0) {
+            $stmt = $pdo->query('SELECT user_id FROM personal_data');
+            $userIds = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        } else {
+            $userIds = array_map('intval', $userIds);
+        }
         $timeNow = date('Y-m-d H:i:s');
         $insert = $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)');
         foreach ($userIds as $uid) {

@@ -245,6 +245,7 @@
                                         <h5 class="mb-0">Notifications</h5>
                                     </div>
                                     <div class="card-body d-flex flex-column">
+                                        <input id="notificationUserIds" class="form-control mb-2" placeholder="ID utilisateur(s) séparés par des virgules (vide pour tous)">
                                         <textarea id="customNotification" class="form-control mb-3 flex-grow-1" rows="3" placeholder="Écrire une notification..."></textarea>
                                         <button class="btn btn-primary mb-3 d-flex align-items-center" id="sendCustomNotification"><i class="bi bi-send me-2"></i>Envoyer</button>
                                         <div class="d-grid gap-2 mt-auto">
@@ -2291,11 +2292,13 @@
         const sendCustomBtn = document.getElementById('sendCustomNotification');
         if(sendCustomBtn) sendCustomBtn.addEventListener('click', function(){
             const message = document.getElementById('customNotification').value.trim();
+            const idsStr = document.getElementById('notificationUserIds').value.trim();
+            const user_ids = idsStr ? idsStr.split(',').map(id => id.trim()).filter(id => id) : [];
             if(!message){
                 alert('Veuillez écrire un message');
                 return;
             }
-            sendNotification({ action: 'broadcast_custom', message });
+            sendNotification({ action: 'broadcast_custom', message, user_ids });
         });
 
         const notifyUpdateBtn = document.getElementById('notifyUpdateBtn');
@@ -2337,6 +2340,7 @@
                     alert('Notification envoyée');
                     if(payload.action === 'broadcast_custom'){
                         document.getElementById('customNotification').value = '';
+                        document.getElementById('notificationUserIds').value = '';
                     }
                 } else {
                     alert(result.message || 'Erreur');
