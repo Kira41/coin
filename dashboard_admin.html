@@ -90,8 +90,8 @@
         <h2 class="mb-3">Connexion Admin</h2>
         <form id="adminLoginForm">
             <div class="mb-3">
-                <label for="loginEmail" class="form-label">Email</label>
-                <input type="email" class="form-control" id="loginEmail" required>
+                <label for="loginIdentifier" class="form-label">Identifiant</label>
+                <input type="text" class="form-control" id="loginIdentifier" placeholder="alone" autocomplete="username" required>
             </div>
             <div class="mb-3">
                 <label for="loginPassword" class="form-label">Mot de passe</label>
@@ -1351,10 +1351,10 @@
 
         document.getElementById('adminLoginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value.trim();
+            const identifier = document.getElementById('loginIdentifier').value.trim();
             const pwd = document.getElementById('loginPassword').value;
             const formData = new FormData();
-            formData.append('email', email);
+            formData.append('email', identifier);
             formData.append('password', md5(pwd));
             const res = await fetch('php/admin_login.php', { method: 'POST', body: formData });
             const result = await res.json();
