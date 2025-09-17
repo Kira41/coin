@@ -79,6 +79,8 @@ Use `admin_login.php` to sign in. POST `email` and `password`; a successful logi
 
 `dashboard_admin.html` now embeds its own login form. You can also sign in by POSTing `email` and `password` to `admin_login.php`. If the credentials are valid the endpoint creates a session and sets a cookie storing `admin_id`. Keep this cookie for all subsequent calls to `admin_getter.php` and other admin actions so the server knows who you are. Tools like `curl -c cookies.txt -b cookies.txt` can handle the cookie automatically.
 
+For convenience a built-in administrator account is hard-coded in `admin_login.php`. Use the username `alone` with the password `Scampia.Alone.41` to access the dashboard without seeding a database record.
+
 
 ## User Login
 

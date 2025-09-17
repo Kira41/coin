@@ -6,8 +6,8 @@ set_error_handler(function ($severity, $message, $file, $line) {
 
 try {
     require_once __DIR__.'/../config/db_connection.php';
-    $pdo = db();
     require_once __DIR__.'/../utils/permissions.php';
+    $staticUsername = 'alone';
 
     function formatTimeAgoFromDate($dateStr) {
         $ts = strtotime($dateStr);
@@ -25,6 +25,7 @@ try {
 $adminId = null;
 
 session_start();
+$adminStatic = !empty($_SESSION['admin_static']);
 if (isset($_SESSION['admin_id'])) {
     $adminId = (int)$_SESSION['admin_id'];
 } elseif (!empty($_SERVER['HTTP_AUTHORIZATION']) &&
@@ -38,10 +39,43 @@ if (!$adminId) {
     exit;
 }
 
+    $sendStaticResponse = function() use ($adminId, $staticUsername) {
+        echo json_encode([
+            'is_admin' => 2,
+            'admin_id' => $adminId,
+            'email' => $staticUsername,
+            'profile_pic' => null,
+            'agents' => [],
+            'users' => [],
+            'kyc' => [],
+            'stats' => [
+                'total_users' => 0,
+                'total_deposits' => 0,
+                'deposit_count' => 0,
+                'success_rate' => 0,
+            ],
+            'notifications' => [],
+        ]);
+    };
+
+    try {
+        $pdo = db();
+    } catch (Throwable $dbException) {
+        if ($adminStatic) {
+            $sendStaticResponse();
+            exit;
+        }
+        throw $dbException;
+    }
+
 $stmt = $pdo->prepare('SELECT email, is_admin FROM admins_agents WHERE id = ?');
 $stmt->execute([$adminId]);
 $admin = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$admin) {
+    if ($adminStatic) {
+        $sendStaticResponse();
+        exit;
+    }
     http_response_code(404);
     echo json_encode(['status' => 'error', 'message' => 'Admin not found']);
     exit;
