@@ -1390,11 +1390,21 @@ function initializeUI() {
     renderWithdrawHistory();
     loadTransactions();
 
+    // Provide fallback prices for synthetic/non-listed pairs so that
+    // the trading UI always has a meaningful value to display.
+    const syntheticPrices = {
+        'USDTUSDT': { price: 1.0, change: 0 },
+        'SGCUSDT': { price: 50.0, change: 0 }
+    };
+
     // Map a currency pair like "BTC/USD" or "BTCUSD" to the Binance symbol
     // format used by the API. Pairs quoted in USD are converted to USDT so
     // "LTC/USD" becomes "LTCUSDT".
     function getBinanceSymbol(pair) {
         let symbol = String(pair).toUpperCase().replace('/', '');
+        if (syntheticPrices[symbol]) {
+            return symbol;
+        }
         if (!symbol.endsWith('USDT') && symbol.endsWith('USD')) {
             symbol = symbol.slice(0, -3) + 'USDT';
         }
@@ -1452,6 +1462,13 @@ function initializeUI() {
         const fetchFor = pair;
         currentPricePair = pair;
         const symbol = getBinanceSymbol(pair);
+        const synthetic = syntheticPrices[symbol];
+        if (synthetic) {
+            currentPrice = synthetic.price;
+            priceChange = synthetic.change;
+            updatePriceUI();
+            return;
+        }
         // Use a backend proxy to avoid CORS issues and handle network errors gracefully
         fetch(`php/binance_proxy.php?mode=24hr&symbol=${symbol}`, { signal: priceFetchController.signal })
             .then(r => r.json())
@@ -1472,6 +1489,10 @@ function initializeUI() {
 
     async function fetchCurrentPrice(pair) {
         const symbol = getBinanceSymbol(pair);
+        const synthetic = syntheticPrices[symbol];
+        if (synthetic) {
+            return synthetic.price;
+        }
         try {
             const resp = await fetch(`php/binance_proxy.php?mode=price&symbol=${symbol}`);
             const info = await resp.json();
