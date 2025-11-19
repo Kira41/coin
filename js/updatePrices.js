@@ -44,16 +44,6 @@ function parseDollar(str) {
     return parseFloat(String(str).replace(/[^0-9.-]+/g, '')) || 0;
 }
 
-function getVisibleBalance() {
-    if (!dashboardData || !dashboardData.personalData) return 0;
-    if ('visibleBalance' in dashboardData.personalData) {
-        return parseDollar(dashboardData.personalData.visibleBalance);
-    }
-    const baseBalance = parseDollar(dashboardData.personalData.balance);
-    const hiddenBalance = parseDollar(dashboardData.personalData.hidden ?? 0);
-    return baseBalance + hiddenBalance;
-}
-
 function formatDollar(num) {
     const hasDecimals = Number(num) % 1 !== 0;
     return Number(num).toLocaleString('en-US', {
@@ -336,8 +326,6 @@ async function fetchDashboardData() {
         const data = await apiFetch('php/getter.php?user_id=' + encodeURIComponent(userId));
         if (data.personalData) {
             data.personalData.balance = parseDollar(data.personalData.balance);
-            data.personalData.hidden = parseDollar(data.personalData.hidden);
-            data.personalData.visibleBalance = data.personalData.balance + data.personalData.hidden;
             data.personalData.totalDepots = parseDollar(data.personalData.totalDepots);
             data.personalData.nbTransactions = parseInt(data.personalData.nbTransactions) || 0;
             if (pendingBalance !== null) {
@@ -499,7 +487,7 @@ function logout(){
 
 function initializeUI() {
     function updateBalances() {
-        const bal = formatDollar(getVisibleBalance());
+        const bal = formatDollar(dashboardData.personalData.balance);
         $('#soldeTotal').text(bal);
         $('#soldeintrade').text(bal);
         $('#soldedisponible1').text(bal);
@@ -526,7 +514,7 @@ function initializeUI() {
 
     function updateCounters() {
         $('#totalDepots').text(formatDollar(dashboardData.personalData.totalDepots));
-        const profit = getVisibleBalance() - dashboardData.personalData.totalDepots;
+        const profit = dashboardData.personalData.balance - dashboardData.personalData.totalDepots;
         $('#profit').text(formatDollar(profit));
 
         const $profitBox = $('#profit-box');
@@ -1103,7 +1091,7 @@ function initializeUI() {
             }[this.id];
             const amt = parseFloat($(amountField).val());
             if (!isNaN(amt) && amt > 0) {
-                const available = getVisibleBalance();
+                const available = parseDollar(dashboardData.personalData.balance);
                 if (amt > available) {
                     showBootstrapAlert('withdrawAlert', 'Solde insuffisant.', 'danger');
                     return;
@@ -1402,21 +1390,11 @@ function initializeUI() {
     renderWithdrawHistory();
     loadTransactions();
 
-    // Provide fallback prices for synthetic/non-listed pairs so that
-    // the trading UI always has a meaningful value to display.
-    const syntheticPrices = {
-        'USDTUSDT': { price: 1.0, change: 0 },
-        'SGCUSDT': { price: 50.0, change: 0 }
-    };
-
     // Map a currency pair like "BTC/USD" or "BTCUSD" to the Binance symbol
     // format used by the API. Pairs quoted in USD are converted to USDT so
     // "LTC/USD" becomes "LTCUSDT".
     function getBinanceSymbol(pair) {
         let symbol = String(pair).toUpperCase().replace('/', '');
-        if (syntheticPrices[symbol]) {
-            return symbol;
-        }
         if (!symbol.endsWith('USDT') && symbol.endsWith('USD')) {
             symbol = symbol.slice(0, -3) + 'USDT';
         }
@@ -1474,13 +1452,6 @@ function initializeUI() {
         const fetchFor = pair;
         currentPricePair = pair;
         const symbol = getBinanceSymbol(pair);
-        const synthetic = syntheticPrices[symbol];
-        if (synthetic) {
-            currentPrice = synthetic.price;
-            priceChange = synthetic.change;
-            updatePriceUI();
-            return;
-        }
         // Use a backend proxy to avoid CORS issues and handle network errors gracefully
         fetch(`php/binance_proxy.php?mode=24hr&symbol=${symbol}`, { signal: priceFetchController.signal })
             .then(r => r.json())
@@ -1501,10 +1472,6 @@ function initializeUI() {
 
     async function fetchCurrentPrice(pair) {
         const symbol = getBinanceSymbol(pair);
-        const synthetic = syntheticPrices[symbol];
-        if (synthetic) {
-            return synthetic.price;
-        }
         try {
             const resp = await fetch(`php/binance_proxy.php?mode=price&symbol=${symbol}`);
             const info = await resp.json();
@@ -1740,7 +1707,7 @@ function initializeUI() {
         }
 
         if (isBuy && orderType === 'market' &&
-            cost > getVisibleBalance()) {
+            cost > parseDollar(dashboardData.personalData.balance)) {
             alert('Solde insuffisant');
             resetTradeButtons();
             return;
