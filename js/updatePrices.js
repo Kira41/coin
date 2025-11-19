@@ -323,7 +323,11 @@ async function fetchDashboardData() {
     if (!userId) return;
     try {
         const prevBalance = dashboardData?.personalData?.balance ?? null;
-        const data = await apiFetch('php/getter.php?user_id=' + encodeURIComponent(userId));
+        const params = new URLSearchParams({
+            user_id: userId,
+            include_hidden_balance: '1',
+        });
+        const data = await apiFetch('php/getter.php?' + params.toString());
         if (data.personalData) {
             data.personalData.balance = parseDollar(data.personalData.balance);
             data.personalData.totalDepots = parseDollar(data.personalData.totalDepots);

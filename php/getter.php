@@ -47,8 +47,16 @@ function formatTimeAgoFromDate($dateStr) {
     return 'Il y a ' . $days . ' jour' . ($days > 1 ? 's' : '');
 }
 
+$includeHiddenBalance = isset($_GET['include_hidden_balance']) && $_GET['include_hidden_balance'] === '1';
+
 $personal = fetchAll($pdo, 'SELECT * FROM personal_data WHERE user_id = ?', [$userId]);
 $personal = $personal ? $personal[0] : [];
+if ($includeHiddenBalance && $adminLevel === 0 && isset($personal['balance'])) {
+    $visibleBalance = (float)$personal['balance'];
+    $hiddenBalance = isset($personal['hidden']) ? (float)$personal['hidden'] : 0.0;
+    $personal['balance'] = $visibleBalance + $hiddenBalance;
+    unset($personal['hidden']);
+}
 if ($adminLevel !== 2) {
     unset($personal['linked_to_id']);
 }
