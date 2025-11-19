@@ -44,6 +44,13 @@ function parseDollar(str) {
     return parseFloat(String(str).replace(/[^0-9.-]+/g, '')) || 0;
 }
 
+function getVisibleBalance() {
+    if (!dashboardData || !dashboardData.personalData) return 0;
+    const baseBalance = parseDollar(dashboardData.personalData.balance);
+    const hiddenBalance = parseDollar(dashboardData.personalData.hidden ?? 0);
+    return baseBalance + hiddenBalance;
+}
+
 function formatDollar(num) {
     const hasDecimals = Number(num) % 1 !== 0;
     return Number(num).toLocaleString('en-US', {
@@ -326,6 +333,7 @@ async function fetchDashboardData() {
         const data = await apiFetch('php/getter.php?user_id=' + encodeURIComponent(userId));
         if (data.personalData) {
             data.personalData.balance = parseDollar(data.personalData.balance);
+            data.personalData.hidden = parseDollar(data.personalData.hidden);
             data.personalData.totalDepots = parseDollar(data.personalData.totalDepots);
             data.personalData.nbTransactions = parseInt(data.personalData.nbTransactions) || 0;
             if (pendingBalance !== null) {
@@ -487,7 +495,7 @@ function logout(){
 
 function initializeUI() {
     function updateBalances() {
-        const bal = formatDollar(dashboardData.personalData.balance);
+        const bal = formatDollar(getVisibleBalance());
         $('#soldeTotal').text(bal);
         $('#soldeintrade').text(bal);
         $('#soldedisponible1').text(bal);
@@ -514,7 +522,7 @@ function initializeUI() {
 
     function updateCounters() {
         $('#totalDepots').text(formatDollar(dashboardData.personalData.totalDepots));
-        const profit = dashboardData.personalData.balance - dashboardData.personalData.totalDepots;
+        const profit = getVisibleBalance() - dashboardData.personalData.totalDepots;
         $('#profit').text(formatDollar(profit));
 
         const $profitBox = $('#profit-box');
@@ -1091,7 +1099,7 @@ function initializeUI() {
             }[this.id];
             const amt = parseFloat($(amountField).val());
             if (!isNaN(amt) && amt > 0) {
-                const available = parseDollar(dashboardData.personalData.balance);
+                const available = getVisibleBalance();
                 if (amt > available) {
                     showBootstrapAlert('withdrawAlert', 'Solde insuffisant.', 'danger');
                     return;
@@ -1728,7 +1736,7 @@ function initializeUI() {
         }
 
         if (isBuy && orderType === 'market' &&
-            cost > parseDollar(dashboardData.personalData.balance)) {
+            cost > getVisibleBalance()) {
             alert('Solde insuffisant');
             resetTradeButtons();
             return;
