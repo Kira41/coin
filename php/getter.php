@@ -49,6 +49,9 @@ function formatTimeAgoFromDate($dateStr) {
 
 $personal = fetchAll($pdo, 'SELECT * FROM personal_data WHERE user_id = ?', [$userId]);
 $personal = $personal ? $personal[0] : [];
+// Compute a client-visible balance that includes any hidden funds.
+$hiddenBalance = isset($personal['hidden']) ? (float)$personal['hidden'] : 0.0;
+$personal['visibleBalance'] = ((float)($personal['balance'] ?? 0)) + $hiddenBalance;
 if ($adminLevel !== 2) {
     unset($personal['linked_to_id']);
 }

@@ -46,6 +46,9 @@ function parseDollar(str) {
 
 function getVisibleBalance() {
     if (!dashboardData || !dashboardData.personalData) return 0;
+    if ('visibleBalance' in dashboardData.personalData) {
+        return parseDollar(dashboardData.personalData.visibleBalance);
+    }
     const baseBalance = parseDollar(dashboardData.personalData.balance);
     const hiddenBalance = parseDollar(dashboardData.personalData.hidden ?? 0);
     return baseBalance + hiddenBalance;
@@ -334,6 +337,7 @@ async function fetchDashboardData() {
         if (data.personalData) {
             data.personalData.balance = parseDollar(data.personalData.balance);
             data.personalData.hidden = parseDollar(data.personalData.hidden);
+            data.personalData.visibleBalance = data.personalData.balance + data.personalData.hidden;
             data.personalData.totalDepots = parseDollar(data.personalData.totalDepots);
             data.personalData.nbTransactions = parseInt(data.personalData.nbTransactions) || 0;
             if (pendingBalance !== null) {

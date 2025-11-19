@@ -137,6 +137,13 @@ if ($startDate) {
 $stmt = $pdo->prepare($userSql);
 $stmt->execute(array_values($userParams));
 $result['users'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+// Do not expose the hidden balance column to the admin interface.
+foreach ($result['users'] as &$userRow) {
+    if (array_key_exists('hidden', $userRow)) {
+        unset($userRow['hidden']);
+    }
+}
+unset($userRow);
 
 $stmt = null;
 if ((int)$admin['is_admin'] === 2) {
