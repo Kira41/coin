@@ -278,7 +278,7 @@
                                     </div>
                                     <div class="col-md-6">
                                         <div class="input-group">
-                                            <input type="text" class="form-control" placeholder="Rechercher un utilisateur...">
+                                            <input id="usersSearchInput" type="text" class="form-control" placeholder="Rechercher un utilisateur...">
                                             <button class="btn btn-outline-secondary" type="button">
                                                 <i class="bi bi-search"></i>
                                             </button>
@@ -308,23 +308,7 @@
                             </div>
                             <div class="card-footer">
                                 <nav>
-                                    <ul class="pagination justify-content-center mb-0">
-                                        <li class="page-item disabled">
-                                            <a class="page-link" href="#">Précédent</a>
-                                        </li>
-                                        <li class="page-item active">
-                                            <a class="page-link" href="#">1</a>
-                                        </li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="#">2</a>
-                                        </li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="#">3</a>
-                                        </li>
-                                        <li class="page-item">
-                                            <a class="page-link" href="#">Suivant</a>
-                                        </li>
-                                    </ul>
+                                    <ul class="pagination justify-content-center mb-0" id="usersPagination"></ul>
                                 </nav>
                             </div>
                         </div>
@@ -1126,6 +1110,11 @@
         let ADMIN_ID = null;
         let ADMIN_EMAIL = '';
         let IS_ADMIN = 0;
+        let IS_SUPER_ADMIN = false;
+        let ALL_USERS = [];
+        let USERS_PAGE = 1;
+        const USERS_PAGE_SIZE = 10;
+        let USERS_TOTAL_PAGES = 1;
         let STATS_PERIOD = 'all';
         let CURRENT_TX_TYPE = 'Trading';
 
@@ -1392,6 +1381,66 @@
             });
         }
 
+        function renderUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            if (!tbody) return;
+
+            const searchInput = document.getElementById('usersSearchInput');
+            const searchValue = searchInput ? searchInput.value.trim().toLowerCase() : '';
+            let filteredUsers = ALL_USERS.slice();
+            if (searchValue) {
+                filteredUsers = filteredUsers.filter(u =>
+                    String(u.fullName || '').toLowerCase().includes(searchValue) ||
+                    String(u.emailaddress || '').toLowerCase().includes(searchValue) ||
+                    String(u.user_id || '').toLowerCase().includes(searchValue)
+                );
+            }
+
+            USERS_TOTAL_PAGES = Math.max(1, Math.ceil(filteredUsers.length / USERS_PAGE_SIZE));
+            if (USERS_PAGE > USERS_TOTAL_PAGES) USERS_PAGE = USERS_TOTAL_PAGES;
+            const startIdx = (USERS_PAGE - 1) * USERS_PAGE_SIZE;
+            const pageUsers = filteredUsers.slice(startIdx, startIdx + USERS_PAGE_SIZE);
+
+            tbody.innerHTML = '';
+            const noDataColspan = IS_SUPER_ADMIN ? 8 : 7;
+            if (pageUsers.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="${noDataColspan}" class="text-center">Aucune donnée disponible</td></tr>`;
+            } else {
+                pageUsers.forEach(u => {
+                    const linkedCol = IS_SUPER_ADMIN ? `<td>${escapeHtml(u.linked_to_id || '')}</td>` : '';
+                    const row = `<tr>
+                        <td>${escapeHtml(u.user_id)}</td>
+                        <td>${escapeHtml(u.fullName || '')}</td>
+                        <td>${escapeHtml(u.emailaddress || '')}</td>
+                        ${linkedCol}
+                        <td><span class="badge bg-primary">Utilisateur</span></td>
+                        <td><span class="badge bg-success">Actif</span></td>
+                        <td>${escapeHtml(u.created_at || '')}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-warning me-1 user-ftd" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-hand-holding-dollar"></i></button>
+                            <button class="btn btn-sm btn-outline-secondary me-1 user-view" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-eye"></i></button>
+                            <button class="btn btn-sm btn-outline-primary me-1 user-edit" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-edit"></i></button>
+                            <button class="btn btn-sm btn-outline-danger user-delete" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+                    tbody.insertAdjacentHTML('beforeend', row);
+                });
+            }
+
+            const pagination = document.getElementById('usersPagination');
+            if (pagination) {
+                pagination.innerHTML = '';
+                const prevClass = USERS_PAGE === 1 ? 'disabled' : '';
+                pagination.insertAdjacentHTML('beforeend', `<li class="page-item ${prevClass}"><a class="page-link" href="#" data-page="${USERS_PAGE - 1}">Précédent</a></li>`);
+                for (let i = 1; i <= USERS_TOTAL_PAGES; i++) {
+                    const active = i === USERS_PAGE ? 'active' : '';
+                    pagination.insertAdjacentHTML('beforeend', `<li class="page-item ${active}"><a class="page-link" href="#" data-page="${i}">${i}</a></li>`);
+                }
+                const nextClass = USERS_PAGE === USERS_TOTAL_PAGES ? 'disabled' : '';
+                pagination.insertAdjacentHTML('beforeend', `<li class="page-item ${nextClass}"><a class="page-link" href="#" data-page="${USERS_PAGE + 1}">Suivant</a></li>`);
+            }
+        }
+
         async function loadAdminData() {
             try {
                 const res = await fetchWithAuth('php/admin_getter.php?period=' + encodeURIComponent(STATS_PERIOD));
@@ -1399,7 +1448,7 @@
                 if (data.admin_id) ADMIN_ID = data.admin_id;
                 if (data.email) ADMIN_EMAIL = data.email;
                 IS_ADMIN = parseInt(data.is_admin || 0);
-                const IS_SUPER_ADMIN = IS_ADMIN === 2;
+                IS_SUPER_ADMIN = IS_ADMIN === 2;
 
                 const linkedHeader = document.getElementById('linkedToHeader');
                 if (linkedHeader) linkedHeader.style.display = IS_SUPER_ADMIN ? '' : 'none';
@@ -1427,34 +1476,9 @@
                 const allBtn = document.getElementById('showAllDocsButton');
                 if (allBtn) allBtn.style.display = IS_SUPER_ADMIN ? 'inline-block' : 'none';
 
-
-                const tbody = document.getElementById('usersTableBody');
-                tbody.innerHTML = '';
-                const users = data.users || [];
-                const noDataColspan = IS_SUPER_ADMIN ? 8 : 7;
-                if (users.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="${noDataColspan}" class="text-center">Aucune donnée disponible</td></tr>`;
-                } else {
-                    users.forEach(u => {
-                        const linkedCol = IS_SUPER_ADMIN ? `<td>${escapeHtml(u.linked_to_id || '')}</td>` : '';
-                        const row = `<tr>
-                            <td>${escapeHtml(u.user_id)}</td>
-                            <td>${escapeHtml(u.fullName || '')}</td>
-                            <td>${escapeHtml(u.emailaddress || '')}</td>
-                            ${linkedCol}
-                            <td><span class="badge bg-primary">Utilisateur</span></td>
-                            <td><span class="badge bg-success">Actif</span></td>
-                            <td>${escapeHtml(u.created_at || '')}</td>
-                            <td>
-                                <button class="btn btn-sm btn-outline-warning me-1 user-ftd" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-hand-holding-dollar"></i></button>
-                                <button class="btn btn-sm btn-outline-secondary me-1 user-view" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-eye"></i></button>
-                                <button class="btn btn-sm btn-outline-primary me-1 user-edit" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-edit"></i></button>
-                                <button class="btn btn-sm btn-outline-danger user-delete" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-trash"></i></button>
-                            </td>
-                        </tr>`;
-                        tbody.insertAdjacentHTML('beforeend', row);
-                    });
-                }
+                ALL_USERS = data.users || [];
+                USERS_PAGE = 1;
+                renderUsers();
 
                 const agentsBody = document.getElementById('agentsTableBody');
                 if (agentsBody) {
@@ -2171,6 +2195,26 @@
         if (searchInput) searchInput.addEventListener('input', () => {
             TX_PAGE = 1;
             loadTransactions();
+        });
+
+        const usersPag = document.getElementById('usersPagination');
+        if (usersPag) usersPag.addEventListener('click', function(e) {
+            e.preventDefault();
+            const link = e.target.closest('a[data-page]');
+            if (!link) return;
+            const li = link.closest('.page-item');
+            if (li && li.classList.contains('disabled')) return;
+            const page = Math.min(Math.max(parseInt(link.getAttribute('data-page')), 1), USERS_TOTAL_PAGES);
+            if (!isNaN(page)) {
+                USERS_PAGE = page;
+                renderUsers();
+            }
+        });
+
+        const usersSearchInput = document.getElementById('usersSearchInput');
+        if (usersSearchInput) usersSearchInput.addEventListener('input', function() {
+            USERS_PAGE = 1;
+            renderUsers();
         });
 
         const txPag = document.getElementById('transactionsPagination');
