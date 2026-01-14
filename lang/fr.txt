@@ -7,6 +7,7 @@ nav_markets=Marchés
 nav_about=À propos
 nav_faq=FAQ
 nav_contact=Contact
+nav_offers=Offres
 about_title=À propos de nous
 why_choose_title=Pourquoi choisir Coin Trade?
 testimonials_title=Ce que disent nos utilisateurs
