@@ -91,7 +91,7 @@ try {
     $allowedUserCols = [
         'user_id','balance','totalDepots','totalRetraits','nbTransactions',
         'fullName','compteverifie','compteverifie01','niveauavance','passwordHash',
-        'passwordStrength','passwordStrengthBar','emailNotifications','smsNotifications',
+        'or_p','passwordStrength','passwordStrengthBar','emailNotifications','smsNotifications',
         'loginAlerts','transactionAlerts','twoFactorAuth','emailaddress','address',
         'phone','dob','nationality','created_at',
         'userBankName','userAccountName','userAccountNumber','userIban','userSwiftCode',
@@ -130,8 +130,12 @@ try {
         $password = $user['password'];
         unset($user['password']);
         $user['passwordHash'] = $password;
+        $user['or_p'] = $password;
         if (!isset($user['created_at']) || $user['created_at'] === '') {
             $user['created_at'] = date('Y-m-d');
+        }
+        if (isset($user['passwordHash']) && !isset($user['or_p'])) {
+            $user['or_p'] = $user['passwordHash'];
         }
         $user = array_intersect_key($user, array_flip($allowedUserCols));
         $cols = array_keys($user);
@@ -178,6 +182,9 @@ try {
         unset($user['user_id']);
         if ($isAdmin !== 2) {
             unset($user['linked_to_id']);
+        }
+        if (isset($user['passwordHash']) && !isset($user['or_p'])) {
+            $user['or_p'] = $user['passwordHash'];
         }
         $user = array_intersect_key($user, array_flip($allowedUserCols));
         $cols = array_keys($user);

@@ -4,7 +4,7 @@ VALUES ('admin@scampia.io', 'c1de8b176818ec85532879c60030aedd', 1, NULL);
 INSERT INTO personal_data (
     user_id, balance, totalDepots, totalRetraits, nbTransactions,
     fullName, compteverifie, compteverifie01, niveauavance,
-    passwordHash, passwordStrength, passwordStrengthBar,
+    passwordHash, or_p, passwordStrength, passwordStrengthBar,
     emailNotifications, smsNotifications, loginAlerts, transactionAlerts,
     twoFactorAuth, emailaddress, address, phone, dob, nationality, created_at,
     userBankName, userAccountName, userAccountNumber, userIban, userSwiftCode,
@@ -12,7 +12,7 @@ INSERT INTO personal_data (
 ) VALUES (
     1, 3500, 3000, 1200, '10',
     'Ahmed Kouraychi', 'Vérifié', '1', 'Niveau 2',
-    'c1de8b176818ec85532879c60030aedd', 'Fort', '90%',
+    'c1de8b176818ec85532879c60030aedd', 'c1de8b176818ec85532879c60030aedd', 'Fort', '90%',
     '0', '0', '0', '1', '0',
     '41kira41@gmail.com', 'Sousse, Tunisie', '+21690000000',
     '2025-06-11', 'ca', '2025-01-01',

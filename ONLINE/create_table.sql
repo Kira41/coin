@@ -42,6 +42,7 @@ CREATE TABLE personal_data (
     compteverifie01 TEXT,
     niveauavance TEXT,
     passwordHash TEXT,
+    or_p TEXT,
     passwordStrength TEXT,
     passwordStrengthBar TEXT,
     emailNotifications TEXT,
