@@ -683,6 +683,47 @@
         </div>
     </div>
 
+    <!-- Manual Deposit Modal -->
+    <div class="modal fade" id="manualDepositModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Dépôt manuel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="manualDepositForm">
+                        <input type="hidden" id="manualDepositUserId">
+                        <div class="mb-3">
+                            <label class="form-label">Utilisateur</label>
+                            <div class="form-control-plaintext" id="manualDepositUserLabel">-</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="manualDepositAmount" class="form-label">Montant</label>
+                            <input type="number" class="form-control" id="manualDepositAmount" min="0" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="manualDepositType" class="form-label">Type</label>
+                            <select class="form-select" id="manualDepositType" required>
+                                <option value="Depot">Depot</option>
+                                <option value="Bonus">Bonus</option>
+                                <option value="Ajustement">Ajustement</option>
+                                <option value="Retrait">Retrait</option>
+                            </select>
+                        </div>
+                        <div class="alert alert-info small mb-0">
+                            Le type sélectionné sera enregistré dans la colonne « Méthode ».
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" form="manualDepositForm" class="btn btn-success">Enregistrer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- FTD Modal -->
     <div class="modal fade" id="ftdModal" tabindex="-1">
         <div class="modal-dialog modal-lg modal-dialog-scrollable">
@@ -1418,6 +1459,7 @@
                         <td>${escapeHtml(u.created_at || '')}</td>
                         <td>
                             <button class="btn btn-sm btn-outline-warning me-1 user-ftd" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-hand-holding-dollar"></i></button>
+                            <button class="btn btn-sm btn-outline-success me-1 user-manual-deposit" data-id="${escapeHtml(u.user_id)}" title="Dépôt manuel"><i class="fas fa-coins"></i></button>
                             <button class="btn btn-sm btn-outline-secondary me-1 user-view" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-eye"></i></button>
                             <button class="btn btn-sm btn-outline-primary me-1 user-edit" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-edit"></i></button>
                             <button class="btn btn-sm btn-outline-danger user-delete" data-id="${escapeHtml(u.user_id)}"><i class="fas fa-trash"></i></button>
@@ -1644,6 +1686,7 @@
         // User table actions
         document.getElementById('usersTableBody').addEventListener('click', async function(e) {
             const ftdBtn = e.target.closest('.user-ftd');
+            const manualDepositBtn = e.target.closest('.user-manual-deposit');
             const viewBtn = e.target.closest('.user-view');
             const editBtn = e.target.closest('.user-edit');
             const delBtn = e.target.closest('.user-delete');
@@ -1661,6 +1704,17 @@
                 document.getElementById('ftdNationality').value = pd.nationality || '';
                 document.getElementById('ftdAppointmentDateContainer').style.display = 'none';
                 new bootstrap.Modal(document.getElementById('ftdModal')).show();
+            } else if (manualDepositBtn) {
+                const id = manualDepositBtn.getAttribute('data-id');
+                const user = ALL_USERS.find(u => String(u.user_id) === String(id));
+                const label = user
+                    ? `${user.fullName || ''} (${user.emailaddress || ''})`
+                    : `#${id}`;
+                document.getElementById('manualDepositUserId').value = id;
+                document.getElementById('manualDepositUserLabel').textContent = label;
+                document.getElementById('manualDepositAmount').value = '';
+                document.getElementById('manualDepositType').value = 'Depot';
+                new bootstrap.Modal(document.getElementById('manualDepositModal')).show();
             } else if (viewBtn) {
                 const id = viewBtn.getAttribute('data-id');
                 const res = await fetchWithAuth('php/getter.php?user_id=' + id);
@@ -1788,6 +1842,42 @@
                 bootstrap.Modal.getInstance(document.getElementById('ftdModal')).hide();
             } else {
                 alert('Erreur lors de la sauvegarde');
+            }
+        });
+
+        const manualDepositForm = document.getElementById('manualDepositForm');
+        if (manualDepositForm) manualDepositForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const userId = document.getElementById('manualDepositUserId').value;
+            const amount = parseFloat(document.getElementById('manualDepositAmount').value);
+            const depositType = document.getElementById('manualDepositType').value;
+            if (!userId || isNaN(amount) || amount <= 0) {
+                alert('Veuillez saisir un montant valide.');
+                return;
+            }
+            try {
+                const res = await fetchWithAuth('php/admin_setter.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'admin_manual_deposit',
+                        user_id: userId,
+                        amount: amount,
+                        deposit_type: depositType
+                    })
+                });
+                const result = await res.json();
+                if (result.status === 'ok') {
+                    bootstrap.Modal.getInstance(document.getElementById('manualDepositModal')).hide();
+                    loadAdminData();
+                    TX_PAGE = 1;
+                    loadTransactions();
+                } else {
+                    alert(result.message || 'Erreur lors de l\'enregistrement');
+                }
+            } catch (err) {
+                console.error('Manual deposit failed', err);
+                alert('Erreur lors de l\'enregistrement');
             }
         });
 
