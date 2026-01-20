@@ -340,6 +340,26 @@
             border-color: var(--neon-blue);
         }
 
+        .market-support-card {
+            text-align: center;
+            padding: 1.25rem 1rem;
+        }
+
+        .market-support-flag {
+            font-size: 2.5rem;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            filter: drop-shadow(0 6px 12px rgba(59, 130, 246, 0.25));
+        }
+
+        .market-support-text {
+            color: var(--text-gray);
+            margin-top: 1rem;
+        }
+
         .crypto-symbol {
             font-weight: 600;
             font-size: 1.1rem;
@@ -877,6 +897,41 @@
     <section id="markets" class="market-section">
         <div class="container">
             <h2 class="section-title" id="live-market-title" data-translate="live_market_prices">Live Market Prices</h2>
+            <div class="row justify-content-center mb-3">
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="market-card market-support-card">
+                        <div class="market-support-flag" aria-hidden="true">🇨🇦</div>
+                        <div class="crypto-symbol">Canada</div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="market-card market-support-card">
+                        <div class="market-support-flag" aria-hidden="true">🇦🇺</div>
+                        <div class="crypto-symbol">Australia</div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="market-card market-support-card">
+                        <div class="market-support-flag" aria-hidden="true">🇬🇧</div>
+                        <div class="crypto-symbol">United Kingdom</div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="market-card market-support-card">
+                        <div class="market-support-flag" aria-hidden="true">🇪🇺</div>
+                        <div class="crypto-symbol">European Union</div>
+                    </div>
+                </div>
+                <div class="col-lg-2 col-md-4 col-6">
+                    <div class="market-card market-support-card">
+                        <div class="market-support-flag" aria-hidden="true">🇨🇭</div>
+                        <div class="crypto-symbol">Switzerland</div>
+                    </div>
+                </div>
+            </div>
+            <p class="section-subtitle market-support-text">
+                Coin Trade supports most countries worldwide, including Canada, Australia, the United Kingdom, the European Union, and Switzerland.
+            </p>
             <div class="row">
                 <div class="col-lg-3 col-md-6 mb-4">
                     <div class="market-card">
@@ -1637,6 +1692,8 @@
             return new Intl.NumberFormat('en-US', { style: 'currency', currency: currency.toUpperCase() }).format(num);
         }
 
+        let currentCurrency = 'usd';
+
         // Fetch live crypto prices
         async function fetchPrices(currency) {
             const response = await fetch('php/crypto_prices.php?currency=' + currency);
@@ -1666,13 +1723,15 @@
                 const currency = this.getAttribute('data-currency');
                 document.getElementById('current-lang').textContent = this.textContent;
                 loadLanguage(lang);
+                currentCurrency = currency;
                 fetchPrices(currency);
             });
         });
 
         // Initialize defaults
         loadLanguage('en');
-        fetchPrices('usd');
+        fetchPrices(currentCurrency);
+        setInterval(() => fetchPrices(currentCurrency), 30000);
 
         // FAQ Toggle
         function toggleFaq(element) {
