@@ -72,27 +72,25 @@
 <h1 class="h2">Bonjour, <span id="firstname"></span></h1>
 <div class="btn-toolbar mb-2 mb-md-0">
 <div class="dropdown position-relative me-2">
-<button aria-expanded="false" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" type="button">
-<i class="fas fa-bell"></i>
-</button>
-<span class="notification-badge" id="notificationCount">0</span>
-<ul aria-labelledby="notificationsDropdown" class="dropdown-menu dropdown-menu-end" id="notificationsRecentes" style="min-width: 300px;">
-  <li class="dropdown-header">
-    <i class="fas fa-bell me-2"></i> Notifications récentes
-  </li>
-  <li>
-    <hr class="dropdown-divider" />
-  </li>
-  <div id="notificationsDropdown">
-    <li class="text-center text-muted py-3">
+  <button aria-expanded="false" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" id="notificationsDropdownButton" type="button">
+    <i class="fas fa-bell"></i>
+  </button>
+  <span class="notification-badge" id="notificationCount">0</span>
+  <ul aria-labelledby="notificationsDropdownButton" class="dropdown-menu dropdown-menu-end" id="notificationsRecentes" style="min-width: 300px;">
+    <li class="dropdown-header">
+      <i class="fas fa-bell me-2"></i> Notifications récentes
     </li>
-    <hr class="dropdown-divider" />
+    <li>
+      <hr class="dropdown-divider"/>
+    </li>
+    <li id="notificationsDropdown" class="text-center text-muted py-3"></li>
+    <li>
+      <hr class="dropdown-divider"/>
+    </li>
     <li class="text-center">
       <a class="dropdown-item small" href="#"></a>
     </li>
-  </div>
-</ul>
-
+  </ul>
 </div>
 <div class="dropdown me-2">
 <button aria-expanded="false" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" id="languageDropdown" type="button">
