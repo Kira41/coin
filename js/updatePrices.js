@@ -1277,11 +1277,12 @@ function initializeUI() {
         }
     });
 
-    $('.nav-link').each(function () {
-        const tabTrigger = new bootstrap.Tab(this);
-        $(this).on('click', function (e) {
-            e.preventDefault();
-            tabTrigger.show();
+    document.querySelectorAll('[data-bs-toggle="pill"], [data-bs-toggle="tab"]').forEach((tabEl) => {
+        tabEl.addEventListener('click', (e) => {
+            if (tabEl.tagName.toLowerCase() === 'a') {
+                e.preventDefault();
+            }
+            bootstrap.Tab.getOrCreateInstance(tabEl).show();
         });
     });
 
