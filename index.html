@@ -346,12 +346,14 @@
         }
 
         .market-support-flag {
-            font-size: 2.5rem;
-            line-height: 1;
+            width: 48px;
+            height: 36px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 0.75rem;
+            border-radius: 6px;
+            object-fit: cover;
             filter: drop-shadow(0 6px 12px rgba(59, 130, 246, 0.25));
         }
 
@@ -900,31 +902,31 @@
             <div class="row justify-content-center mb-3">
                 <div class="col-lg-2 col-md-4 col-6">
                     <div class="market-card market-support-card">
-                        <div class="market-support-flag" aria-hidden="true">🇨🇦</div>
+                        <img class="market-support-flag" src="https://flagcdn.com/w80/ca.png" alt="Canada flag" loading="lazy">
                         <div class="crypto-symbol">Canada</div>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-4 col-6">
                     <div class="market-card market-support-card">
-                        <div class="market-support-flag" aria-hidden="true">🇦🇺</div>
+                        <img class="market-support-flag" src="https://flagcdn.com/w80/au.png" alt="Australia flag" loading="lazy">
                         <div class="crypto-symbol">Australia</div>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-4 col-6">
                     <div class="market-card market-support-card">
-                        <div class="market-support-flag" aria-hidden="true">🇬🇧</div>
+                        <img class="market-support-flag" src="https://flagcdn.com/w80/gb.png" alt="United Kingdom flag" loading="lazy">
                         <div class="crypto-symbol">United Kingdom</div>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-4 col-6">
                     <div class="market-card market-support-card">
-                        <div class="market-support-flag" aria-hidden="true">🇪🇺</div>
+                        <img class="market-support-flag" src="https://flagcdn.com/w80/eu.png" alt="European Union flag" loading="lazy">
                         <div class="crypto-symbol">European Union</div>
                     </div>
                 </div>
                 <div class="col-lg-2 col-md-4 col-6">
                     <div class="market-card market-support-card">
-                        <div class="market-support-flag" aria-hidden="true">🇨🇭</div>
+                        <img class="market-support-flag" src="https://flagcdn.com/w80/ch.png" alt="Switzerland flag" loading="lazy">
                         <div class="crypto-symbol">Switzerland</div>
                     </div>
                 </div>
@@ -1696,23 +1698,32 @@
 
         // Fetch live crypto prices
         async function fetchPrices(currency) {
-            const response = await fetch('php/crypto_prices.php?currency=' + currency);
-            const data = await response.json();
-            const mapping = {
-                bitcoin: 'price-bitcoin',
-                ethereum: 'price-ethereum',
-                cardano: 'price-cardano',
-                solana: 'price-solana'
-            };
-            Object.keys(mapping).forEach(coin => {
-                if (data[coin] && data[coin][currency]) {
-                    document.getElementById(mapping[coin]).textContent = formatCurrency(data[coin][currency], currency);
-                    const symbolEl = document.querySelector('[data-coin="' + coin + '"]');
-                    if (symbolEl) {
-                        symbolEl.textContent = symbolEl.textContent.split('/')[0] + '/' + currency.toUpperCase();
-                    }
+            const normalizedCurrency = ['usd', 'eur', 'cad'].includes(currency) ? currency : 'usd';
+            const apiUrl = 'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,cardano,solana&vs_currencies=' + normalizedCurrency;
+            try {
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error('Price API error');
                 }
-            });
+                const data = await response.json();
+                const mapping = {
+                    bitcoin: 'price-bitcoin',
+                    ethereum: 'price-ethereum',
+                    cardano: 'price-cardano',
+                    solana: 'price-solana'
+                };
+                Object.keys(mapping).forEach(coin => {
+                    if (data[coin] && data[coin][normalizedCurrency]) {
+                        document.getElementById(mapping[coin]).textContent = formatCurrency(data[coin][normalizedCurrency], normalizedCurrency);
+                        const symbolEl = document.querySelector('[data-coin="' + coin + '"]');
+                        if (symbolEl) {
+                            symbolEl.textContent = symbolEl.textContent.split('/')[0] + '/' + normalizedCurrency.toUpperCase();
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Unable to fetch live prices:', error);
+            }
         }
 
         // Handle language/currency dropdown
@@ -1731,7 +1742,7 @@
         // Initialize defaults
         loadLanguage('en');
         fetchPrices(currentCurrency);
-        setInterval(() => fetchPrices(currentCurrency), 30000);
+        setInterval(() => fetchPrices(currentCurrency), 10000);
 
         // FAQ Toggle
         function toggleFaq(element) {
