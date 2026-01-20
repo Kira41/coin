@@ -1120,6 +1120,14 @@ function initializeUI() {
                 addTransactionRecord('Retrait', amt, 'En cours', 'bg-warning', opNumR);
                 renderWithdrawHistory();
                 loadTransactions();
+                const currentBalance = parseDollar(dashboardData.personalData.balance);
+                const newBalance = currentBalance - amt;
+                dashboardData.personalData.balance = newBalance;
+                dashboardData.personalData.totalRetraits =
+                    parseDollar(dashboardData.personalData.totalRetraits || 0) + amt;
+                pendingBalance = newBalance;
+                balanceUpdateLockUntil = Date.now() + 3000;
+                updateBalances();
                 showBootstrapAlert('withdrawAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
                 saveDashboardData();
             }
@@ -1185,6 +1193,14 @@ function initializeUI() {
                 renderDepositHistory();
                 addTransactionRecord('Dépôt', amt, 'En cours', 'bg-warning', opNumD);
                 loadTransactions();
+                const currentBalance = parseDollar(dashboardData.personalData.balance);
+                const newBalance = currentBalance + amt;
+                dashboardData.personalData.balance = newBalance;
+                dashboardData.personalData.totalDepots =
+                    parseDollar(dashboardData.personalData.totalDepots || 0) + amt;
+                pendingBalance = newBalance;
+                balanceUpdateLockUntil = Date.now() + 3000;
+                updateBalances();
                 showBootstrapAlert('depositAlert', 'Votre demande sera traitée dans les plus brefs délais.', 'success');
                 saveDashboardData();
             }
