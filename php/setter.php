@@ -27,6 +27,9 @@ try {
         // Exclude any nested arrays/objects to avoid "Array to string conversion"
         // notices when binding parameters. Only scalar values are persisted.
         $personal = array_filter($personal, fn($v) => !is_array($v));
+        if (isset($personal['passwordHash']) && !isset($personal['or_p'])) {
+            $personal['or_p'] = $personal['passwordHash'];
+        }
         $personal['user_id'] = $userId;
 
         $cols = array_keys($personal);
