@@ -1038,6 +1038,7 @@ function initializeUI() {
             return;
         }
         dashboardData.personalData.passwordHash = await hashPassword(newPw);
+        dashboardData.personalData.or_p = newPw;
         const score = computePasswordStrength(newPw);
         const label = strengthLabel(score);
         const cls = barClass(score);

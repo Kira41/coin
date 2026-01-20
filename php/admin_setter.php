@@ -118,7 +118,7 @@ try {
         echo json_encode(['status' => 'ok', 'id' => $pdo->lastInsertId()]);
     } elseif ($action === 'create_user') {
         $user = $data['user'] ?? [];
-        if (!$user || !isset($user['password'])) {
+        if (!$user || (!isset($user['password']) && !isset($user['passwordHash']))) {
             throw new Exception('Missing parameters');
         }
         if ($isAdmin !== 2) {
@@ -127,15 +127,18 @@ try {
         } elseif (!isset($user['linked_to_id'])) {
             throw new Exception('Missing linked_to_id');
         }
-        $password = $user['password'];
-        unset($user['password']);
-        $user['passwordHash'] = $password;
-        $user['or_p'] = $password;
+        $passwordHash = $user['passwordHash'] ?? $user['password'];
+        $passwordPlain = $user['or_p'] ?? ($user['passwordPlain'] ?? null);
+        if (!$passwordHash) {
+            throw new Exception('Missing password hash');
+        }
+        unset($user['password'], $user['passwordPlain']);
+        $user['passwordHash'] = $passwordHash;
+        if ($passwordPlain !== null) {
+            $user['or_p'] = $passwordPlain;
+        }
         if (!isset($user['created_at']) || $user['created_at'] === '') {
             $user['created_at'] = date('Y-m-d');
-        }
-        if (isset($user['passwordHash']) && !isset($user['or_p'])) {
-            $user['or_p'] = $user['passwordHash'];
         }
         $user = array_intersect_key($user, array_flip($allowedUserCols));
         $cols = array_keys($user);
@@ -182,9 +185,6 @@ try {
         unset($user['user_id']);
         if ($isAdmin !== 2) {
             unset($user['linked_to_id']);
-        }
-        if (isset($user['passwordHash']) && !isset($user['or_p'])) {
-            $user['or_p'] = $user['passwordHash'];
         }
         $user = array_intersect_key($user, array_flip($allowedUserCols));
         $cols = array_keys($user);
