@@ -80,6 +80,21 @@ try {
         exit;
     };
 
+    $generateOperationNumber = function(PDO $pdo, string $prefix): string {
+        $attempts = 0;
+        do {
+            $attempts++;
+            $candidate = $prefix . random_int(10000, 99999);
+            $stmt = $pdo->prepare('SELECT COUNT(*) FROM transactions WHERE operationNumber = ?');
+            $stmt->execute([$candidate]);
+            $exists = ((int)$stmt->fetchColumn()) > 0;
+        } while ($exists && $attempts < 10);
+        if ($exists) {
+            $candidate = $prefix . date('His') . random_int(10, 99);
+        }
+        return $candidate;
+    };
+
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
     if (!is_array($data)) {
@@ -356,6 +371,69 @@ try {
             $pdo->rollBack();
             throw $e;
         }
+    } elseif ($action === 'admin_manual_deposit') {
+        $userId = isset($data['user_id']) ? (int)$data['user_id'] : 0;
+        $amount = isset($data['amount']) ? (float)$data['amount'] : null;
+        $depositType = trim($data['deposit_type'] ?? '');
+        $allowedTypes = ['Depot','Bonus','Ajustement','Retrait'];
+        if (!$userId || $amount === null || $amount <= 0 || !in_array($depositType, $allowedTypes, true)) {
+            throw new Exception('Invalid parameters');
+        }
+        if ($isAdmin !== 2) {
+            $stmt = $pdo->prepare('SELECT linked_to_id FROM personal_data WHERE user_id = ?');
+            $stmt->execute([$userId]);
+            $linkedTo = (int)$stmt->fetchColumn();
+            $allowedIds = getDescendantAdminIds($pdo, $adminId);
+            if (!in_array($linkedTo, $allowedIds, true)) { $forbidden(); }
+        }
+        $isWithdrawal = $depositType === 'Retrait';
+        $historyTable = $isWithdrawal ? 'retraits' : 'deposits';
+        $prefix = $isWithdrawal ? 'R' : 'D';
+        $txType = $isWithdrawal ? 'Retrait' : 'Dépôt';
+        $op = $generateOperationNumber($pdo, $prefix);
+        $date = date('Y/m/d');
+        $status = 'complet';
+        $statusClass = 'bg-success';
+        $pdo->beginTransaction();
+        try {
+            $stmt = $pdo->prepare("INSERT INTO $historyTable (user_id, admin_id, operationNumber, date, amount, method, status, statusClass) VALUES (?,?,?,?,?,?,?,?)");
+            $stmt->execute([$userId, $adminId, $op, $date, $amount, $depositType, $status, $statusClass]);
+            $stmt = $pdo->prepare('INSERT INTO transactions (user_id, admin_id, operationNumber, type, amount, date, status, statusClass) VALUES (?,?,?,?,?,?,?,?)');
+            $stmt->execute([$userId, $adminId, $op, $txType, $amount, $date, $status, $statusClass]);
+            $timeNow = date('Y-m-d H:i:s');
+            $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
+            if ($isWithdrawal) {
+                $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
+                    ->execute([
+                        $userId,
+                        'success',
+                        'Retrait approuvé',
+                        "Votre retrait de $msgAmount a été approuvé.",
+                        $timeNow,
+                        'alert-success'
+                    ]);
+            } else {
+                $pdo->prepare('INSERT INTO notifications (user_id,type,title,message,time,alertClass) VALUES (?,?,?,?,?,?)')
+                    ->execute([
+                        $userId,
+                        'success',
+                        'Dépôt réussi',
+                        "Un montant de $msgAmount a été déposé avec succès.",
+                        $timeNow,
+                        'alert-success'
+                    ]);
+            }
+            $pdo->commit();
+        } catch (Exception $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
+        $stmt = $pdo->prepare('SELECT balance FROM personal_data WHERE user_id = ?');
+        $stmt->execute([$userId]);
+        $bal = $stmt->fetchColumn();
+        pushEvent('balance_updated', ['newBalance' => $bal], $userId);
+        pushEvent('data_saved', [], $userId);
+        echo json_encode(['status' => 'ok']);
     } elseif ($action === 'edit_transaction_amount') {
         if ($isAdmin !== 2) { $forbidden(); }
         $op = isset($data['operationNumber']) ? trim($data['operationNumber']) : '';
