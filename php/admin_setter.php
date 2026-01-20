@@ -94,6 +94,11 @@ try {
         }
         return $candidate;
     };
+    $hasInsertTrigger = function(PDO $pdo, string $table): bool {
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM information_schema.TRIGGERS WHERE TRIGGER_SCHEMA = DATABASE() AND EVENT_OBJECT_TABLE = ? AND EVENT_MANIPULATION = "INSERT"');
+        $stmt->execute([$table]);
+        return ((int)$stmt->fetchColumn()) > 0;
+    };
 
     $input = file_get_contents('php://input');
     $data = json_decode($input, true);
@@ -394,12 +399,24 @@ try {
         $date = date('Y/m/d');
         $status = 'complet';
         $statusClass = 'bg-success';
+        $needsManualTotals = !$hasInsertTrigger($pdo, $historyTable);
         $pdo->beginTransaction();
         try {
             $stmt = $pdo->prepare("INSERT INTO $historyTable (user_id, admin_id, operationNumber, date, amount, method, status, statusClass) VALUES (?,?,?,?,?,?,?,?)");
             $stmt->execute([$userId, $adminId, $op, $date, $amount, $depositType, $status, $statusClass]);
             $stmt = $pdo->prepare('INSERT INTO transactions (user_id, admin_id, operationNumber, type, amount, date, status, statusClass) VALUES (?,?,?,?,?,?,?,?)');
             $stmt->execute([$userId, $adminId, $op, $txType, $amount, $date, $status, $statusClass]);
+            if ($needsManualTotals) {
+                $balanceDelta = $isWithdrawal ? -$amount : $amount;
+                updateBalance($pdo, $userId, $balanceDelta);
+                if ($isWithdrawal) {
+                    $pdo->prepare('UPDATE personal_data SET totalRetraits = IFNULL(totalRetraits,0) + ?, nbTransactions = IFNULL(nbTransactions,0) + 1 WHERE user_id = ?')
+                        ->execute([$amount, $userId]);
+                } else {
+                    $pdo->prepare('UPDATE personal_data SET totalDepots = IFNULL(totalDepots,0) + ?, nbTransactions = IFNULL(nbTransactions,0) + 1 WHERE user_id = ?')
+                        ->execute([$amount, $userId]);
+                }
+            }
             $timeNow = date('Y-m-d H:i:s');
             $msgAmount = number_format($amount, 0, '.', ' ') . ' $';
             if ($isWithdrawal) {
