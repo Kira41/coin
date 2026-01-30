@@ -271,6 +271,39 @@
             margin-right: auto;
         }
 
+        .active-daily-users {
+            margin-top: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            align-items: center;
+        }
+
+        .active-daily-users-label {
+            font-weight: 600;
+            color: var(--text-light);
+        }
+
+        .avatar-bubbles {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .avatar-bubbles img {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            border: 2px solid rgba(59, 130, 246, 0.6);
+            margin-left: -10px;
+            background: #0f172a;
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
+        }
+
+        .avatar-bubbles img:first-child {
+            margin-left: 0;
+        }
+
         .btn-cta {
             background: linear-gradient(135deg, var(--neon-blue), var(--neon-cyan));
             border: none;
@@ -870,6 +903,10 @@
                 <h1 id="hero-heading" data-translate="hero_heading">Start Trading Crypto with Confidence</h1>
                 <p id="hero-subtext" data-translate="hero_subtext">Join Coin Trade and explore fast, secure, and global crypto trading. Experience the future of digital finance with our cutting-edge platform.</p>
                 <a href="#markets" class="btn-cta" id="start-trading-btn" data-translate="start_trading">Start Trading</a>
+                <div class="active-daily-users">
+                    <div class="active-daily-users-label">Active daily users</div>
+                    <div class="avatar-bubbles" id="activeDailyUsersBubbles"></div>
+                </div>
             </div>
         </div>
     </section>
@@ -1711,6 +1748,60 @@
         
         // Auto-advance slides every 5 seconds
         setInterval(nextSlide, 5000);
+
+        const dailyUserAvatars = [
+            'img/avatar/avatar-01.svg',
+            'img/avatar/avatar-02.svg',
+            'img/avatar/avatar-03.svg',
+            'img/avatar/avatar-04.svg',
+            'img/avatar/avatar-05.svg',
+            'img/avatar/avatar-06.svg',
+            'img/avatar/avatar-07.svg',
+            'img/avatar/avatar-08.svg'
+        ];
+
+        function mulberry32(seed) {
+            return function() {
+                let t = seed += 0x6d2b79f5;
+                t = Math.imul(t ^ (t >>> 15), t | 1);
+                t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+            };
+        }
+
+        function getHourlySeed() {
+            const now = new Date();
+            return now.getFullYear() * 1000000
+                + (now.getMonth() + 1) * 10000
+                + now.getDate() * 100
+                + now.getHours();
+        }
+
+        function renderDailyUserBubbles() {
+            const bubbleContainer = document.getElementById('activeDailyUsersBubbles');
+            if (!bubbleContainer) {
+                return;
+            }
+            const rng = mulberry32(getHourlySeed());
+            const shuffled = [...dailyUserAvatars].sort(() => rng() - 0.5);
+            const visible = shuffled.slice(0, Math.min(6, shuffled.length));
+            bubbleContainer.innerHTML = visible
+                .map((src, index) => `<img src="${src}" alt="Active user avatar ${index + 1}" loading="lazy">`)
+                .join('');
+        }
+
+        renderDailyUserBubbles();
+
+        (function scheduleHourlyRefresh() {
+            const now = new Date();
+            const msToNextHour = ((60 - now.getMinutes()) * 60 * 1000)
+                - (now.getSeconds() * 1000)
+                - now.getMilliseconds();
+            setTimeout(() => {
+                renderDailyUserBubbles();
+                setInterval(renderDailyUserBubbles, 60 * 60 * 1000);
+            }, Math.max(msToNextHour, 0));
+        })();
 
         // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
