@@ -225,49 +225,6 @@
             opacity: 0.3;
         }
 
-        .active-users-card {
-            margin-top: 2.5rem;
-            display: inline-flex;
-            flex-direction: column;
-            gap: 0.75rem;
-            padding: 1.25rem 1.5rem;
-            border-radius: 16px;
-            background: rgba(15, 23, 42, 0.7);
-            border: 1px solid rgba(59, 130, 246, 0.25);
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.35);
-            backdrop-filter: blur(8px);
-        }
-
-        .active-users-title {
-            font-family: 'Montserrat', sans-serif;
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin: 0;
-        }
-
-        .active-users-bubbles {
-            display: flex;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.35rem;
-        }
-
-        .active-users-bubbles img {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            border: 2px solid rgba(59, 130, 246, 0.6);
-            box-shadow: 0 6px 12px rgba(15, 23, 42, 0.4);
-            object-fit: cover;
-            background: rgba(15, 23, 42, 0.8);
-        }
-
-        .active-users-note {
-            font-size: 0.85rem;
-            color: var(--text-gray);
-            margin: 0;
-        }
-
         .hero::before {
             content: '';
             position: absolute;
@@ -934,11 +891,6 @@
                 <h1 id="hero-heading" data-translate="hero_heading">Start Trading Crypto with Confidence</h1>
                 <p id="hero-subtext" data-translate="hero_subtext">Join Coin Trade and explore fast, secure, and global crypto trading. Experience the future of digital finance with our cutting-edge platform.</p>
                 <a href="dashbord_user.html" class="btn-cta" id="start-trading-btn" data-translate="start_trading">Start Trading</a>
-                <div class="active-users-card">
-                    <h3 class="active-users-title">Active daily users</h3>
-                    <div class="active-users-bubbles" id="activeDailyUsers"></div>
-                    <p class="active-users-note">Avatars refresh every hour.</p>
-                </div>
             </div>
         </div>
     </section>
@@ -1877,42 +1829,6 @@
         document.querySelectorAll('section').forEach(section => {
             observer.observe(section);
         });
-
-        function mulberry32(seed) {
-            return function() {
-                let t = seed += 0x6D2B79F5;
-                t = Math.imul(t ^ (t >>> 15), t | 1);
-                t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-                return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-            };
-        }
-
-        function buildAvatarSelection(seed, count) {
-            const avatars = Array.from({ length: 65 }, (_, idx) => idx + 1);
-            const random = mulberry32(seed);
-            for (let i = avatars.length - 1; i > 0; i--) {
-                const j = Math.floor(random() * (i + 1));
-                [avatars[i], avatars[j]] = [avatars[j], avatars[i]];
-            }
-            return avatars.slice(0, count);
-        }
-
-        function renderActiveDailyUsers() {
-            const container = document.getElementById('activeDailyUsers');
-            if (!container) return;
-            const hourSeed = Math.floor(Date.now() / 3600000);
-            const selected = buildAvatarSelection(hourSeed, 10);
-            container.innerHTML = selected.map((avatarId) => (
-                `<img src="img/avatar/${avatarId}.jpg" alt="Active user ${avatarId}" loading="lazy">`
-            )).join('');
-        }
-
-        renderActiveDailyUsers();
-        const msToNextHour = 3600000 - (Date.now() % 3600000);
-        setTimeout(() => {
-            renderActiveDailyUsers();
-            setInterval(renderActiveDailyUsers, 3600000);
-        }, msToNextHour);
     </script>
 </body>
 </html>
