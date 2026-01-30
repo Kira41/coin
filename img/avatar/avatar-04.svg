@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 80 80" role="img" aria-label="Avatar DN">
+  <defs>
+    <linearGradient id="grad-DN" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22c55e" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+  </defs>
+  <circle cx="40" cy="40" r="38" fill="url(#grad-DN)" />
+  <circle cx="40" cy="40" r="36" fill="rgba(15, 23, 42, 0.15)" />
+  <text x="50%" y="52%" text-anchor="middle" dominant-baseline="middle" font-family="'Montserrat', Arial, sans-serif" font-size="26" fill="#f8fafc" font-weight="700">DN</text>
+</svg>
