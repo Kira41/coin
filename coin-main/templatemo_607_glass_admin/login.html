@@ -46,15 +46,15 @@ https://templatemo.com/tm-607-glass-admin
                     <p class="login-subtitle">Sign in to continue to GlassDash</p>
                 </div>
 
-                <form data-validate data-redirect="index.html">
+                <form id="userLoginForm">
                     <div class="form-group">
-                        <label class="form-label" for="email">Email Address</label>
-                        <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
+                        <label class="form-label" for="loginEmail">Email Address</label>
+                        <input type="email" id="loginEmail" class="form-input" placeholder="Enter your email" required>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="password">Password</label>
-                        <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                        <label class="form-label" for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required>
                     </div>
 
                     <div class="form-row">
@@ -73,6 +73,7 @@ https://templatemo.com/tm-607-glass-admin
                         </svg>
                     </button>
                 </form>
+                <p class="login-footer" id="loginError" role="alert" style="display: none; color: #ff6b6b;"></p>
 
                 <div class="divider">
                     <span>or continue with</span>
@@ -112,6 +113,48 @@ https://templatemo.com/tm-607-glass-admin
     </div>
 
     <script src="templatemo-glass-admin-script.js"></script>
+    <script>
+        const loginForm = document.getElementById('userLoginForm');
+        const loginError = document.getElementById('loginError');
+
+        if (localStorage.getItem('user_id')) {
+            window.location.href = '/templatemo_607_glass_admin/index.html';
+        }
+
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            loginError.style.display = 'none';
+            loginError.textContent = '';
+
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+
+            try {
+                const response = await fetch('../php/user_login.php', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const result = await response.json().catch(() => ({}));
+
+                if (response.ok && result.status === 'ok') {
+                    localStorage.setItem('user_id', result.user_id);
+                    window.location.href = '/templatemo_607_glass_admin/index.html';
+                    return;
+                }
+
+                loginError.textContent = result.message || 'Unable to sign in. Please check your credentials.';
+                loginError.style.display = 'block';
+            } catch (error) {
+                loginError.textContent = 'Unable to sign in. Please try again later.';
+                loginError.style.display = 'block';
+            }
+        });
+    </script>
     <!-- TemplateMo 607 Glass Admin -->
 </body>
 </html>

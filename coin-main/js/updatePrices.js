@@ -28,6 +28,8 @@ let selectedPairVal = $('#currencyPair').val();
 let selectedPairText = $('#currencyPair option:selected').text();
 let priceInterval = null;
 let priceFetchController = null;
+const apiBasePath = window.API_BASE_PATH || '';
+const buildApiUrl = (path) => `${apiBasePath}${path}`;
 
 // Trigger immediate refresh on user interactions
 function triggerTurboRefresh() {
@@ -327,7 +329,7 @@ async function fetchDashboardData() {
             user_id: userId,
             include_hidden_balance: '1',
         });
-        const data = await apiFetch('php/getter.php?' + params.toString());
+        const data = await apiFetch(buildApiUrl('php/getter.php?' + params.toString()));
         if (data.personalData) {
             data.personalData.balance = parseDollar(data.personalData.balance);
             data.personalData.totalDepots = parseDollar(data.personalData.totalDepots);
@@ -435,7 +437,7 @@ async function saveDashboardData() {
                 }
             }));
         }
-        const result = await apiFetch('php/setter.php', {
+        const result = await apiFetch(buildApiUrl('php/setter.php'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ ...dataToSave, user_id: userId })
@@ -466,7 +468,7 @@ $("#userLoginForm").on("submit", async function(e){
     const formData = new FormData();
     formData.append("email", email);
     formData.append("password", md5(pwd));
-    const res = await fetch("php/user_login.php", { method: "POST", body: formData });
+    const res = await fetch(buildApiUrl("php/user_login.php"), { method: "POST", body: formData });
     const result = await res.json();
     if(result.status === "ok") {
         userId = result.user_id;
@@ -895,7 +897,7 @@ function initializeUI() {
 
     async function loadTransactions() {
         try {
-            const data = await apiFetch(`php/user_transactions_getter.php?user_id=${encodeURIComponent(userId)}&page=${TX_PAGE}&page_size=${TX_PAGE_SIZE}`);
+            const data = await apiFetch(buildApiUrl(`php/user_transactions_getter.php?user_id=${encodeURIComponent(userId)}&page=${TX_PAGE}&page_size=${TX_PAGE_SIZE}`));
             ALL_TXS = data.transactions || [];
             TX_TOTAL_PAGES = Math.ceil((data.total || 0) / TX_PAGE_SIZE) || 1;
             renderTransactions();
@@ -1067,7 +1069,7 @@ function initializeUI() {
         const fd = new FormData();
         fd.append('user_id', userId);
         fd.append('file', file, file.name);
-        const res = await fetch('php/profile_pic_upload.php', { method: 'POST', body: fd });
+        const res = await fetch(buildApiUrl('php/profile_pic_upload.php'), { method: 'POST', body: fd });
         const result = await res.json();
         if (result.status === 'ok') {
             const url = 'data:image/*;base64,' + result.data;
@@ -1283,7 +1285,7 @@ function initializeUI() {
                 if (o.type === 'address') { hasAddress = true; }
             }
         });
-        const res = await fetch('php/kyc_upload.php', { method: 'POST', body: fd });
+        const res = await fetch(buildApiUrl('php/kyc_upload.php'), { method: 'POST', body: fd });
         const result = await res.json();
         if (result.status === 'ok') {
             setKYCStatus('telechargerlesdocumentsdidentitestat', 2);
@@ -1530,7 +1532,7 @@ function initializeUI() {
         currentPricePair = pair;
         const commoditySymbol = getCommoditySymbol(pair);
         if (commoditySymbol) {
-            fetch(`php/commodity_proxy.php?symbol=${encodeURIComponent(commoditySymbol)}`, { signal: priceFetchController.signal })
+            fetch(buildApiUrl(`php/commodity_proxy.php?symbol=${encodeURIComponent(commoditySymbol)}`), { signal: priceFetchController.signal })
                 .then(r => r.json())
                 .then(info => {
                     if (currentPricePair !== fetchFor) return;
@@ -1549,7 +1551,7 @@ function initializeUI() {
 
         const symbol = getBinanceSymbol(pair);
         // Use a backend proxy to avoid CORS issues and handle network errors gracefully
-        fetch(`php/binance_proxy.php?mode=24hr&symbol=${symbol}`, { signal: priceFetchController.signal })
+        fetch(buildApiUrl(`php/binance_proxy.php?mode=24hr&symbol=${symbol}`), { signal: priceFetchController.signal })
             .then(r => r.json())
             .then(info => {
                 if (currentPricePair !== fetchFor) return; // ignore stale response
@@ -1570,7 +1572,7 @@ function initializeUI() {
         const commoditySymbol = getCommoditySymbol(pair);
         if (commoditySymbol) {
             try {
-                const resp = await fetch(`php/commodity_proxy.php?symbol=${encodeURIComponent(commoditySymbol)}`);
+            const resp = await fetch(buildApiUrl(`php/commodity_proxy.php?symbol=${encodeURIComponent(commoditySymbol)}`));
                 const info = await resp.json();
                 return parseFloat(info.price);
             } catch (e) {
@@ -1580,7 +1582,7 @@ function initializeUI() {
 
         const symbol = getBinanceSymbol(pair);
         try {
-            const resp = await fetch(`php/binance_proxy.php?mode=price&symbol=${symbol}`);
+            const resp = await fetch(buildApiUrl(`php/binance_proxy.php?mode=price&symbol=${symbol}`));
             const info = await resp.json();
             return parseFloat(info.price);
         } catch (e) {
@@ -1821,7 +1823,7 @@ function initializeUI() {
         }
 
         try {
-            const url = orderType === 'market' ? 'php/market_order.php' : 'php/place_order.php';
+            const url = orderType === 'market' ? buildApiUrl('php/market_order.php') : buildApiUrl('php/place_order.php');
             resp = await apiFetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1891,7 +1893,7 @@ function initializeUI() {
     async function cancel_order(op) {
         try {
             const orderId = parseInt(String(op).replace(/\D/g, ''), 10);
-            await apiFetch('php/cancel_order.php', {
+            await apiFetch(buildApiUrl('php/cancel_order.php'), {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: userId, order_id: orderId })
@@ -1953,7 +1955,7 @@ function initializeUI() {
         if(slType==='time') payload.stop_time=$('#stopLossTime').val();
         if(slType==='trailing') payload.trailing_percentage=parseFloat($('#trailingPercentage').val());
         try{
-            await apiFetch('php/place_order.php',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+            await apiFetch(buildApiUrl('php/place_order.php'),{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
         }catch(e){alert(e.message||'Erreur');}
     });
 };
