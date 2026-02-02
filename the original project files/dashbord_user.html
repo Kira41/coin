@@ -1,531 +1,324 @@
 <!DOCTYPE html>
-
 <html dir="ltr" lang="fr">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Tableau de bord</title>
-<!-- Bootstrap RTL CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-<!-- Font Awesome -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
-<!-- Custom CSS -->
-<link rel="stylesheet" href="style.css"/>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Tableau de bord</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="templatemo-glass-admin-style.css"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-<div id="loginSection" class="container mt-5" style="max-width: 400px; display:none;">
-  <h2 class="mb-3">Connexion</h2>
-  <form id="userLoginForm">
-    <div class="mb-3">
-      <label for="loginEmail" class="form-label">Email</label>
-      <input type="email" class="form-control" id="loginEmail" required>
-    </div>
-    <div class="mb-3">
-      <label for="loginPassword" class="form-label">Mot de passe</label>
-      <input type="password" class="form-control" id="loginPassword" required>
-    </div>
-    <button type="submit" class="btn btn-primary">Se connecter</button>
-  </form>
-</div>
-<div id="dashboardContainer" class="container-fluid" style="display:none;">
-<div class="row">
-<!-- Sidebar -->
-<div class="col-md-3 col-lg-2 sidebar p-0">
-<div class="d-flex flex-column p-3">
-<h3 class="text-center mb-4">Tableau de bord</h3>
-<ul class="nav nav-pills flex-column mb-auto">
-<li class="nav-item">
-<a class="nav-link active" data-bs-toggle="pill" href="#dashboard">
-<i class="fas fa-tachometer-alt" style="margin-right: 8px;"></i>Accueil </a>
-</li>
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="pill" href="#deposit">
-<i class="fas fa-money-bill-wave" style="margin-right: 8px;"></i>Dépôt </a>
-</li>
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="pill" href="#withdraw">
-<i class="fas fa-hand-holding-usd" style="margin-right: 8px;"></i>Retrait </a>
-</li>
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="pill" href="#Profil">
-<i class="fas fa-user" style="margin-right: 8px;"></i>Profil </a>
-</li>
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="pill" href="#trading">
-<i class="fas fa-chart-line" style="margin-right: 8px;"></i>Trading </a>
-</li>
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="pill" href="#kyc">
-<i class="fas fa-id-card" style="margin-right: 8px;"></i> KYC </a>
-</li>
-<li class="nav-item">
-<a class="nav-link" data-bs-toggle="pill" href="#offers">
-<i class="fas fa-gift" style="margin-right: 8px;"></i>Offres </a>
-</li>
-</ul>
-</div>
-</div>
-<!-- Main Content -->
-<div class="col-md-9 col-lg-10 main-content ms-sm-auto px-md-4 py-4">
-<!-- Header -->
-<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-<h1 class="h2">Bonjour, <span id="firstname"></span></h1>
-<div class="btn-toolbar mb-2 mb-md-0">
-<div class="dropdown position-relative me-2">
-  <button aria-expanded="false" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" id="notificationsDropdownButton" type="button">
-    <i class="fas fa-bell"></i>
-  </button>
-  <span class="notification-badge" id="notificationCount">0</span>
-  <ul aria-labelledby="notificationsDropdownButton" class="dropdown-menu dropdown-menu-end" id="notificationsRecentes" style="min-width: 300px;">
-    <li class="dropdown-header">
-      <i class="fas fa-bell me-2"></i> Notifications récentes
-    </li>
-    <li>
-      <hr class="dropdown-divider"/>
-    </li>
-    <li id="notificationsDropdown" class="text-center text-muted py-3"></li>
-    <li>
-      <hr class="dropdown-divider"/>
-    </li>
-    <li class="text-center">
-      <a class="dropdown-item small" href="#"></a>
-    </li>
-  </ul>
-</div>
-<div class="dropdown me-2">
-<button aria-expanded="false" class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" id="languageDropdown" type="button">
-<i class="fas fa-globe"></i>
-</button>
-<ul aria-labelledby="languageDropdown" class="dropdown-menu dropdown-menu-end" style="">
-<li class="dropdown-header">
-<i class="fas fa-language me-2"></i> Choisissez la langue
-                  </li>
-<li>
-<hr class="dropdown-divider"/>
-</li>
-<li>
-<a class="dropdown-item active" href="#" onclick="changeLanguage('ar')">
-<i class="fas fa-check me-2"></i> Français </a>
-</li>
-<li>
-<a class="dropdown-item" href="#" onclick="changeLanguage('en')"> English </a>
-</li>
-<li>
-<a class="dropdown-item" href="#" onclick="changeLanguage('ar')"> Arabe </a>
-</li>
-</ul>
-</div>
-<div class="dropdown">
-<button aria-expanded="false" class="btn btn-sm btn-outline-secondary dropdown-toggle ms-2 d-flex align-items-center" data-bs-toggle="dropdown" id="accountDropdown" type="button">
-Mon compte </button>
-<ul aria-labelledby="accountDropdown" class="dropdown-menu dropdown-menu-end" style="min-width: 250px;">
-<li class="dropdown-header text-center">
-<img alt="Image Utilisateur" class="rounded-circle mb-2 user-avatar" src="" style="width: 60px; height: 60px;"/>
-<div class="fw-bold" id="nameincompte">---</div>
-</li>
-<li>
-<hr class="dropdown-divider"/>
-</li>
-<li class="px-3 py-2">
-<div class="text-muted small">Solde total</div>
-<div class="fw-bold text-success" id="accountBalance">$12,500.00</div>
-</li>
-<li>
-<hr class="dropdown-divider"/>
-</li>
-<li>
-<a class="dropdown-item text-danger" href="#" onclick="logout()">
-<i class="fas fa-sign-out-alt me-2"></i>Se déconnecter </a>
-</li>
-</ul>
-</div>
-</div>
-</div>
-<!-- Tab Content -->
-<div class="tab-content">
-<!-- Trading Tab -->
-<div class="tab-pane fade" id="trading">
-<h2 class="mb-4">Plateforme du trading</h2>
-<div class="row">
-<!-- Trading Chart Section -->
-<div class="col-lg-8">
-<div class="card mb-4">
-<div class="card-header d-flex justify-content-between align-items-center">
-<div>
-<i class="fas fa-chart-line me-2"></i> Graphique de trading
-                      </div>
-<div class="d-flex align-items-center">
-                    <label class="form-label me-2 mb-0" for="currencyPair">Paire de devises :</label>
-                    <select class="form-select form-select-sm" id="currencyPair" style="width: auto;">
-                      <optgroup label="Crypto">
-                        <option value="BTCUSD">BTC/USD</option>
-                        <option value="ETHUSD">ETH/USD</option>
-                        <option value="USDTUSD">USDT/USD</option>
-                        <option value="BNBUSD">BNB/USD</option>
-                        <option value="USDCUSD">USDC/USD</option>
-                        <option value="XRPUSD">XRP/USD</option>
-                        <option value="ADAUSD">ADA/USD</option>
-                        <option value="DOGEUSD">DOGE/USD</option>
-                        <option value="MATICUSD">MATIC/USD</option>
-                        <option value="SOLUSD">SOL/USD</option>
-                        <option value="DOTUSD">DOT/USD</option>
-                        <option value="SHIBUSD">SHIB/USD</option>
-                        <option value="AVAXUSD">AVAX/USD</option>
-                        <option value="LUNAUSD">LUNA/USD</option>
-                        <option value="LTCUSD">LTC/USD</option>
-                        <option value="LINKUSD">LINK/USD</option>
-                        <option value="UNIUSD">UNI/USD</option>
-                        <option value="ALGOUSD">ALGO/USD</option>
-                        <option value="XLMUSD">XLM/USD</option>
-                        <option value="VETUSD">VET/USD</option>
-                        <option value="ICPUSD">ICP/USD</option>
-                        <option value="ATOMUSD">ATOM/USD</option>
-                        <option value="FILUSD">FIL/USD</option>
-                        <option value="TRXUSD">TRX/USD</option>
-                        <option value="XTZUSD">XTZ/USD</option>
-                        <option value="THETAUSD">THETA/USD</option>
-                        <option value="FTTUSD">FTT/USD</option>
-                        <option value="EOSUSD">EOS/USD</option>
-                        <option value="HBARUSD">HBAR/USD</option>
-                        <option value="IOTAUSD">IOTA/USD</option>
-                        <option value="XMRUSD">XMR/USD</option>
-                        <option value="BCHUSD">BCH/USD</option>
-                        <option value="NEOUSD">NEO/USD</option>
-                        <option value="EGLDUSD">EGLD/USD</option>
-                        <option value="ZECUSD">ZEC/USD</option>
-                        <option value="CAKEUSD">CAKE/USD</option>
-                        <option value="KLAYUSD">KLAY/USD</option>
-                        <option value="ONEUSD">ONE/USD</option>
-                        <option value="MANAUSD">MANA/USD</option>
-                        <option value="ENJUSD">ENJ/USD</option>
-                        <option value="AAVEUSD">AAVE/USD</option>
-                        <option value="MKRUSD">MKR/USD</option>
-                        <option value="SNXUSD">SNX/USD</option>
-                        <option value="COMPUSD">COMP/USD</option>
-                        <option value="SUSHIUSD">SUSHI/USD</option>
-                        <option value="HTUSD">HT/USD</option>
-                        <option value="CELUSD">CEL/USD</option>
-                        <option value="OKBUSD">OKB/USD</option>
-                        <option value="WAVESUSD">WAVES/USD</option>
-                        <option value="SGCUSD">SGC/USD</option>
-                      </optgroup>
-                      <optgroup label="Commodities">
-                        <option value="GOLDUSD">Gold/USD</option>
-                        <option value="SILVERUSD">Silver/USD</option>
-                        <option value="PLATINUMUSD">Platinum/USD</option>
-                        <option value="COPPERUSD">Copper/USD</option>
-                        <option value="WTIUSD">Crude Oil – WTI/USD</option>
-                        <option value="BRENTUSD">Crude Oil – Brent/USD</option>
-                        <option value="NATGASUSD">Natural Gas/USD</option>
-                        <option value="COALUSD">Coal/USD</option>
-                        <option value="ALUMINUMUSD">Aluminum/USD</option>
-                        <option value="NICKELUSD">Nickel/USD</option>
-                        <option value="ZINCUSD">Zinc/USD</option>
-                        <option value="LEADUSD">Lead/USD</option>
-                        <option value="IRONOREUSD">Iron Ore/USD</option>
-                        <option value="WHEATUSD">Wheat/USD</option>
-                        <option value="CORNUSD">Corn/USD</option>
-                        <option value="SOYBEANUSD">Soybeans/USD</option>
-                        <option value="COFFEEUSD">Coffee/USD</option>
-                        <option value="COCOAUSD">Cocoa/USD</option>
-                        <option value="SUGARUSD">Sugar/USD</option>
-                        <option value="COTTONUSD">Cotton/USD</option>
-                      </optgroup>
-                    </select>
-</div>
-</div>
-<div class="card-body p-0">
-<!-- TradingView Chart Container -->
-<div id="tradingview_chart" style="height: 500px; width: 100%;">
-<!-- TradingView Widget BEGIN -->
-<div class="tradingview-widget-container" style="height:100%;width:100%">
-<div class="tradingview-widget-container__widget" style="height:calc(100% - 32px);width:100%"></div>
-<div class="tradingview-widget-copyright">
-<a href="https://www.tradingview.com/" rel="noopener nofollow" target="_blank">
-<span class="blue-text">Track all markets on TradingView</span>
-</a>
-</div>
-<script async="" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" type="text/javascript">
-                            {
-                              "autosize": true,
-                              "symbol": "BINANCE:BTCUSDT",
-                              "interval": "D",
-                              "timezone": "Etc/UTC",
-                              "theme": "light",
-                              "style": "1",
-                              "locale": "en",
-                              "allow_symbol_change": true,
-                              "calendar": false,
-                              "support_host": "https://www.tradingview.com"
-                            }
-                          </script>
-</div>
-<!-- TradingView Widget END -->
-</div>
-</div>
-</div>
-</div>
-<!-- Trading Panel -->
-<div class="col-lg-4">
-<!-- Current Price Card -->
-<div class="card mb-3">
-<div class="card-body text-center">
-<h5 class="card-title">Prix actuel</h5>
-<h2 class="text-primary mb-0" id="currentPrice">$43,250.00</h2>
-<small class="text-success" id="priceChange">+2.5% (+$1,050.00)</small>
-</div>
-</div>
-<!-- Trading Form -->
-<div class="card mb-3">
-<div class="card-header">
-<i class="fas fa-exchange-alt me-2"></i> Exécution de la transaction
-                    </div>
-<div class="card-body">
-<form id="tradingForm">
-<div class="mb-3">
-<label class="form-label" for="tradeAmount">Montant</label>
-<div class="input-group">
-<input class="form-control" name="tradeAmount" id="tradeAmount" placeholder="Entrez le montant" required="" step="0.01" type="number"/>
-<span class="input-group-text" id="tradeAmountCurrency" style="cursor: pointer;">
-  <i class="fas fa-exchange-alt me-1"></i>USD
-</span>
-</div>
-<div class="form-text">Solde disponible : <span class="fw-bold" id="soldeintrade">---</span>
-</div>
-<div class="form-text">Valeur de la paire : <span class="fw-bold" id="tradeAmountEquivalent">--</span>
-</div>
-</div>
-<div class="mb-3">
-<label class="form-label" for="orderType">Type d’ordre</label>
-<select class="form-select" id="orderType">
-<option value="market">Ordre au marché</option>
-<option value="limit">Ordre à cours limité</option>
-<option value="stop">Ordre stop</option>
-<option value="stoplimit">Stop-limit</option>
-<option value="trailing_stop">Trailing stop</option>
-<option value="oco">OCO</option>
-</select>
-</div>
-<div class="mb-3" id="stopPriceDiv" style="display: none;">
-<label class="form-label" for="stopPrice">Prix stop</label>
-<div class="input-group">
-  <input class="form-control" name="stopPrice" id="stopPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
-  <span class="input-group-text">USD</span>
-  <button class="btn btn-outline-secondary" id="useCurrentStopPrice" type="button">
-    <i class="fas fa-bolt"></i>
-  </button>
-</div>
-</div>
-<div class="mb-3" id="limitPriceDiv" style="display: none;">
-<label class="form-label" for="limitPrice">Prix limite</label>
-<div class="input-group">
-  <input class="form-control" name="limitPrice" id="limitPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
-  <span class="input-group-text">USD</span>
-  <button class="btn btn-outline-secondary" id="useCurrentLimitPrice" type="button">
-    <i class="fas fa-bolt"></i>
-  </button>
-</div>
-<div class="mb-3" id="stopLimitPriceDiv" style="display: none;">
-<label class="form-label" for="stopLimitPrice">Prix limite du stop</label>
-<div class="input-group">
-<input class="form-control" name="stopLimitPrice" id="stopLimitPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
-<span class="input-group-text">USD</span>
-</div>
-</div>
-</div>
-<div class="row g-2 mb-3">
-<div class="col-6">
-<button class="btn btn-success w-100" id="buyBtn" type="button">
-<i class="fas fa-arrow-up me-2"></i>Acheter </button>
-</div>
-<div class="col-6">
-<button class="btn btn-danger w-100" id="sellBtn" type="button">
-<i class="fas fa-arrow-down me-2"></i>Vendre </button>
-</div>
-</div>
-</form>
-</div>
-<!-- Stop Loss Settings -->
-<div class="card">
-<div class="card-header">
-<i class="fas fa-shield-alt me-2"></i> Paramètres du stop loss
-                    </div>
-<div class="card-body">
-<div class="form-check mb-3">
-<input class="form-check-input" id="enableStopLoss" type="checkbox"/>
-<label class="form-check-label" for="enableStopLoss"> Activer le stop loss </label>
-</div>
-<div id="stopLossSettings" style="display: none;">
-<div class="mb-3">
-<label class="form-label" for="stopLossType">Type de stop loss</label>
-<select class="form-select" id="stopLossType">
-<option value="price">À l’atteinte d’un prix spécifique</option>
-<option value="percentage">Lors d’un pourcentage de perte spécifié</option>
-<option value="time">À un moment précis</option>
-<option value="trailing">Trailing stop</option>
-</select>
-</div>
-<div class="mb-3" id="stopLossPriceDiv">
-<label class="form-label" for="stopLossPrice">Prix du stop loss</label>
-<div class="input-group">
-<input class="form-control" name="stopLossPrice" id="stopLossPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
-<span class="input-group-text">USD</span>
-</div>
-</div>
-<div class="mb-3" id="stopLossPercentageDiv" style="display: none;">
-<label class="form-label" for="stopLossPercentage">Pourcentage de perte autorisé</label>
-<div class="input-group">
-<input class="form-control" name="stopLossPercentage" id="stopLossPercentage" max="100" min="0.1" placeholder="Entrez le pourcentage" step="0.1" type="number"/>
-<span class="input-group-text">%</span>
-</div>
-</div>
-<div class="mb-3" id="trailingPercentageDiv" style="display: none;">
-<label class="form-label" for="trailingPercentage">Pourcentage du trailing stop</label>
-<div class="input-group">
-<input class="form-control" name="trailingPercentage" id="trailingPercentage" max="100" min="0.1" placeholder="Entrez le pourcentage" step="0.1" type="number"/>
-<span class="input-group-text">%</span>
-</div>
-</div>
-<div class="mb-3" id="stopLossTimeDiv" style="display: none;">
-<label class="form-label" for="stopLossTime">Heure d'arrêt du trading</label>
-<input class="form-control" id="stopLossTime" type="datetime-local"/>
-</div>
-<div class="form-check mb-3">
-<input class="form-check-input" id="enableOCO" type="checkbox"/>
-<label class="form-check-label" for="enableOCO"> Activer OCO (take profit + stop loss)</label>
-</div>
-<div class="mb-3" id="takeProfitDiv" style="display: none;">
-<label class="form-label" for="takeProfitPrice">Prix take profit</label>
-<div class="input-group">
-<input class="form-control" name="takeProfitPrice" id="takeProfitPrice" placeholder="Entrez le prix" step="0.01" type="number"/>
-<span class="input-group-text">USD</span>
-</div>
-</div>
-<button class="btn btn-warning btn-sm w-100" id="setStopLoss" type="button">
-<i class="fas fa-save me-2"></i>Enregistrer les paramètres du stop loss </button>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Trading History -->
-<div class="row mt-4">
-<div class="col-12">
-<div class="card" id="historiquedutradingCard">
-<div class="card-header" id="historiquedutradingHeader">
-<i class="fas fa-history me-2"></i> Historique du trading
-                    </div>
-<div class="card-body">
-<div id="cancelOrderAlert"></div>
-<div class="table-responsive" style="max-height: 250px; overflow-y: auto;">
-<table class="table table-hover" id="historiqueTrading">
-<thead>
-<tr>
-<th>Opération</th>
-<th>Le temps</th>
-<th>Paire de devises</th>
-<th>Type</th>
-<th>Quantité</th>
-<th>Prix d'achat</th>
-<th>Statut</th>
-<th>Profit/Perte</th>
-<th>Annuler</th>
-</tr>
-</thead>
-<tbody id="tradingHistory">
-</tbody>
-</table>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-</div>
-<!-- Dashboard Tab -->
-<div class="tab-pane fade show active" id="dashboard">
-<div class="row">
-<div class="col-md-6 col-lg-3">
-<div class="dashboard-stat stat-primary">
-<div class="d-flex justify-content-between align-items-center">
-<div>
-<h3 class="mb-0" id="soldeTotal">--- $</h3>
-<p class="mb-0">Solde total</p>
-</div>
-<i class="fas fa-wallet stat-icon"></i>
-</div>
-</div>
-</div>
-<div class="col-md-6 col-lg-3">
-<div class="dashboard-stat stat-success">
-<div class="d-flex justify-content-between align-items-center">
-<div>
-<h3 class="mb-0" id="totalDepots">--- $</h3>
-<p class="mb-0">Total Dépôts</p>
-</div>
-<i class="fas fa-arrow-circle-down stat-icon"></i>
-</div>
-</div>
-</div>
-<div class="col-md-6 col-lg-3">
-  <div class="dashboard-stat stat-danger" id="profit-box">
-    <div class="d-flex justify-content-between align-items-center">
-      <div>
-        <h3 class="mb-0" id="profit">--- $</h3>
-        <p class="mb-0">Profit</p>
+  <div class="background"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div id="loginSection" class="login-page" style="display:none;">
+    <button class="theme-toggle-float" id="theme-toggle" title="Toggle Light/Dark Mode">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/>
+        <path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/>
+        <path d="M2 12h2"/><path d="M20 12h2"/>
+        <path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-logo">C</div>
+          <h1 class="login-title">Bon retour</h1>
+          <p class="login-subtitle">Connectez-vous pour accéder à votre espace</p>
+        </div>
+
+        <form id="userLoginForm">
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Email</label>
+            <input type="email" id="loginEmail" class="form-input" placeholder="Entrez votre email" required/>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Mot de passe</label>
+            <input type="password" id="loginPassword" class="form-input" placeholder="Entrez votre mot de passe" required/>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            Se connecter
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+        </form>
       </div>
-      <i class="fas fa-chart-line stat-icon"></i>
     </div>
   </div>
-</div>
-<div class="col-md-6 col-lg-3">
-<div class="dashboard-stat stat-warning">
-<div class="d-flex justify-content-between align-items-center">
-<div>
-<h3 class="mb-0" id="nbTransactions">---</h3>
-<p class="mb-0">Nombre de transactions</p>
-</div>
-<i class="fas fa-exchange-alt stat-icon"></i>
-</div>
-</div>
-</div>
-</div>
-<div class="row mt-4">
-<div class="col-md-8">
-<div class="card" id="transactionsCard">
-  <div class="card-header" id="transactionsHeader">
-    <i class="fas fa-history me-2"></i> Toutes les transactions
-  </div>
-  <div class="card-body">
-    <div class="table-responsive">
-      <table id="transactionsTable" class="table table-hover">
-        <thead>
-          <tr>
-            <th>Numéro Opération</th>
-            <th>Type</th>
-            <th>Quantité</th>
-            <th>Date</th>
-            <th>Statut</th>
-          </tr>
-        </thead>
-        <tbody id="transactionsTableBody"></tbody>
-      </table>
-    </div>
-    <ul class="pagination justify-content-center mt-3" id="transactionsPagination"></ul>
-  </div>
-</div>
-</div>
-<div class="col-md-4">
-<div class="card">
-<div class="card-header">
-<i class="fas fa-bullhorn me-2"></i> Notifications
-                    </div>
-<div class="card-body"><div id="notifications"></div></div>
-</div>
-</div>
-</div>
-</div>
-<!-- Deposit Tab -->
+
+  <div id="dashboardContainer" class="dashboard" style="display:none;">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">C</div>
+        <span class="logo-text">Coin Dashboard</span>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-section">
+          <span class="nav-section-title">Main Menu</span>
+          <ul>
+            <li class="nav-item">
+              <a class="nav-link active" data-bs-toggle="pill" href="#dashboard">
+                <i class="fas fa-tachometer-alt nav-icon"></i>
+                Accueil
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="pill" href="#deposit">
+                <i class="fas fa-money-bill-wave nav-icon"></i>
+                Dépôt
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="pill" href="#withdraw">
+                <i class="fas fa-hand-holding-usd nav-icon"></i>
+                Retrait
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="pill" href="#Profil">
+                <i class="fas fa-user nav-icon"></i>
+                Profil
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="pill" href="#trading">
+                <i class="fas fa-chart-line nav-icon"></i>
+                Trading
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="pill" href="#kyc">
+                <i class="fas fa-id-card nav-icon"></i>
+                KYC
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-bs-toggle="pill" href="#offers">
+                <i class="fas fa-gift nav-icon"></i>
+                Offres
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      <div class="sidebar-footer">
+        <div class="user-profile">
+          <img alt="Image Utilisateur" class="user-avatar" src=""/>
+          <div class="user-info">
+            <div class="user-name" id="sidebarName">---</div>
+            <div class="user-role" id="memberSince">Utilisateur</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <nav class="navbar">
+        <h1 class="page-title">Bonjour, <span id="firstname"></span></h1>
+        <div class="navbar-right">
+          <div class="dropdown position-relative">
+            <button aria-expanded="false" class="nav-btn" data-bs-toggle="dropdown" id="notificationsDropdownButton" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              <span class="notification-dot" id="notificationCount">0</span>
+            </button>
+            <ul aria-labelledby="notificationsDropdownButton" class="dropdown-menu dropdown-menu-end" id="notificationsRecentes" style="min-width: 300px;">
+              <li class="dropdown-header">
+                <i class="fas fa-bell me-2"></i> Notifications récentes
+              </li>
+              <li><hr class="dropdown-divider"/></li>
+              <li id="notificationsDropdown" class="text-center text-muted py-3"></li>
+              <li><hr class="dropdown-divider"/></li>
+              <li class="text-center">
+                <a class="dropdown-item small" href="#"></a>
+              </li>
+            </ul>
+          </div>
+          <div class="dropdown">
+            <button aria-expanded="false" class="nav-btn" data-bs-toggle="dropdown" id="languageDropdown" type="button">
+              <i class="fas fa-globe"></i>
+            </button>
+            <ul aria-labelledby="languageDropdown" class="dropdown-menu dropdown-menu-end">
+              <li class="dropdown-header">
+                <i class="fas fa-language me-2"></i> Choisissez la langue
+              </li>
+              <li><hr class="dropdown-divider"/></li>
+              <li><a class="dropdown-item active" href="#" onclick="changeLanguage('ar')"><i class="fas fa-check me-2"></i> Français</a></li>
+              <li><a class="dropdown-item" href="#" onclick="changeLanguage('en')">English</a></li>
+              <li><a class="dropdown-item" href="#" onclick="changeLanguage('ar')">Arabe</a></li>
+            </ul>
+          </div>
+          <div class="dropdown">
+            <button aria-expanded="false" class="nav-btn" data-bs-toggle="dropdown" id="accountDropdown" type="button">
+              <i class="fas fa-user-circle"></i>
+            </button>
+            <ul aria-labelledby="accountDropdown" class="dropdown-menu dropdown-menu-end" style="min-width: 250px;">
+              <li class="dropdown-header text-center">
+                <img alt="Image Utilisateur" class="rounded-circle mb-2 user-avatar" src="" style="width: 60px; height: 60px;"/>
+                <div class="fw-bold" id="nameincompte">---</div>
+              </li>
+              <li><hr class="dropdown-divider"/></li>
+              <li class="px-3 py-2">
+                <div class="text-muted small">Solde total</div>
+                <div class="fw-bold text-success" id="accountBalance">$12,500.00</div>
+              </li>
+              <li><hr class="dropdown-divider"/></li>
+              <li>
+                <a class="dropdown-item text-danger" href="#" onclick="logout()">
+                  <i class="fas fa-sign-out-alt me-2"></i>Se déconnecter
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="dashboard">
+          <section class="stats-grid">
+            <div class="glass-card glass-card-3d stat-card">
+              <div class="stat-card-inner">
+                <div class="stat-info">
+                  <h3>Solde total</h3>
+                  <div class="stat-value" id="soldeTotal">--- $</div>
+                </div>
+                <div class="stat-icon cyan">
+                  <i class="fas fa-wallet"></i>
+                </div>
+              </div>
+            </div>
+            <div class="glass-card glass-card-3d stat-card">
+              <div class="stat-card-inner">
+                <div class="stat-info">
+                  <h3>Total Dépôts</h3>
+                  <div class="stat-value" id="totalDepots">--- $</div>
+                </div>
+                <div class="stat-icon magenta">
+                  <i class="fas fa-arrow-circle-down"></i>
+                </div>
+              </div>
+            </div>
+            <div class="glass-card glass-card-3d stat-card" id="profit-box">
+              <div class="stat-card-inner">
+                <div class="stat-info">
+                  <h3>Profit</h3>
+                  <div class="stat-value" id="profit">--- $</div>
+                </div>
+                <div class="stat-icon purple">
+                  <i class="fas fa-chart-line"></i>
+                </div>
+              </div>
+            </div>
+            <div class="glass-card glass-card-3d stat-card">
+              <div class="stat-card-inner">
+                <div class="stat-info">
+                  <h3>Transactions</h3>
+                  <div class="stat-value" id="nbTransactions">---</div>
+                </div>
+                <div class="stat-icon success">
+                  <i class="fas fa-exchange-alt"></i>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section class="content-grid">
+            <div class="glass-card chart-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">Revenue Analytics</h2>
+                  <p class="card-subtitle">Monthly revenue overview</p>
+                </div>
+                <div class="card-actions">
+                  <button class="card-btn active">Monthly</button>
+                  <button class="card-btn">Weekly</button>
+                  <button class="card-btn">Daily</button>
+                </div>
+              </div>
+              <div class="chart-wrapper">
+                <div class="chart-container">
+                  <div class="chart-y-axis">
+                    <span class="y-value">$100K</span>
+                    <span class="y-value">$80K</span>
+                    <span class="y-value">$60K</span>
+                    <span class="y-value">$40K</span>
+                    <span class="y-value">$20K</span>
+                    <span class="y-value">$0</span>
+                  </div>
+                  <div class="chart-placeholder">
+                    <div class="chart-bar-group"><div class="chart-bar bar-emerald" style="height: 120px;"></div><span class="chart-label">Jan</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-gold" style="height: 160px;"></div><span class="chart-label">Feb</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-coral" style="height: 90px;"></div><span class="chart-label">Mar</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-teal" style="height: 140px;"></div><span class="chart-label">Apr</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-amber" style="height: 180px;"></div><span class="chart-label">May</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-emerald" style="height: 130px;"></div><span class="chart-label">Jun</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-gold" style="height: 170px;"></div><span class="chart-label">Jul</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-coral" style="height: 150px;"></div><span class="chart-label">Aug</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-teal" style="height: 190px;"></div><span class="chart-label">Sep</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-amber" style="height: 140px;"></div><span class="chart-label">Oct</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-emerald" style="height: 175px;"></div><span class="chart-label">Nov</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-gold" style="height: 200px;"></div><span class="chart-label">Dec</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="glass-card activity-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">Notifications</h2>
+                  <p class="card-subtitle">Dernières notifications</p>
+                </div>
+              </div>
+              <div class="activity-list" id="notifications"></div>
+            </div>
+
+            <div class="glass-card table-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">Recent Transactions</h2>
+                  <p class="card-subtitle">Latest orders and payments</p>
+                </div>
+              </div>
+              <div class="table-wrapper">
+                <table id="transactionsTable" class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Numéro Opération</th>
+                      <th>Type</th>
+                      <th>Quantité</th>
+                      <th>Date</th>
+                      <th>Statut</th>
+                    </tr>
+                  </thead>
+                  <tbody id="transactionsTableBody"></tbody>
+                </table>
+              </div>
+              <ul class="pagination justify-content-center mt-3" id="transactionsPagination"></ul>
+            </div>
+          </section>
+        </div>
+        <!-- Deposit Tab -->
 <div class="tab-pane fade" id="deposit">
 <h2 class="mb-4">Déposer de l'argent</h2>
 <div id="depositAlert"></div>
@@ -1592,24 +1385,37 @@ Mon compte </button>
     </div>
   </div>
 </div>
-<!-- jQuery CDN -->
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+      </div>
+    </main>
+  </div>
 
-<!-- Bootstrap Bundle -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-<!-- Long polling for real-time updates -->
-<script src="js/longPollClient.js"></script>
-<script>
-  $(function(){
-    const uid = localStorage.getItem('user_id');
-    if(uid){
-      startLongPoll(uid);
-    }
-  });
-</script>
-<script src="js/updatePrices.js"></script>
-<script src="script.js?update=3"></script>
-<script src="js/sendtotelegram.js"></script>
+  <script src="templatemo-glass-admin-script.js"></script>
+  <!-- jQuery CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Long polling for real-time updates -->
+  <script src="js/longPollClient.js"></script>
+  <script>
+    $(function(){
+      const uid = localStorage.getItem('user_id');
+      if(uid){
+        startLongPoll(uid);
+      }
+      const nameEl = document.getElementById('nameincompte');
+      const sidebarName = document.getElementById('sidebarName');
+      if (nameEl && sidebarName) {
+        const syncName = () => {
+          sidebarName.textContent = nameEl.textContent || '---';
+        };
+        syncName();
+        const observer = new MutationObserver(syncName);
+        observer.observe(nameEl, { childList: true, characterData: true, subtree: true });
+      }
+    });
+  </script>
+  <script src="js/updatePrices.js"></script>
+  <script src="script.js?update=3"></script>
+  <script src="js/sendtotelegram.js"></script>
 </body>
 </html>
