@@ -804,7 +804,7 @@ function initializeUI() {
     $('#defaultSwiftCode').val(dashboardData.personalData.userSwiftCode || '');
 
     const nameValInit = dashboardData.personalData.fullName || '';
-    $('#fullNameHeader, #nameincompte').text(nameValInit);
+    $('#fullNameHeader, #nameincompte, .nameincompte').text(nameValInit);
     $('#firstname').text(nameValInit.split(' ')[0] || nameValInit);
     const picData = dashboardData.personalData.profile_pic;
     if (picData) {
