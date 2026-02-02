@@ -12,6 +12,19 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
   <link rel="stylesheet" href="style.css"/>
   <style>
+    body.user-template-scope {
+      --glass-bg: rgba(90, 255, 210, 0.08);
+      --glass-bg-strong: rgba(90, 255, 210, 0.14);
+      --glass-border: rgba(120, 255, 220, 0.22);
+      --glass-border-strong: rgba(140, 255, 230, 0.32);
+      --glass-shadow: 0 18px 40px rgba(6, 16, 28, 0.45);
+      --glass-blur: blur(18px) saturate(165%);
+      --glass-highlight: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(120, 255, 210, 0.04));
+      --glass-text: #e6f7f2;
+      --glass-muted: rgba(230, 247, 242, 0.7);
+    }
+
+    body.user-template-scope .glass-card,
     body.user-template-scope .card,
     body.user-template-scope .card-header,
     body.user-template-scope .card-body,
@@ -20,51 +33,80 @@
     body.user-template-scope .modal-body,
     body.user-template-scope .modal-footer,
     body.user-template-scope .dropdown-menu,
+    body.user-template-scope .dropdown-item,
     body.user-template-scope .list-group-item,
     body.user-template-scope .table,
+    body.user-template-scope .data-table,
     body.user-template-scope .table th,
     body.user-template-scope .table td,
+    body.user-template-scope .data-table th,
+    body.user-template-scope .data-table td,
     body.user-template-scope .form-control,
     body.user-template-scope .form-select,
+    body.user-template-scope .form-input,
     body.user-template-scope .input-group-text,
     body.user-template-scope .nav-tabs .nav-link,
     body.user-template-scope .tab-content,
     body.user-template-scope .alert,
     body.user-template-scope .pagination .page-link,
     body.user-template-scope .bg-light,
-    body.user-template-scope .bg-white {
-      background: rgba(20, 24, 40, 0.6) !important;
-      color: #e4ecff;
-      border-color: rgba(255, 255, 255, 0.08);
-      backdrop-filter: blur(16px);
+    body.user-template-scope .bg-white,
+    body.user-template-scope .sidebar,
+    body.user-template-scope .navbar,
+    body.user-template-scope .nav-btn,
+    body.user-template-scope .search-input,
+    body.user-template-scope .login-page,
+    body.user-template-scope .login-container,
+    body.user-template-scope .login-card {
+      background: var(--glass-highlight), var(--glass-bg) !important;
+      color: var(--glass-text);
+      border: 1px solid var(--glass-border);
+      box-shadow: var(--glass-shadow);
+      backdrop-filter: var(--glass-blur);
+    }
+
+    body.user-template-scope .navbar,
+    body.user-template-scope .sidebar {
+      border: 1px solid var(--glass-border);
     }
 
     body.user-template-scope .table th,
-    body.user-template-scope .table td {
+    body.user-template-scope .table td,
+    body.user-template-scope .data-table th,
+    body.user-template-scope .data-table td {
       background: transparent !important;
+      border-color: var(--glass-border);
+    }
+
+    body.user-template-scope .table-striped > tbody > tr:nth-of-type(odd) > * {
+      background: rgba(90, 255, 210, 0.06) !important;
     }
 
     body.user-template-scope .nav-tabs .nav-link.active,
     body.user-template-scope .dropdown-menu .dropdown-item.active,
     body.user-template-scope .pagination .page-link.active {
-      background: rgba(255, 255, 255, 0.08) !important;
-      color: #fff;
-      border-color: rgba(255, 255, 255, 0.18);
+      background: var(--glass-highlight), var(--glass-bg-strong) !important;
+      color: #f7fffb;
+      border-color: var(--glass-border-strong);
     }
 
+    body.user-template-scope .dropdown-divider,
     body.user-template-scope .list-group-item {
-      border-color: rgba(255, 255, 255, 0.08);
+      border-color: var(--glass-border);
     }
 
     body.user-template-scope .badge,
     body.user-template-scope .badge.bg-success-subtle,
     body.user-template-scope .badge.bg-warning-subtle {
-      background: rgba(255, 255, 255, 0.12) !important;
-      color: #fff !important;
+      background: var(--glass-highlight), rgba(90, 255, 210, 0.18) !important;
+      color: #f7fffb !important;
+      border: 1px solid var(--glass-border);
     }
 
-    body.user-template-scope .form-control::placeholder {
-      color: rgba(228, 236, 255, 0.6);
+    body.user-template-scope .form-control::placeholder,
+    body.user-template-scope .form-input::placeholder,
+    body.user-template-scope .search-input::placeholder {
+      color: var(--glass-muted);
     }
   </style>
 </head>
