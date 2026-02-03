@@ -33,37 +33,11 @@
 
     body.user-template-scope .glass-card,
     body.user-template-scope .card,
-    body.user-template-scope .card-header,
-    body.user-template-scope .card-body,
     body.user-template-scope .modal-content,
-    body.user-template-scope .modal-header,
-    body.user-template-scope .modal-body,
-    body.user-template-scope .modal-footer,
     body.user-template-scope .dropdown-menu,
-    body.user-template-scope .dropdown-item,
-    body.user-template-scope .list-group-item,
-    body.user-template-scope .table,
-    body.user-template-scope .data-table,
-    body.user-template-scope .table th,
-    body.user-template-scope .table td,
-    body.user-template-scope .data-table th,
-    body.user-template-scope .data-table td,
-    body.user-template-scope .form-control,
-    body.user-template-scope .form-select,
-    body.user-template-scope .form-input,
-    body.user-template-scope .input-group-text,
-    body.user-template-scope .nav-tabs .nav-link,
-    body.user-template-scope .tab-content,
-    body.user-template-scope .alert,
-    body.user-template-scope .pagination .page-link,
-    body.user-template-scope .bg-light,
-    body.user-template-scope .bg-white,
     body.user-template-scope .sidebar,
-    body.user-template-scope .navbar,
     body.user-template-scope .nav-btn,
     body.user-template-scope .search-input,
-    body.user-template-scope .login-page,
-    body.user-template-scope .login-container,
     body.user-template-scope .login-card {
       position: relative;
       overflow: hidden;
@@ -79,10 +53,7 @@
     body.user-template-scope .modal-content::before,
     body.user-template-scope .dropdown-menu::before,
     body.user-template-scope .sidebar::before,
-    body.user-template-scope .navbar::before,
-    body.user-template-scope .login-card::before,
-    body.user-template-scope .tab-content::before,
-    body.user-template-scope .alert::before {
+    body.user-template-scope .login-card::before {
       content: "";
       position: absolute;
       inset: 0;
@@ -95,6 +66,51 @@
     body.user-template-scope .sidebar {
       background: var(--glass-bg), var(--glass-bg-2) !important;
       border: 1px solid var(--glass-border);
+    }
+
+    body.user-template-scope .navbar {
+      background: transparent !important;
+      border: none;
+      box-shadow: none;
+      backdrop-filter: none;
+    }
+
+    body.user-template-scope .main-content {
+      padding: 30px;
+    }
+
+    body.user-template-scope .card-header,
+    body.user-template-scope .card-header *,
+    body.user-template-scope .card-body,
+    body.user-template-scope .tab-content,
+    body.user-template-scope .tab-pane {
+      background: transparent !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+
+    body.user-template-scope .tab-content::before {
+      content: none !important;
+    }
+
+    body.user-template-scope .dropdown-item,
+    body.user-template-scope .list-group-item,
+    body.user-template-scope .table,
+    body.user-template-scope .data-table,
+    body.user-template-scope .table th,
+    body.user-template-scope .table td,
+    body.user-template-scope .data-table th,
+    body.user-template-scope .data-table td,
+    body.user-template-scope .pagination .page-link,
+    body.user-template-scope .alert {
+      background: transparent !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+
+    body.user-template-scope .activity-item {
+      background: transparent;
+      box-shadow: none;
     }
 
     body.user-template-scope .table th,
