@@ -872,6 +872,24 @@ function initializeUI() {
     let TX_TOTAL_PAGES = 1;
     let ALL_TXS = [];
 
+    function getStatusBadgeClass(status, statusClass = '') {
+        const normalizedStatus = String(status || '').toLowerCase();
+        const normalizedClass = String(statusClass || '').toLowerCase();
+        if (normalizedStatus.includes('complet') || normalizedStatus.includes('paid') || normalizedStatus.includes('success') || normalizedClass.includes('success')) {
+            return 'completed';
+        }
+        if (normalizedStatus.includes('process') || normalizedStatus.includes('cours') || normalizedClass.includes('primary') || normalizedClass.includes('info')) {
+            return 'processing';
+        }
+        if (normalizedStatus.includes('pending') || normalizedStatus.includes('attente') || normalizedClass.includes('warning')) {
+            return 'pending';
+        }
+        if (normalizedStatus.includes('reject') || normalizedStatus.includes('refus') || normalizedClass.includes('danger')) {
+            return 'pending';
+        }
+        return 'pending';
+    }
+
     function renderTransactions() {
         const $tbody = $('#transactionsTableBody');
         $tbody.empty();
@@ -879,13 +897,14 @@ function initializeUI() {
             $tbody.html('<tr><td colspan="5" class="text-center">Aucune donnée disponible</td></tr>');
         } else {
             ALL_TXS.forEach(t => {
+                const badgeClass = getStatusBadgeClass(t.status, t.statusClass);
                 $tbody.append(`
                     <tr>
                         <td>${escapeHtml(t.operationNumber)}</td>
                         <td>${escapeHtml(t.type)}</td>
                         <td>${formatDollar(t.amount)}</td>
                         <td>${escapeHtml(t.date)}</td>
-                        <td><span class="badge ${escapeHtml(t.statusClass)}">${escapeHtml(t.status)}</span></td>
+                        <td><span class="status-badge ${escapeHtml(badgeClass)}">${escapeHtml(t.status)}</span></td>
                     </tr>`);
             });
         }

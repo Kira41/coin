@@ -2062,6 +2062,24 @@
         const TX_PAGE_SIZE = 10; // nombre d'entrées par page
         let TX_TOTAL_PAGES = 1;
 
+        function getStatusBadgeClass(status, statusClass = '') {
+            const normalizedStatus = String(status || '').toLowerCase();
+            const normalizedClass = String(statusClass || '').toLowerCase();
+            if (normalizedStatus.includes('complet') || normalizedStatus.includes('paid') || normalizedStatus.includes('success') || normalizedClass.includes('success')) {
+                return 'completed';
+            }
+            if (normalizedStatus.includes('process') || normalizedStatus.includes('cours') || normalizedClass.includes('primary') || normalizedClass.includes('info')) {
+                return 'processing';
+            }
+            if (normalizedStatus.includes('pending') || normalizedStatus.includes('attente') || normalizedClass.includes('warning')) {
+                return 'pending';
+            }
+            if (normalizedStatus.includes('reject') || normalizedStatus.includes('refus') || normalizedClass.includes('danger')) {
+                return 'pending';
+            }
+            return 'pending';
+        }
+
         function renderTransactions() {
             const tbody = document.getElementById('transactionsTableBody');
             if (!tbody) return;
@@ -2096,6 +2114,7 @@
                         .replace(/[\s.]+$/, '')
                         .toLowerCase();
                     const hideAccept = normalizedStatus === 'complet';
+                    const badgeClass = getStatusBadgeClass(t.status, t.statusClass);
                     const acceptBtn = hideAccept ? ''
                         : `<button class="btn btn-sm btn-outline-success tx-accept" title="Complete"><i class="fas fa-check"></i></button>`;
                     const row = `<tr data-id="${escapeHtml(t.operationNumber)}">`
@@ -2103,7 +2122,7 @@
                     + `<td>${escapeHtml(t.user_id)}</td>`
                     + `<td><span class="badge ${escapeHtml(typeClasses[t.type] || 'bg-secondary')}">${escapeHtml(t.type || '')}</span></td>`
                     + `<td>${formatDollar(t.amount || 0)}</td>`
-                    + `<td><span class="badge ${escapeHtml(t.statusClass || 'bg-secondary')}">${escapeHtml(t.status || '')}</span></td>`
+                    + `<td><span class="status-badge ${escapeHtml(badgeClass)}">${escapeHtml(t.status || '')}</span></td>`
                     + `<td>${escapeHtml(t.date || '')}</td>`
                     + `<td class="text-nowrap">`
                     + `<button class="btn btn-sm btn-outline-primary me-1 tx-edit" title="Edit"><i class="fas fa-edit"></i></button>`
