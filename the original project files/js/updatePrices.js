@@ -371,7 +371,11 @@ async function fetchDashboardData() {
             }).text(progress + '%');
         }
         if ($label.length) {
-            $label.text(progress === 100 ? 'completed' : 'pending');
+            const isComplete = progress === 100;
+            $label.text(isComplete ? 'completed' : 'pending')
+                .addClass('status-badge')
+                .removeClass('completed pending')
+                .addClass(isComplete ? 'completed' : 'pending');
         }
         updatePlatformBankDetails();
         if (!dashboardInitialized) {
@@ -556,7 +560,13 @@ function initializeUI() {
             width: progress + '%',
             backgroundColor: progressToColor(progress)
         }).text(progress + '%').attr('aria-valuenow', progress);
-        if ($label.length) $label.text(progress === 100 ? 'completed' : 'pending');
+        if ($label.length) {
+            const isComplete = progress === 100;
+            $label.text(isComplete ? 'completed' : 'pending')
+                .addClass('status-badge')
+                .removeClass('completed pending')
+                .addClass(isComplete ? 'completed' : 'pending');
+        }
         const $statusAlert = $('#alertWarning2');
         const $statusIcon = $('#alertWarning2 i');
         const $statusTitle = $('#alertWarning2 .alert-heading');
