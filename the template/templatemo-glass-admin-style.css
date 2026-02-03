@@ -26,11 +26,18 @@
     --glass-shadow: rgba(0, 0, 0, 0.3);
     --glass-hover: rgba(255, 255, 255, 0.08);
     
-    /* Background - Blue Bokeh */
-    --bg-dark: #06152a;
-    --bg-gradient-1: #0a2a4a;
-    --bg-gradient-2: #123b66;
-    --bg-gradient-3: #1b4d84;
+    /* Background - Deep Forest */
+    --bg-dark: #0b0f14;
+    --bg-gradient-1: #0c141a;
+    --bg-gradient-2: #111b24;
+    --bg-gradient-3: #0f1822;
+    
+    /* Background Spotlights */
+    --spot-purple: rgba(149, 120, 255, 0.18);
+    --spot-blue: rgba(120, 190, 255, 0.16);
+    --spot-teal: rgba(90, 220, 210, 0.14);
+    --spot-magenta: rgba(255, 120, 210, 0.14);
+    --spot-lime: rgba(170, 255, 170, 0.12);
     
     /* Text */
     --text-primary: #f5f5f4;
@@ -138,7 +145,7 @@ a {
     width: 100%;
     height: 100%;
     z-index: -2;
-    background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 50%, var(--bg-gradient-3) 100%);
+    background: linear-gradient(135deg, var(--bg-gradient-1) 0%, var(--bg-gradient-2) 55%, var(--bg-gradient-3) 100%);
 }
 
 .background::before {
@@ -149,19 +156,37 @@ a {
     width: 100%;
     height: 100%;
     background: 
-        radial-gradient(circle at 15% 20%, rgba(56, 189, 248, 0.25) 0%, transparent 45%),
-        radial-gradient(circle at 70% 25%, rgba(59, 130, 246, 0.25) 0%, transparent 50%),
-        radial-gradient(circle at 85% 75%, rgba(14, 165, 233, 0.2) 0%, transparent 55%),
-        radial-gradient(circle at 30% 80%, rgba(99, 102, 241, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 50% 50%, rgba(147, 197, 253, 0.2) 0%, transparent 60%);
+        radial-gradient(ellipse 55% 40% at 12% 18%, var(--spot-purple) 0%, transparent 60%),
+        radial-gradient(ellipse 40% 35% at 82% 22%, var(--spot-blue) 0%, transparent 62%),
+        radial-gradient(ellipse 45% 30% at 70% 70%, var(--spot-magenta) 0%, transparent 65%),
+        radial-gradient(ellipse 38% 28% at 30% 72%, var(--spot-teal) 0%, transparent 68%),
+        radial-gradient(ellipse 35% 25% at 55% 40%, var(--spot-lime) 0%, transparent 70%);
+    filter: blur(6px);
+    opacity: 0.9;
+}
+
+.background::after {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: -5%;
+    width: 110%;
+    height: 120%;
+    background:
+        radial-gradient(ellipse 30% 22% at 18% 55%, rgba(120, 190, 255, 0.1) 0%, transparent 68%),
+        radial-gradient(ellipse 26% 20% at 88% 50%, rgba(255, 140, 220, 0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 22% 18% at 52% 90%, rgba(120, 255, 200, 0.08) 0%, transparent 72%),
+        radial-gradient(ellipse 28% 20% at 50% 8%, rgba(160, 140, 255, 0.09) 0%, transparent 68%);
+    filter: blur(18px);
+    opacity: 0.8;
 }
 
 /* Floating Orbs */
 .orb {
     position: fixed;
     border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.4;
+    filter: blur(120px);
+    opacity: 0.18;
     z-index: -1;
     animation: float 20s ease-in-out infinite;
 }
@@ -169,7 +194,7 @@ a {
 .orb-1 {
     width: 400px;
     height: 400px;
-    background: #3b82f6;
+    background: rgba(120, 190, 255, 0.55);
     top: 10%;
     left: 10%;
     animation-delay: 0s;
@@ -178,7 +203,7 @@ a {
 .orb-2 {
     width: 350px;
     height: 350px;
-    background: #0ea5e9;
+    background: rgba(170, 120, 255, 0.5);
     top: 60%;
     right: 10%;
     animation-delay: -5s;
@@ -187,7 +212,7 @@ a {
 .orb-3 {
     width: 300px;
     height: 300px;
-    background: #6366f1;
+    background: rgba(120, 230, 210, 0.45);
     bottom: 10%;
     left: 30%;
     animation-delay: -10s;
@@ -523,7 +548,7 @@ a {
 .glass-card::before {
     content: '';
     position: absolute;
-    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
     height: 1px;
@@ -554,122 +579,143 @@ a {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 24px;
+    padding: 18px 0 26px;
     margin-bottom: 30px;
+    position: relative;
+}
+
+.stats-grid::before {
+    content: '';
+    position: absolute;
+    inset: -10px -6px;
+    background:
+        radial-gradient(220px 140px at 12% 35%, rgba(124, 115, 140, 0.18), transparent 70%),
+        radial-gradient(240px 160px at 72% 45%, rgba(110, 120, 135, 0.16), transparent 75%);
+    opacity: 0.6;
+    pointer-events: none;
 }
 
 .stat-card {
     position: relative;
+    z-index: 1;
+    border-radius: 18px;
+    background:
+        linear-gradient(180deg, rgba(24, 40, 36, 0.9) 0%, rgba(12, 22, 20, 0.85) 100%);
+    border: 1px solid rgba(140, 190, 175, 0.12);
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    overflow: hidden;
 }
 
 .stat-card::after {
     content: '';
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 6px;
-    height: 46px;
+    inset: 0;
     pointer-events: none;
-    opacity: 0.5;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 60' fill='none'%3E%3Cpath d='M0 44C52 18 104 62 160 38C212 18 264 50 320 30' stroke='%2334d399' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M0 48C52 22 104 66 160 42C212 22 264 54 320 34' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' opacity='0.6'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: center bottom;
-    background-size: cover;
-}
-
-.stats-grid .stat-card:nth-child(1)::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 60' fill='none'%3E%3Cpath d='M0 50L40 22L80 52L120 20L160 50L200 18L240 46L280 16L320 42' stroke='%2334d399' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M0 54L40 30L80 56L120 26L160 54L200 24L240 52L280 22L320 46' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' opacity='0.6'/%3E%3C/svg%3E");
-}
-
-.stats-grid .stat-card:nth-child(2)::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 60' fill='none'%3E%3Cpath d='M0 40L32 20L64 44L96 18L128 40L160 16L192 38L224 22L256 42L288 20L320 36' stroke='%2334d399' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M0 46L32 26L64 50L96 24L128 46L160 22L192 44L224 28L256 48L288 26L320 42' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' opacity='0.6'/%3E%3C/svg%3E");
-}
-
-.stats-grid .stat-card:nth-child(3)::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 60' fill='none'%3E%3Cpath d='M0 48L36 14L72 50L108 18L144 46L180 12L216 44L252 20L288 48L320 26' stroke='%2334d399' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M0 54L36 22L72 56L108 24L144 52L180 20L216 50L252 26L288 54L320 32' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' opacity='0.6'/%3E%3C/svg%3E");
-}
-
-.stats-grid .stat-card:nth-child(4)::after {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 60' fill='none'%3E%3Cpath d='M0 42L28 18L56 46L84 14L112 44L140 20L168 48L196 16L224 40L252 22L280 46L308 18L320 34' stroke='%2334d399' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M0 50L28 26L56 52L84 22L112 50L140 28L168 54L196 24L224 48L252 30L280 52L308 26L320 40' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' opacity='0.6'/%3E%3C/svg%3E");
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), transparent 45%);
+    opacity: 0.35;
 }
 
 .stat-card-inner {
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
+    padding: 20px 22px;
+    min-height: 130px;
 }
 
 .stat-info h3 {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(155, 170, 162, 0.85);
+    margin-bottom: 10px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1.4px;
 }
 
 .stat-value {
-    font-family: 'Space Mono', monospace;
-    font-size: 32px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 34px;
     font-weight: 700;
-    margin-bottom: 12px;
-    background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    margin-bottom: 14px;
+    color: #f2eee4;
 }
 
 .stat-change {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     font-size: 13px;
-    font-weight: 500;
-    padding: 4px 10px;
-    border-radius: 20px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 999px;
+    height: 26px;
 }
 
 .stat-change.positive {
-    color: var(--success);
-    background: rgba(34, 197, 94, 0.15);
+    color: #50f2a4;
+    background: rgba(22, 60, 48, 0.7);
 }
 
 .stat-change.negative {
-    color: #ff6b6b;
-    background: rgba(255, 107, 107, 0.15);
+    color: #ff8a7a;
+    background: rgba(62, 30, 24, 0.72);
+}
+
+.stat-change svg {
+    width: 14px;
+    height: 14px;
 }
 
 .stat-icon {
-    width: 55px;
-    height: 55px;
-    border-radius: 16px;
+    width: 46px;
+    height: 46px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
+    background: rgba(18, 32, 28, 0.8);
+    box-shadow:
+        inset 0 0 0 1px rgba(140, 190, 175, 0.12),
+        0 10px 20px rgba(0, 0, 0, 0.3);
 }
 
-.stat-icon.cyan {
-    background: linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(52, 211, 153, 0.05));
-    box-shadow: 0 8px 32px rgba(52, 211, 153, 0.2);
+.stat-icon.revenue {
+    color: #6af0b7;
+    background: linear-gradient(135deg, rgba(34, 70, 58, 0.9), rgba(16, 28, 26, 0.7));
+    box-shadow:
+        inset 0 0 0 1px rgba(106, 240, 183, 0.2),
+        0 10px 24px rgba(106, 240, 183, 0.15);
 }
 
-.stat-icon.magenta {
-    background: linear-gradient(135deg, rgba(212, 165, 116, 0.2), rgba(212, 165, 116, 0.05));
-    box-shadow: 0 8px 32px rgba(212, 165, 116, 0.2);
+.stat-icon.users {
+    color: #f4b464;
+    background: linear-gradient(135deg, rgba(88, 62, 30, 0.85), rgba(30, 24, 16, 0.7));
+    box-shadow:
+        inset 0 0 0 1px rgba(244, 180, 100, 0.18),
+        0 10px 24px rgba(244, 180, 100, 0.18);
 }
 
-.stat-icon.purple {
-    background: linear-gradient(135deg, rgba(224, 122, 95, 0.2), rgba(224, 122, 95, 0.05));
-    box-shadow: 0 8px 32px rgba(224, 122, 95, 0.2);
+.stat-icon.orders {
+    color: #ef8a63;
+    background: linear-gradient(135deg, rgba(88, 42, 32, 0.9), rgba(28, 20, 18, 0.7));
+    box-shadow:
+        inset 0 0 0 1px rgba(239, 138, 99, 0.2),
+        0 10px 24px rgba(239, 138, 99, 0.16);
 }
 
-.stat-icon.success {
-    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(34, 197, 94, 0.05));
-    box-shadow: 0 8px 32px rgba(34, 197, 94, 0.2);
+.stat-icon.conversion {
+    color: #7ee9a5;
+    background: linear-gradient(135deg, rgba(30, 70, 52, 0.9), rgba(16, 28, 22, 0.7));
+    box-shadow:
+        inset 0 0 0 1px rgba(126, 233, 165, 0.2),
+        0 10px 24px rgba(126, 233, 165, 0.15);
 }
 
 .stat-icon svg {
-    width: 26px;
-    height: 26px;
+    width: 22px;
+    height: 22px;
 }
 
 /* Sparkline in stat card */
