@@ -26,6 +26,10 @@
       --muted: #98a3b7;
       --accent: #b8ff00;
       --lime: #B8FE08;
+      --glow-shift-x: 0px;
+      --glow-shift-y: 0px;
+      --glow-shift-x-alt: 0px;
+      --glow-shift-y-alt: 0px;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -39,20 +43,26 @@
       pointer-events: none;
       z-index: 0;
       background:
-        radial-gradient(140px 140px at 12% 18%, rgba(255, 255, 255, 0.22), transparent 62%),
-        radial-gradient(220px 220px at 22% 38%, rgba(255, 255, 255, 0.18), transparent 64%),
-        radial-gradient(180px 180px at 36% 16%, rgba(255, 255, 255, 0.16), transparent 62%),
-        radial-gradient(260px 260px at 52% 32%, rgba(255, 255, 255, 0.14), transparent 65%),
-        radial-gradient(200px 200px at 68% 18%, rgba(255, 255, 255, 0.18), transparent 62%),
-        radial-gradient(260px 260px at 78% 40%, rgba(255, 255, 255, 0.15), transparent 66%),
-        radial-gradient(180px 180px at 86% 68%, rgba(255, 255, 255, 0.14), transparent 66%),
-        radial-gradient(240px 240px at 64% 78%, rgba(255, 255, 255, 0.16), transparent 64%),
-        radial-gradient(160px 160px at 40% 82%, rgba(255, 255, 255, 0.12), transparent 62%),
-        radial-gradient(200px 200px at 18% 74%, rgba(255, 255, 255, 0.14), transparent 64%),
-        radial-gradient(280px 280px at 10% 60%, rgba(255, 255, 255, 0.12), transparent 66%),
-        radial-gradient(120px 120px at 90% 20%, rgba(255, 255, 255, 0.18), transparent 62%),
+        radial-gradient(140px 140px at calc(12% + var(--glow-shift-x)) calc(18% + var(--glow-shift-y)), rgba(255, 255, 255, 0.22), transparent 62%),
+        radial-gradient(220px 220px at calc(22% + var(--glow-shift-x-alt)) calc(38% + var(--glow-shift-y-alt)), rgba(255, 255, 255, 0.18), transparent 64%),
+        radial-gradient(180px 180px at calc(36% + var(--glow-shift-x)) calc(16% + var(--glow-shift-y)), rgba(255, 255, 255, 0.16), transparent 62%),
+        radial-gradient(260px 260px at calc(52% + var(--glow-shift-x-alt)) calc(32% + var(--glow-shift-y-alt)), rgba(255, 255, 255, 0.14), transparent 65%),
+        radial-gradient(200px 200px at calc(68% + var(--glow-shift-x)) calc(18% + var(--glow-shift-y)), rgba(255, 255, 255, 0.18), transparent 62%),
+        radial-gradient(260px 260px at calc(78% + var(--glow-shift-x-alt)) calc(40% + var(--glow-shift-y-alt)), rgba(255, 255, 255, 0.15), transparent 66%),
+        radial-gradient(180px 180px at calc(86% + var(--glow-shift-x)) calc(68% + var(--glow-shift-y)), rgba(255, 255, 255, 0.14), transparent 66%),
+        radial-gradient(240px 240px at calc(64% + var(--glow-shift-x-alt)) calc(78% + var(--glow-shift-y-alt)), rgba(255, 255, 255, 0.16), transparent 64%),
+        radial-gradient(160px 160px at calc(40% + var(--glow-shift-x)) calc(82% + var(--glow-shift-y)), rgba(255, 255, 255, 0.12), transparent 62%),
+        radial-gradient(200px 200px at calc(18% + var(--glow-shift-x-alt)) calc(74% + var(--glow-shift-y-alt)), rgba(255, 255, 255, 0.14), transparent 64%),
+        radial-gradient(280px 280px at calc(10% + var(--glow-shift-x)) calc(60% + var(--glow-shift-y)), rgba(255, 255, 255, 0.12), transparent 66%),
+        radial-gradient(120px 120px at calc(90% + var(--glow-shift-x-alt)) calc(20% + var(--glow-shift-y-alt)), rgba(255, 255, 255, 0.18), transparent 62%),
+        radial-gradient(420px 420px at calc(8% + var(--glow-shift-x)) calc(12% + var(--glow-shift-y)), rgba(255, 255, 255, 0.10), transparent 68%),
+        radial-gradient(460px 460px at calc(88% + var(--glow-shift-x-alt)) calc(28% + var(--glow-shift-y-alt)), rgba(255, 255, 255, 0.12), transparent 70%),
+        radial-gradient(520px 520px at calc(52% + var(--glow-shift-x)) calc(92% + var(--glow-shift-y)), rgba(255, 255, 255, 0.08), transparent 72%),
         linear-gradient(180deg, var(--bg) 0%, var(--bg) 100%);
       background-position:
+        0% 0%,
+        0% 0%,
+        0% 0%,
         0% 0%,
         0% 0%,
         0% 0%,
@@ -90,6 +100,9 @@
           0% 0%,
           0% 0%,
           0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
           0% 0%;
       }
       50% {
@@ -106,10 +119,16 @@
           4% 6%,
           -6% -6%,
           7% 3%,
+          -4% 6%,
+          5% -8%,
+          -3% -5%,
           0% 0%;
       }
       100% {
         background-position:
+          0% 0%,
+          0% 0%,
+          0% 0%,
           0% 0%,
           0% 0%,
           0% 0%,
@@ -2248,6 +2267,58 @@
           activateTab(sectionId);
         });
       });
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const body = document.body;
+      if (!body.classList.contains('user-template-scope')) {
+        return;
+      }
+
+      let mouseX = window.innerWidth / 2;
+      let mouseY = window.innerHeight / 2;
+      let ticking = false;
+
+      const updateGlowShift = () => {
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        const xRatio = (mouseX - centerX) / centerX;
+        const yRatio = (mouseY - centerY) / centerY;
+        const scrollRange = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        const scrollRatio = (window.scrollY / scrollRange) - 0.5;
+
+        const shiftX = (xRatio * 28) + (scrollRatio * 40);
+        const shiftY = (yRatio * 28) + (scrollRatio * 40);
+        const shiftXAlt = (xRatio * 16) + (scrollRatio * 24);
+        const shiftYAlt = (yRatio * 16) + (scrollRatio * 24);
+
+        body.style.setProperty('--glow-shift-x', `${shiftX.toFixed(2)}px`);
+        body.style.setProperty('--glow-shift-y', `${shiftY.toFixed(2)}px`);
+        body.style.setProperty('--glow-shift-x-alt', `${shiftXAlt.toFixed(2)}px`);
+        body.style.setProperty('--glow-shift-y-alt', `${shiftYAlt.toFixed(2)}px`);
+        ticking = false;
+      };
+
+      const requestUpdate = () => {
+        if (!ticking) {
+          ticking = true;
+          window.requestAnimationFrame(updateGlowShift);
+        }
+      };
+
+      window.addEventListener('mousemove', (event) => {
+        mouseX = event.clientX;
+        mouseY = event.clientY;
+        requestUpdate();
+      }, { passive: true });
+
+      window.addEventListener('scroll', () => {
+        requestUpdate();
+      }, { passive: true });
+
+      window.addEventListener('resize', requestUpdate, { passive: true });
+      updateGlowShift();
     });
   </script>
   <!-- Long polling for real-time updates -->
