@@ -49,13 +49,87 @@
         radial-gradient(240px 240px at 64% 78%, rgba(255, 255, 255, 0.16), transparent 64%),
         radial-gradient(160px 160px at 40% 82%, rgba(255, 255, 255, 0.12), transparent 62%),
         radial-gradient(200px 200px at 18% 74%, rgba(255, 255, 255, 0.14), transparent 64%),
+        radial-gradient(280px 280px at 10% 60%, rgba(255, 255, 255, 0.12), transparent 66%),
+        radial-gradient(120px 120px at 90% 20%, rgba(255, 255, 255, 0.18), transparent 62%),
         linear-gradient(180deg, var(--bg) 0%, var(--bg) 100%);
+      background-position:
+        0% 0%,
+        0% 0%,
+        0% 0%,
+        0% 0%,
+        0% 0%,
+        0% 0%,
+        0% 0%,
+        0% 0%,
+        0% 0%,
+        0% 0%,
+        0% 0%,
+        0% 0%,
+        0% 0%;
       filter: blur(26px);
       opacity: 0.95;
+      animation: floatGlow 20s ease-in-out infinite;
     }
 
     body.user-template-scope::after {
       content: none;
+    }
+
+    @keyframes floatGlow {
+      0% {
+        background-position:
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%;
+      }
+      50% {
+        background-position:
+          6% -4%,
+          -5% 8%,
+          3% -6%,
+          8% 4%,
+          -6% 6%,
+          5% -5%,
+          -4% 7%,
+          6% 5%,
+          -7% -4%,
+          4% 6%,
+          -6% -6%,
+          7% 3%,
+          0% 0%;
+      }
+      100% {
+        background-position:
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body.user-template-scope::before {
+        animation: none;
+      }
     }
 
     body.user-template-scope > * {
