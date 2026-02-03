@@ -571,7 +571,7 @@
           <span class="nav-section-title">Main Menu</span>
           <ul>
             <li class="nav-item">
-              <a class="nav-link active" data-bs-toggle="pill" href="#dashboard">
+              <a class="nav-link active" data-section="dashboard" href="#dashboard">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="3" width="7" height="7" rx="1"/>
                   <rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -582,7 +582,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="pill" href="#deposit">
+              <a class="nav-link" data-section="deposit" href="#deposit">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                   <path d="M2 17l10 5 10-5"/>
@@ -592,7 +592,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="pill" href="#withdraw">
+              <a class="nav-link" data-section="withdraw" href="#withdraw">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                   <circle cx="9" cy="7" r="4"/>
@@ -603,7 +603,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="pill" href="#trading">
+              <a class="nav-link" data-section="trading" href="#trading">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <rect x="3" y="3" width="7" height="7" rx="1"/>
                   <rect x="14" y="3" width="7" height="7" rx="1"/>
@@ -614,7 +614,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="pill" href="#kyc">
+              <a class="nav-link" data-section="kyc" href="#kyc">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M12 2L2 7l10 5 10-5-10-5z"/>
                   <path d="M2 17l10 5 10-5"/>
@@ -624,7 +624,7 @@
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" data-bs-toggle="pill" href="#offers">
+              <a class="nav-link" data-section="offers" href="#offers">
                 <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="3"/>
                   <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -638,7 +638,7 @@
           <span class="nav-section-title">Account</span>
           <ul>
             <li class="nav-item account-item">
-              <a class="nav-link account-link" data-bs-toggle="pill" href="#Profil">
+              <a class="nav-link account-link" data-section="Profil" href="#Profil">
                 <img alt="Image Utilisateur" class="user-avatar" src=""/>
                 <div class="account-details">
                   <div class="user-name" id="sidebarName">---</div>
@@ -2138,6 +2138,40 @@
   <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
   <!-- Bootstrap Bundle -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabLinks = document.querySelectorAll('#sidebar .nav-link[data-section]');
+      const tabPanes = document.querySelectorAll('.tab-content .tab-pane');
+
+      const activateTab = (sectionId) => {
+        const targetPane = document.getElementById(sectionId);
+        if (!targetPane) {
+          return;
+        }
+
+        tabLinks.forEach(link => {
+          link.classList.toggle('active', link.dataset.section === sectionId);
+        });
+
+        tabPanes.forEach(pane => {
+          const isActive = pane.id === sectionId;
+          pane.classList.toggle('active', isActive);
+          pane.classList.toggle('show', isActive);
+        });
+      };
+
+      tabLinks.forEach(link => {
+        link.addEventListener('click', (event) => {
+          const sectionId = link.dataset.section;
+          if (!sectionId) {
+            return;
+          }
+          event.preventDefault();
+          activateTab(sectionId);
+        });
+      });
+    });
+  </script>
   <!-- Long polling for real-time updates -->
   <script src="js/longPollClient.js"></script>
   <script>
