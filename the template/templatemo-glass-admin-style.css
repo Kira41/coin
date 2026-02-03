@@ -523,7 +523,7 @@ a {
 .glass-card::before {
     content: '';
     position: absolute;
-    top: 0;
+    bottom: 0;
     left: 0;
     right: 0;
     height: 1px;
@@ -559,6 +559,21 @@ a {
 
 .stat-card {
     position: relative;
+}
+
+.stat-card::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 6px;
+    height: 46px;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 60' fill='none'%3E%3Cpath d='M0 44C52 18 104 62 160 38C212 18 264 50 320 30' stroke='%2334d399' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M0 48C52 22 104 66 160 42C212 22 264 54 320 34' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' opacity='0.6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: cover;
 }
 
 .stat-card-inner {
