@@ -400,7 +400,7 @@ a {
 ============================================ */
 .main-content {
     flex: 1;
-    margin-left: var(--sidebar-width);
+    margin-left: 0;
     padding: 30px;
     min-height: 100vh;
 }
