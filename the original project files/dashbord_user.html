@@ -29,7 +29,21 @@
     }
 
     body.user-template-scope::before {
-      content: none;
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        radial-gradient(1100px 800px at 12% 8%, rgba(124, 37, 239, 0.10), transparent 72%),
+        radial-gradient(950px 750px at 85% 12%, rgba(124, 37, 239, 0.08), transparent 74%),
+        radial-gradient(1000px 820px at 22% 45%, rgba(160, 120, 255, 0.07), transparent 76%),
+        radial-gradient(1200px 900px at 78% 48%, rgba(124, 37, 239, 0.06), transparent 78%),
+        radial-gradient(1050px 820px at 14% 78%, rgba(124, 37, 239, 0.06), transparent 80%),
+        radial-gradient(980px 780px at 88% 82%, rgba(160, 120, 255, 0.05), transparent 82%),
+        radial-gradient(900px 700px at 48% 90%, rgba(124, 37, 239, 0.05), transparent 84%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg) 100%);
+      filter: blur(60px);
     }
 
     body.user-template-scope::after {
@@ -66,6 +80,21 @@
     body.user-template-scope .background,
     body.user-template-scope .orb {
       display: none;
+    }
+
+    body.user-template-scope .navbar {
+      background: transparent !important;
+      background-color: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    body.user-template-scope .navbar::before,
+    body.user-template-scope .navbar::after {
+      content: none !important;
+      display: none !important;
     }
 
     body.user-template-scope .glass-card .glass-card,
