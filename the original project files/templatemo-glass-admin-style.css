@@ -524,9 +524,9 @@ a {
     min-width: 18px;
     height: 18px;
     padding: 0 4px;
-    background: var(--coral);
+    background: #e53935;
     color: #fff;
-    border-radius: 4px;
+    border-radius: 2px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
