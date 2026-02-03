@@ -1,0 +1,2288 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="fr">
+<head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+  <title>Tableau de bord</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="templatemo-glass-admin-style.css"/>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+  <style>
+    :root{
+      --curve: #a3ec01;
+    }
+
+    body.user-template-scope {
+      --bg: #0b1322;
+      --panel: rgba(124, 37, 239, 0.10);
+      --panel-border: rgba(124, 37, 239, 0.30);
+      --shadow: 0 4px 30px rgba(0, 0, 0, 0.10);
+      --blur: blur(4.7px);
+      --text: #e9eef6;
+      --muted: #98a3b7;
+      --accent: #b8ff00;
+      --lime: #B8FE08;
+      --glow-shift-x: 0px;
+      --glow-shift-y: 0px;
+      --glow-shift-x-alt: 0px;
+      --glow-shift-y-alt: 0px;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      position: relative;
+    }
+
+    body.user-template-scope::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background:
+        linear-gradient(140deg, rgba(120, 180, 255, 0.20) 0%, rgba(120, 180, 255, 0.0) 48%),
+        linear-gradient(220deg, rgba(100, 255, 215, 0.14) 0%, rgba(100, 255, 215, 0.0) 55%),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.0) 42%),
+        linear-gradient(180deg, #0b1322 0%, #0a0f1a 100%);
+      background-position:
+        0% 0%,
+        0% 0%,
+        0% 0%,
+        0% 0%;
+      filter: blur(26px);
+      opacity: 0.95;
+      animation: floatGlow 20s ease-in-out infinite;
+    }
+
+    body.user-template-scope::after {
+      content: none;
+    }
+
+    @keyframes floatGlow {
+      0% {
+        background-position:
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%;
+      }
+      50% {
+        background-position:
+          6% -4%,
+          -5% 8%,
+          4% -6%,
+          0% 0%;
+      }
+      100% {
+        background-position:
+          0% 0%,
+          0% 0%,
+          0% 0%,
+          0% 0%;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      body.user-template-scope::before {
+        animation: none;
+      }
+    }
+
+    body.user-template-scope > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    body.user-template-scope .glass-card,
+    body.user-template-scope .card,
+    body.user-template-scope .modal-content,
+    body.user-template-scope .dropdown-menu,
+    body.user-template-scope .sidebar,
+    body.user-template-scope .navbar,
+    body.user-template-scope .nav-btn,
+    body.user-template-scope .search-input,
+    body.user-template-scope .login-card,
+    body.user-template-scope .table-wrapper,
+    body.user-template-scope .table-responsive,
+    body.user-template-scope .pagination .page-link,
+    body.user-template-scope .btn,
+    body.user-template-scope .card-btn {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      box-shadow: var(--shadow);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      color: var(--text);
+    }
+
+    body.user-template-scope .background,
+    body.user-template-scope .orb {
+      display: none;
+    }
+
+    body.user-template-scope .navbar {
+      background: transparent !important;
+      background-color: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    body.user-template-scope .navbar::before,
+    body.user-template-scope .navbar::after {
+      content: none !important;
+      display: none !important;
+    }
+
+    body.user-template-scope .glass-card .glass-card,
+    body.user-template-scope .glass-card .card,
+    body.user-template-scope .card .glass-card,
+    body.user-template-scope .card .card,
+    body.user-template-scope .glass-card .table-wrapper,
+    body.user-template-scope .card .table-wrapper,
+    body.user-template-scope .glass-card .table-responsive,
+    body.user-template-scope .card .table-responsive {
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+
+    body.user-template-scope .main-content {
+      padding: 30px;
+    }
+
+    body.user-template-scope .card-header,
+    body.user-template-scope .card-header *,
+    body.user-template-scope .card-body,
+    body.user-template-scope .tab-content,
+    body.user-template-scope .tab-pane,
+    body.user-template-scope .alert,
+    body.user-template-scope .dropdown-item,
+    body.user-template-scope .list-group-item,
+    body.user-template-scope .bg-light,
+    body.user-template-scope .bg-white {
+      background: transparent !important;
+      border: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+
+    body.user-template-scope .tab-content::before {
+      content: none !important;
+    }
+
+    body.user-template-scope .dropdown-item,
+    body.user-template-scope .list-group-item,
+    body.user-template-scope .table,
+    body.user-template-scope .data-table,
+    body.user-template-scope .table th,
+    body.user-template-scope .table td,
+    body.user-template-scope .data-table th,
+    body.user-template-scope .data-table td,
+    body.user-template-scope .pagination .page-link,
+    body.user-template-scope .alert {
+      background: transparent !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
+    }
+
+    body.user-template-scope .activity-item {
+      background: transparent;
+      box-shadow: none;
+    }
+
+    body.user-template-scope .table th,
+    body.user-template-scope .table td,
+    body.user-template-scope .data-table th,
+    body.user-template-scope .data-table td {
+      background: transparent !important;
+      border-color: var(--panel-border);
+    }
+
+    body.user-template-scope .table-striped > tbody > tr:nth-of-type(odd) > * {
+      background: transparent !important;
+    }
+
+    body.user-template-scope .nav-tabs .nav-link.active,
+    body.user-template-scope .dropdown-menu .dropdown-item.active {
+      background: transparent !important;
+      color: var(--accent);
+      border-color: var(--panel-border);
+    }
+
+    body.user-template-scope .dropdown-divider,
+    body.user-template-scope .list-group-item {
+      border-color: var(--panel-border);
+    }
+
+    body.user-template-scope .badge,
+    body.user-template-scope .badge.bg-success-subtle,
+    body.user-template-scope .badge.bg-warning-subtle {
+      background: var(--accent) !important;
+      color: #0b0d10 !important;
+      border: 1px solid var(--panel-border);
+    }
+
+    body.user-template-scope .form-control::placeholder,
+    body.user-template-scope .form-input::placeholder,
+    body.user-template-scope .search-input::placeholder {
+      color: var(--muted);
+    }
+
+    body.user-template-scope .dashboard {
+      gap: 0;
+    }
+
+    body.user-template-scope .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 30px 30px 30px 22px;
+    }
+
+    body.user-template-scope .btn-primary,
+    body.user-template-scope .btn-success {
+      background: var(--panel) !important;
+      border-color: var(--panel-border) !important;
+      color: var(--text);
+    }
+
+    body.user-template-scope .btn-primary:hover,
+    body.user-template-scope .btn-success:hover {
+      border-color: var(--accent) !important;
+      color: var(--accent);
+    }
+
+    body.user-template-scope .btn-primary:focus,
+    body.user-template-scope .btn-success:focus,
+    body.user-template-scope .btn-primary:active,
+    body.user-template-scope .btn-success:active {
+      box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--accent) 40%, transparent);
+      border-color: var(--accent) !important;
+    }
+
+    body.user-template-scope .text-success,
+    body.user-template-scope .text-success-emphasis {
+      color: var(--accent) !important;
+    }
+
+    body.user-template-scope .bg-success {
+      background-color: transparent !important;
+      border-color: var(--accent) !important;
+      color: var(--accent) !important;
+    }
+
+    body.user-template-scope .bg-success-subtle,
+    body.user-template-scope .badge.bg-success-subtle {
+      background-color: color-mix(in srgb, var(--accent) 22%, transparent) !important;
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
+      color: var(--text) !important;
+    }
+
+    body.user-template-scope .progress-bar.bg-success {
+      background-color: var(--accent) !important;
+    }
+
+    body.user-template-scope .btn-outline-primary {
+      color: var(--accent) !important;
+      border-color: var(--accent) !important;
+    }
+
+    body.user-template-scope .btn-outline-primary:hover,
+    body.user-template-scope .btn-outline-primary:focus {
+      background-color: transparent !important;
+      color: var(--accent) !important;
+    }
+
+    body.user-template-scope .form-control:focus,
+    body.user-template-scope .form-select:focus,
+    body.user-template-scope .form-check-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+
+    body.user-template-scope .form-check-input:checked {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    body.user-template-scope .nav-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    body.user-template-scope .alert {
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+
+    body.user-template-scope .alert + .alert {
+      border-top-color: rgba(255, 255, 255, 0.12);
+    }
+
+    body.user-template-scope .alert .alert-heading,
+    body.user-template-scope .alert strong {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    body.user-template-scope .alert .text-muted,
+    body.user-template-scope .alert small {
+      color: var(--muted) !important;
+    }
+
+    body.user-template-scope .alert-info,
+    body.user-template-scope .alert-success,
+    body.user-template-scope .alert-warning,
+    body.user-template-scope .alert-danger {
+      background: transparent !important;
+      color: var(--text) !important;
+    }
+
+    body.user-template-scope .pagination {
+      gap: 8px;
+    }
+
+    body.user-template-scope .pagination .page-item {
+      margin: 0;
+    }
+
+    body.user-template-scope .pagination .page-link {
+      border: 1px solid var(--panel-border);
+      border-radius: 999px;
+      padding: 6px 14px;
+      min-width: 36px;
+      text-align: center;
+      font-weight: 500;
+      color: var(--muted);
+      transition: all 0.2s ease;
+    }
+
+    body.user-template-scope .pagination .page-link:hover {
+      color: var(--text);
+      border-color: var(--accent);
+    }
+
+    body.user-template-scope .pagination .page-item.active .page-link,
+    body.user-template-scope .pagination .page-link.active {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--panel) !important;
+    }
+
+    body.user-template-scope .pagination .page-link:focus {
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent);
+    }
+
+    body.user-template-scope .sidebar {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.user-template-scope .nav-menu {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    body.user-template-scope .nav-section-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.user-template-scope .account-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    body.user-template-scope .account-link .user-avatar {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--panel-border);
+      object-fit: cover;
+    }
+
+    body.user-template-scope .account-details {
+      display: flex;
+      flex-direction: column;
+    }
+
+    body.user-template-scope .account-balance {
+      padding: 10px 18px 4px;
+      color: var(--muted);
+    }
+
+    body.user-template-scope .account-balance-label {
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+
+    body.user-template-scope .account-balance-value {
+      font-weight: 600;
+      color: var(--accent) !important;
+    }
+
+    body.user-template-scope .account-logout {
+      color: var(--muted) !important;
+    }
+
+    body.user-template-scope .account-logout:hover {
+      color: var(--text) !important;
+    }
+
+    body.user-template-scope .activity-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    body.user-template-scope .activity-list .notification-row {
+      margin: 0;
+      border: none;
+      border-radius: 0;
+      padding: 14px 2px;
+      background: transparent !important;
+      border-bottom: 1px solid var(--panel-border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    body.user-template-scope .activity-list .notification-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    body.user-template-scope .activity-list .notification-title {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    body.user-template-scope .activity-list .notification-message {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    body.user-template-scope .activity-list .notification-time {
+      color: var(--muted);
+      font-size: 0.85rem;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    body.user-template-scope .text-muted,
+    body.user-template-scope .card-subtitle,
+    body.user-template-scope .nav-section-title,
+    body.user-template-scope .form-text,
+    body.user-template-scope small {
+      color: var(--muted) !important;
+    }
+
+    body.user-template-scope .nav-link.active,
+    body.user-template-scope .nav-link:hover,
+    body.user-template-scope .nav-tabs .nav-link.active {
+      color: var(--accent) !important;
+    }
+
+    body.user-template-scope .nav-link,
+    body.user-template-scope .nav-tabs .nav-link {
+      background: transparent !important;
+    }
+
+    body.user-template-scope .dashboard,
+    body.user-template-scope .main-content,
+    body.user-template-scope .table,
+    body.user-template-scope .data-table {
+      background: transparent;
+    }
+
+    body.user-template-scope .activity-list .notification-row:last-child {
+      border-bottom: none;
+    }
+
+    body.user-template-scope .greenCurve{
+      position: relative;
+      overflow: hidden;
+      border-radius: 16px;
+      min-height: 220px;
+      background: rgba(124, 37, 239, 0.10);
+      border: 1px solid rgba(124, 37, 239, 0.30);
+    }
+
+    body.user-template-scope .greenCurve__wave{
+      position: absolute;
+      left: -15%;
+      width: 130%;
+      bottom: -26px;
+      height: 58%;
+      opacity: 1;
+      pointer-events: none;
+      filter: drop-shadow(0 -18px 40px rgba(163, 236, 1, 0.18));
+    }
+
+    body.user-template-scope .greenCurve__fill{ opacity: .55; }
+    body.user-template-scope .greenCurve__stripes{ opacity: .14; }
+    body.user-template-scope .greenCurve__line{ opacity: .9; }
+    body.user-template-scope .greenCurve .stat-card-inner{ position: relative; z-index: 1; }
+  </style>
+</head>
+<body class="user-template-scope">
+  <div class="background"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div id="loginSection" class="login-page" style="display:none;">
+    <button class="theme-toggle-float" id="theme-toggle" title="Toggle Light/Dark Mode">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/>
+        <path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/>
+        <path d="M2 12h2"/><path d="M20 12h2"/>
+        <path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/>
+      </svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display: none;">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+
+    <div class="login-container">
+      <div class="login-card">
+        <div class="login-header">
+          <div class="login-logo">C</div>
+          <h1 class="login-title">Bon retour</h1>
+          <p class="login-subtitle">Connectez-vous pour accéder à votre espace</p>
+        </div>
+
+        <form id="userLoginForm">
+          <div class="form-group">
+            <label class="form-label" for="loginEmail">Adresse email</label>
+            <input type="email" id="loginEmail" class="form-input" placeholder="Entrez votre email" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Mot de passe</label>
+            <input type="password" id="loginPassword" class="form-input" placeholder="Entrez votre mot de passe" required>
+          </div>
+
+          <div class="form-row">
+            <label class="checkbox-label">
+              <input type="checkbox" checked>
+              Se souvenir de moi
+            </label>
+            <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary">
+            Se connecter
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"/>
+              <polyline points="12 5 19 12 12 19"/>
+            </svg>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div id="dashboardContainer" class="dashboard" style="display:none;">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">C</div>
+        <span class="logo-text">Coin Dashboard</span>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-section nav-section-main">
+          <span class="nav-section-title">Main Menu</span>
+          <ul>
+            <li class="nav-item">
+              <a class="nav-link active" data-section="dashboard" href="#dashboard">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7" rx="1"/>
+                  <rect x="14" y="3" width="7" height="7" rx="1"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1"/>
+                  <rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                Accueil
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-section="deposit" href="#deposit">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                  <path d="M2 17l10 5 10-5"/>
+                  <path d="M2 12l10 5 10-5"/>
+                </svg>
+                Dépôt
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-section="withdraw" href="#withdraw">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Retrait
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-section="trading" href="#trading">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="7" height="7" rx="1"/>
+                  <rect x="14" y="3" width="7" height="7" rx="1"/>
+                  <rect x="3" y="14" width="7" height="7" rx="1"/>
+                  <rect x="14" y="14" width="7" height="7" rx="1"/>
+                </svg>
+                Trading
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-section="kyc" href="#kyc">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                  <path d="M2 17l10 5 10-5"/>
+                  <path d="M2 12l10 5 10-5"/>
+                </svg>
+                KYC
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" data-section="offers" href="#offers">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                Offres
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li class="nav-section">
+          <span class="nav-section-title">Account</span>
+          <ul>
+            <li class="nav-item account-item">
+              <a class="nav-link account-link" data-section="Profil" href="#Profil">
+                <img alt="Image Utilisateur" class="user-avatar" src=""/>
+                <div class="account-details">
+                  <div class="user-name" id="sidebarName">---</div>
+                  <div class="user-role" id="memberSince">Utilisateur</div>
+                </div>
+              </a>
+              <span class="visually-hidden" id="nameincompte">---</span>
+            </li>
+            <li class="nav-item account-balance">
+              <div class="account-balance-label">Solde total</div>
+              <div class="account-balance-value text-success" id="accountBalance">$12,500.00</div>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link account-logout" href="#" onclick="logout()">
+                <svg class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Se déconnecter
+              </a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </aside>
+
+    <main class="main-content">
+      <nav class="navbar">
+        <h1 class="page-title">Bonjour, <span id="firstname"></span></h1>
+        <div class="navbar-right">
+          <div class="search-box">
+            <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input type="text" class="search-input" placeholder="Rechercher...">
+          </div>
+          <div class="dropdown position-relative">
+            <button aria-expanded="false" class="nav-btn" data-bs-toggle="dropdown" id="notificationsDropdownButton" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+              </svg>
+              <span class="notification-dot" id="notificationCount">0</span>
+            </button>
+            <ul aria-labelledby="notificationsDropdownButton" class="dropdown-menu dropdown-menu-end" id="notificationsRecentes" style="min-width: 300px;">
+              <li class="dropdown-header">
+                <svg class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                  <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                  <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                </svg>
+                Notifications récentes
+              </li>
+              <li><hr class="dropdown-divider"/></li>
+              <li id="notificationsDropdown" class="text-center text-muted py-3"></li>
+              <li><hr class="dropdown-divider"/></li>
+              <li class="text-center">
+                <a class="dropdown-item small" href="#"></a>
+              </li>
+            </ul>
+          </div>
+          <button class="nav-btn" type="button" title="Toggle Light/Dark Mode">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="4"/>
+              <path d="M12 2v2"/><path d="M12 20v2"/>
+              <path d="M4.93 4.93l1.41 1.41"/><path d="M17.66 17.66l1.41 1.41"/>
+              <path d="M2 12h2"/><path d="M20 12h2"/>
+              <path d="M6.34 17.66l-1.41 1.41"/><path d="M19.07 4.93l-1.41 1.41"/>
+            </svg>
+          </button>
+          <div class="dropdown">
+            <button aria-expanded="false" class="nav-btn" data-bs-toggle="dropdown" id="languageDropdown" type="button">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="2" y1="12" x2="22" y2="12"/>
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+              </svg>
+            </button>
+            <ul aria-labelledby="languageDropdown" class="dropdown-menu dropdown-menu-end">
+              <li class="dropdown-header">
+                <svg class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="2" y1="12" x2="22" y2="12"/>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+                Choisissez la langue
+              </li>
+              <li><hr class="dropdown-divider"/></li>
+              <li><a class="dropdown-item active" href="#" onclick="changeLanguage('ar')"><i class="fas fa-check me-2"></i> Français</a></li>
+              <li><a class="dropdown-item" href="#" onclick="changeLanguage('en')">English</a></li>
+              <li><a class="dropdown-item" href="#" onclick="changeLanguage('ar')">Arabe</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <div class="tab-content">
+        <div class="tab-pane fade show active" id="dashboard">
+          <section class="stats-grid">
+            <div class="glass-card glass-card-3d stat-card">
+              <div class="greenCurve">
+                <div class="stat-card-inner">
+                  <div class="stat-info">
+                    <h3>TOTAL REVENUE</h3>
+                    <div class="stat-value">$84,254</div>
+                    <span class="stat-change positive">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M7 17l10-10"/><path d="M7 7h10v10"/>
+                      </svg>
+                      +12.5%
+                    </span>
+                  </div>
+                  <div class="stat-icon revenue">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                    </svg>
+                  </div>
+                </div>
+                <svg class="greenCurve__wave" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="gc-waveFill-1" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" style="stop-color: var(--curve); stop-opacity: 0;"/>
+                      <stop offset="55%" style="stop-color: var(--curve); stop-opacity: 0.10;"/>
+                      <stop offset="100%" style="stop-color: var(--curve); stop-opacity: 0.55;"/>
+                    </linearGradient>
+                    <linearGradient id="gc-waveLine-1" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" style="stop-color: var(--curve); stop-opacity: 0.35;"/>
+                      <stop offset="45%" style="stop-color: var(--curve); stop-opacity: 0.95;"/>
+                      <stop offset="100%" style="stop-color: var(--curve); stop-opacity: 0.55;"/>
+                    </linearGradient>
+                    <pattern id="gc-diag-1" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                      <rect x="0" y="0" width="6" height="14" style="fill: var(--curve); opacity: 1;"/>
+                    </pattern>
+                    <clipPath id="gc-waveClip-1">
+                      <path d="M0 270 C 120 180 260 340 400 260 C 520 190 650 320 780 230 C 880 160 950 260 1000 190 L 1000 400 L 0 400 Z"/>
+                    </clipPath>
+                  </defs>
+                  <path class="greenCurve__fill"
+                        d="M0 270 C 120 180 260 340 400 260 C 520 190 650 320 780 230 C 880 160 950 260 1000 190 L 1000 400 L 0 400 Z"
+                        fill="url(#gc-waveFill-1)"/>
+                  <rect class="greenCurve__stripes"
+                        x="0" y="0" width="1000" height="400"
+                        fill="url(#gc-diag-1)"
+                        clip-path="url(#gc-waveClip-1)"/>
+                  <path class="greenCurve__line"
+                        d="M0 270 C 120 180 260 340 400 260 C 520 190 650 320 780 230 C 880 160 950 260 1000 190"
+                        fill="none"
+                        stroke="url(#gc-waveLine-1)"
+                        stroke-width="8"
+                        stroke-linecap="round"/>
+                  <path class="greenCurve__line"
+                        d="M0 270 C 120 180 260 340 400 260 C 520 190 650 320 780 230 C 880 160 950 260 1000 190"
+                        fill="none"
+                        style="stroke: var(--curve); stroke-opacity: 0.35;"
+                        stroke-width="14"
+                        stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+            <div class="glass-card glass-card-3d stat-card">
+              <div class="greenCurve">
+                <div class="stat-card-inner">
+                  <div class="stat-info">
+                    <h3>ACTIVE USERS</h3>
+                    <div class="stat-value">24,521</div>
+                    <span class="stat-change positive">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M7 17l10-10"/><path d="M7 7h10v10"/>
+                      </svg>
+                      +8.2%
+                    </span>
+                  </div>
+                  <div class="stat-icon users">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                      <circle cx="9" cy="7" r="4"/>
+                      <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                      <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                  </div>
+                </div>
+                <svg class="greenCurve__wave" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="gc-waveFill-2" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" style="stop-color: var(--curve); stop-opacity: 0;"/>
+                      <stop offset="55%" style="stop-color: var(--curve); stop-opacity: 0.10;"/>
+                      <stop offset="100%" style="stop-color: var(--curve); stop-opacity: 0.55;"/>
+                    </linearGradient>
+                    <linearGradient id="gc-waveLine-2" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" style="stop-color: var(--curve); stop-opacity: 0.35;"/>
+                      <stop offset="45%" style="stop-color: var(--curve); stop-opacity: 0.95;"/>
+                      <stop offset="100%" style="stop-color: var(--curve); stop-opacity: 0.55;"/>
+                    </linearGradient>
+                    <pattern id="gc-diag-2" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                      <rect x="0" y="0" width="6" height="14" style="fill: var(--curve); opacity: 1;"/>
+                    </pattern>
+                    <clipPath id="gc-waveClip-2">
+                      <path d="M0 230 C 140 320 280 140 420 230 C 560 320 660 170 800 250 C 900 310 960 200 1000 220 L 1000 400 L 0 400 Z"/>
+                    </clipPath>
+                  </defs>
+                  <path class="greenCurve__fill"
+                        d="M0 230 C 140 320 280 140 420 230 C 560 320 660 170 800 250 C 900 310 960 200 1000 220 L 1000 400 L 0 400 Z"
+                        fill="url(#gc-waveFill-2)"/>
+                  <rect class="greenCurve__stripes"
+                        x="0" y="0" width="1000" height="400"
+                        fill="url(#gc-diag-2)"
+                        clip-path="url(#gc-waveClip-2)"/>
+                  <path class="greenCurve__line"
+                        d="M0 230 C 140 320 280 140 420 230 C 560 320 660 170 800 250 C 900 310 960 200 1000 220"
+                        fill="none"
+                        stroke="url(#gc-waveLine-2)"
+                        stroke-width="8"
+                        stroke-linecap="round"/>
+                  <path class="greenCurve__line"
+                        d="M0 230 C 140 320 280 140 420 230 C 560 320 660 170 800 250 C 900 310 960 200 1000 220"
+                        fill="none"
+                        style="stroke: var(--curve); stroke-opacity: 0.35;"
+                        stroke-width="14"
+                        stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+            <div class="glass-card glass-card-3d stat-card">
+              <div class="greenCurve">
+                <div class="stat-card-inner">
+                  <div class="stat-info">
+                    <h3>TOTAL ORDERS</h3>
+                    <div class="stat-value">8,461</div>
+                    <span class="stat-change negative">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M7 7l10 10"/><path d="M17 7H7v10"/>
+                      </svg>
+                      -3.1%
+                    </span>
+                  </div>
+                  <div class="stat-icon orders">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="9" cy="21" r="1"/>
+                      <circle cx="20" cy="21" r="1"/>
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+                    </svg>
+                  </div>
+                </div>
+                <svg class="greenCurve__wave" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="gc-waveFill-3" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" style="stop-color: var(--curve); stop-opacity: 0;"/>
+                      <stop offset="55%" style="stop-color: var(--curve); stop-opacity: 0.10;"/>
+                      <stop offset="100%" style="stop-color: var(--curve); stop-opacity: 0.55;"/>
+                    </linearGradient>
+                    <linearGradient id="gc-waveLine-3" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" style="stop-color: var(--curve); stop-opacity: 0.35;"/>
+                      <stop offset="45%" style="stop-color: var(--curve); stop-opacity: 0.95;"/>
+                      <stop offset="100%" style="stop-color: var(--curve); stop-opacity: 0.55;"/>
+                    </linearGradient>
+                    <pattern id="gc-diag-3" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                      <rect x="0" y="0" width="6" height="14" style="fill: var(--curve); opacity: 1;"/>
+                    </pattern>
+                    <clipPath id="gc-waveClip-3">
+                      <path d="M0 255 C 120 150 260 320 390 235 C 520 140 640 290 770 210 C 880 130 950 260 1000 190 L 1000 400 L 0 400 Z"/>
+                    </clipPath>
+                  </defs>
+                  <path class="greenCurve__fill"
+                        d="M0 255 C 120 150 260 320 390 235 C 520 140 640 290 770 210 C 880 130 950 260 1000 190 L 1000 400 L 0 400 Z"
+                        fill="url(#gc-waveFill-3)"/>
+                  <rect class="greenCurve__stripes"
+                        x="0" y="0" width="1000" height="400"
+                        fill="url(#gc-diag-3)"
+                        clip-path="url(#gc-waveClip-3)"/>
+                  <path class="greenCurve__line"
+                        d="M0 255 C 120 150 260 320 390 235 C 520 140 640 290 770 210 C 880 130 950 260 1000 190"
+                        fill="none"
+                        stroke="url(#gc-waveLine-3)"
+                        stroke-width="8"
+                        stroke-linecap="round"/>
+                  <path class="greenCurve__line"
+                        d="M0 255 C 120 150 260 320 390 235 C 520 140 640 290 770 210 C 880 130 950 260 1000 190"
+                        fill="none"
+                        style="stroke: var(--curve); stroke-opacity: 0.35;"
+                        stroke-width="14"
+                        stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+            <div class="glass-card glass-card-3d stat-card">
+              <div class="greenCurve">
+                <div class="stat-card-inner">
+                  <div class="stat-info">
+                    <h3>CONVERSION RATE</h3>
+                    <div class="stat-value">324%</div>
+                    <span class="stat-change positive">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M7 17l10-10"/><path d="M7 7h10v10"/>
+                      </svg>
+                      +2.4%
+                    </span>
+                  </div>
+                  <div class="stat-icon conversion">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                  </div>
+                </div>
+                <svg class="greenCurve__wave" viewBox="0 0 1000 400" preserveAspectRatio="none" aria-hidden="true">
+                  <defs>
+                    <linearGradient id="gc-waveFill-4" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" style="stop-color: var(--curve); stop-opacity: 0;"/>
+                      <stop offset="55%" style="stop-color: var(--curve); stop-opacity: 0.10;"/>
+                      <stop offset="100%" style="stop-color: var(--curve); stop-opacity: 0.55;"/>
+                    </linearGradient>
+                    <linearGradient id="gc-waveLine-4" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" style="stop-color: var(--curve); stop-opacity: 0.35;"/>
+                      <stop offset="45%" style="stop-color: var(--curve); stop-opacity: 0.95;"/>
+                      <stop offset="100%" style="stop-color: var(--curve); stop-opacity: 0.55;"/>
+                    </linearGradient>
+                    <pattern id="gc-diag-4" width="14" height="14" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                      <rect x="0" y="0" width="6" height="14" style="fill: var(--curve); opacity: 1;"/>
+                    </pattern>
+                    <clipPath id="gc-waveClip-4">
+                      <path d="M0 270 C 140 330 280 190 420 260 C 560 340 680 180 820 250 C 910 310 965 200 1000 225 L 1000 400 L 0 400 Z"/>
+                    </clipPath>
+                  </defs>
+                  <path class="greenCurve__fill"
+                        d="M0 270 C 140 330 280 190 420 260 C 560 340 680 180 820 250 C 910 310 965 200 1000 225 L 1000 400 L 0 400 Z"
+                        fill="url(#gc-waveFill-4)"/>
+                  <rect class="greenCurve__stripes"
+                        x="0" y="0" width="1000" height="400"
+                        fill="url(#gc-diag-4)"
+                        clip-path="url(#gc-waveClip-4)"/>
+                  <path class="greenCurve__line"
+                        d="M0 270 C 140 330 280 190 420 260 C 560 340 680 180 820 250 C 910 310 965 200 1000 225"
+                        fill="none"
+                        stroke="url(#gc-waveLine-4)"
+                        stroke-width="8"
+                        stroke-linecap="round"/>
+                  <path class="greenCurve__line"
+                        d="M0 270 C 140 330 280 190 420 260 C 560 340 680 180 820 250 C 910 310 965 200 1000 225"
+                        fill="none"
+                        style="stroke: var(--curve); stroke-opacity: 0.35;"
+                        stroke-width="14"
+                        stroke-linecap="round"/>
+                </svg>
+              </div>
+            </div>
+          </section>
+
+          <section class="content-grid">
+            <div class="glass-card chart-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">Revenue Analytics</h2>
+                  <p class="card-subtitle">Monthly revenue overview</p>
+                </div>
+                <div class="card-actions">
+                  <button class="card-btn active">Monthly</button>
+                  <button class="card-btn">Weekly</button>
+                  <button class="card-btn">Daily</button>
+                </div>
+              </div>
+              <div class="chart-wrapper">
+                <div class="chart-container">
+                  <div class="chart-y-axis">
+                    <span class="y-value">$100K</span>
+                    <span class="y-value">$80K</span>
+                    <span class="y-value">$60K</span>
+                    <span class="y-value">$40K</span>
+                    <span class="y-value">$20K</span>
+                    <span class="y-value">$0</span>
+                  </div>
+                  <div class="chart-placeholder">
+                    <div class="chart-bar-group"><div class="chart-bar bar-emerald" style="height: 120px;"></div><span class="chart-label">Jan</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-gold" style="height: 160px;"></div><span class="chart-label">Feb</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-coral" style="height: 90px;"></div><span class="chart-label">Mar</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-teal" style="height: 140px;"></div><span class="chart-label">Apr</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-amber" style="height: 180px;"></div><span class="chart-label">May</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-emerald" style="height: 130px;"></div><span class="chart-label">Jun</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-gold" style="height: 170px;"></div><span class="chart-label">Jul</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-coral" style="height: 150px;"></div><span class="chart-label">Aug</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-teal" style="height: 190px;"></div><span class="chart-label">Sep</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-amber" style="height: 140px;"></div><span class="chart-label">Oct</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-emerald" style="height: 175px;"></div><span class="chart-label">Nov</span></div>
+                    <div class="chart-bar-group"><div class="chart-bar bar-gold" style="height: 200px;"></div><span class="chart-label">Dec</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="glass-card activity-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">Notifications</h2>
+                  <p class="card-subtitle">Dernières notifications</p>
+                </div>
+              </div>
+              <div class="activity-list" id="notifications"></div>
+            </div>
+
+            <div class="glass-card table-card">
+              <div class="card-header">
+                <div>
+                  <h2 class="card-title">Recent Transactions</h2>
+                  <p class="card-subtitle">Latest orders and payments</p>
+                </div>
+              </div>
+              <div class="table-wrapper">
+                <table id="transactionsTable" class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Numéro Opération</th>
+                      <th>Type</th>
+                      <th>Quantité</th>
+                      <th>Date</th>
+                      <th>Statut</th>
+                    </tr>
+                  </thead>
+                  <tbody id="transactionsTableBody"></tbody>
+                </table>
+              </div>
+              <ul class="pagination justify-content-center mt-3" id="transactionsPagination"></ul>
+            </div>
+          </section>
+        </div>
+        <!-- Deposit Tab -->
+<div class="tab-pane fade" id="deposit">
+<h2 class="mb-4">Déposer de l'argent</h2>
+<div id="depositAlert"></div>
+<div class="row">
+<div class="col-lg-8">
+<div class="card">
+<div class="card-header">
+<i class="fas fa-money-bill-wave me-2"></i>Méthodes de dépôt
+                    </div>
+<div class="card-body" id="infoCompteBancaire">
+<ul class="nav nav-tabs" id="depositTabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button aria-controls="bank" aria-selected="true" class="nav-link active" data-bs-target="#bank" data-bs-toggle="tab" id="bank-tab" role="tab" type="button">
+<i class="fas fa-university me-2"></i>Virement bancaire </button>
+</li>
+<li class="nav-item" role="presentation">
+<button aria-controls="card" aria-selected="false" class="nav-link" data-bs-target="#card" data-bs-toggle="tab" id="card-tab" role="tab" type="button">
+<i class="fas fa-credit-card me-2"></i>Carte de crédit </button>
+</li>
+<li class="nav-item" role="presentation">
+<button aria-controls="crypto" aria-selected="false" class="nav-link" data-bs-target="#crypto" data-bs-toggle="tab" id="crypto-tab" role="tab" type="button">
+<i class="fab fa-bitcoin me-2"></i>Cryptomonnaies </button>
+</li>
+</ul>
+<div class="tab-content p-3" id="depositTabsContent">
+<!-- Bank Transfer Tab -->
+<div aria-labelledby="bank-tab" class="tab-pane fade show active" id="bank" role="tabpanel">
+<div class="alert alert-info mb-4">
+<i class="fas fa-info-circle me-2"></i>Veuillez transférer le montant requis au compte bancaire ci-dessous. Le montant sera ajouté à votre compte après confirmation.
+                          </div>
+<div class="card mb-4 bg-light">
+<div class="card-body">
+<h5 class="card-title">Informations sur le compte bancaire</h5>
+<div class="row mb-2">
+<div class="col-md-4 fw-bold">Nom de la banque :</div>
+<div class="col-md-8" id="widhrawbankname">---</div>
+</div>
+<div class="row mb-2">
+<div class="col-md-4 fw-bold">Nom du bénéficiaire :</div>
+<div class="col-md-8" id="widhrawusername">---</div>
+</div>
+<div class="row mb-2">
+<div class="col-md-4 fw-bold">Numéro de compte :</div>
+<div class="col-md-8" id="widhrawacountnumber">---</div>
+</div>
+<div class="row mb-2">
+<div class="col-md-4 fw-bold">IBAN:</div>
+<div class="col-md-8" id="widhrawiben">---</div>
+</div>
+<div class="row mb-2">
+<div class="col-md-4 fw-bold">SWIFT/BIC:</div>
+<div class="col-md-8" id="widhrawswift">---</div>
+</div>
+</div>
+</div>
+<form id="bankDepositForm">
+<div class="mb-3">
+<label class="form-label" for="bankDepositAmount">Montant à déposer</label>
+<div class="input-group">
+<input class="form-control" name="bankDepositAmount" id="bankDepositAmount" placeholder="Entrez le montant" required="" type="number"/>
+<span class="input-group-text">$</span>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label" for="bankTransferReceipt">Reçu de transfert</label>
+<input class="form-control" id="bankTransferReceipt" required="" type="file"/>
+<div class="form-text">Veuillez télécharger une image ou un PDF du reçu de virement bancaire.</div>
+</div>
+<div class="mb-3">
+<label class="form-label" for="bankTransferReference">Numéro de référence de transfert</label>
+<input class="form-control" name="bankTransferReference" id="bankTransferReference" placeholder="Entrez le numéro de référence du virement" type="text"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="bankTransferNotes">Remarques (facultatif)</label>
+<textarea class="form-control" id="bankTransferNotes" placeholder="Autres informations que vous souhaitez ajouter" rows="3"></textarea>
+</div>
+<button class="btn btn-primary" type="submit">
+<i class="fas fa-paper-plane me-2"></i>Confirmer le dépôt </button>
+</form>
+</div>
+<!-- Credit Card Tab -->
+<div aria-labelledby="card-tab" class="tab-pane fade" id="card" role="tabpanel">
+<div class="alert alert-info mb-4">
+<i class="fas fa-info-circle me-2"></i> Vous pouvez déposer de l'argent en utilisant une carte de crédit ou de débit. Le montant sera ajouté à votre compte immédiatement.
+                          </div>
+<form id="cardDepositForm">
+<div class="mb-3">
+<label class="form-label" for="cardDepositAmount">Montant à déposer</label>
+<div class="input-group">
+<input class="form-control" name="cardDepositAmount" id="cardDepositAmount" placeholder="Entrez le montant" required="" type="number"/>
+<span class="input-group-text">$</span>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label" for="cardName">Nom sur la carte</label>
+<input class="form-control" name="cardName" id="cardName" placeholder="Entrez le nom tel qu’il apparaît sur la carte" required="" type="text"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="cardNumber">Numéro de la carte</label>
+<div class="input-group">
+<input class="form-control" name="cardNumber" id="cardNumber" placeholder="XXXX XXXX XXXX XXXX" required="" type="text"/>
+<span class="input-group-text">
+<i class="fab fa-cc-visa me-2"></i>
+<i class="fab fa-cc-mastercard me-2"></i>
+<i class="fab fa-cc-amex"></i>
+</span>
+</div>
+</div>
+<div class="row">
+<div class="col-md-6 mb-3">
+<label class="form-label" for="cardExpiry">Date d’expiration</label>
+<input class="form-control" name="cardExpiry" id="cardExpiry" placeholder="MM/YY" required="" type="text" maxlength="5" pattern="\d{2}/\d{2}" inputmode="numeric"/>
+</div>
+<div class="col-md-6 mb-3">
+<label class="form-label" for="cardCVV">Code de sécurité (CVV)</label>
+<input class="form-control" name="cardCVV" id="cardCVV" placeholder="XXX" required="" type="text" maxlength="4" pattern="\d{3,4}" inputmode="numeric"/>
+</div>
+</div>
+<div class="mb-3 form-check">
+<input class="form-check-input" id="saveCardInfo" type="checkbox"/>
+<label class="form-check-label" for="saveCardInfo">Enregistrer les informations de la carte pour les transactions futures</label>
+</div>
+<button class="btn btn-primary" type="submit">
+<i class="fas fa-lock me-2"></i>Paiement sécurisé terminé </button>
+</form>
+</div>
+<!-- Crypto Tab -->
+<div aria-labelledby="crypto-tab" class="tab-pane fade" id="crypto" role="tabpanel">
+<div class="alert alert-info mb-4">
+<i class="fas fa-info-circle me-2"></i> Vous pouvez déposer des fonds en utilisant des crypto-monnaies. Veuillez transférer la devise choisie à l'adresse spécifiée.
+                          </div>
+<div class="mb-4">
+<label class="form-label" for="cryptoCurrency">Choisissez la crypto-monnaie</label>
+<select class="form-select" id="cryptoCurrency">
+</select>
+</div>
+<div class="card mb-4 bg-light">
+<div class="card-body text-center">
+<h5 class="card-title">Adresse du portefeuille</h5>
+<div class="qr-code bg-white p-3 d-inline-block mb-3">
+<img id="cryptoQR" alt="QR Code" class="img-fluid" src=""/>
+</div>
+<div class="input-group mb-3">
+<input class="form-control" id="cryptoDepositAddress" name="cryptoDepositAddress" readonly type="text" value=""/>
+<button class="btn btn-outline-secondary" title="Copier l'adresse" type="button">
+<i class="fas fa-copy"></i>
+</button>
+</div>
+<div class="alert alert-warning" id="alertWarning1">
+<i class="fas fa-exclamation-triangle me-2"></i> Assurez-vous d’envoyer la bonne crypto-monnaie à la bonne adresse. Les transactions sont irréversibles.
+                              </div>
+</div>
+</div>
+<form id="cryptoDepositForm">
+<div class="mb-3">
+<label class="form-label" for="cryptoAmount">Montant à déposer (en dollars américains)</label>
+<div class="input-group">
+<input class="form-control" name="cryptoAmount" id="cryptoAmount" placeholder="Entrez le montant" required="" type="number"/>
+<span class="input-group-text">$</span>
+</div>
+<div class="form-text"> Équivalent approximatif : <span class="fw-bold">0.0034 BTC</span>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label" for="cryptoTxId">Identifiant de la transaction (TXID)</label>
+<input class="form-control" name="cryptoTxId" id="cryptoTxId" placeholder="Entrez l’identifiant de la transaction après avoir effectué le transfert" type="text"/>
+</div>
+<button class="btn btn-primary" type="submit">
+<i class="fas fa-check-circle me-2"></i>Confirmer le dépôt </button>
+</form>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="col-lg-4">
+<div class="card mb-4" id="historiquedesdptsCard">
+<div class="card-header" id="historiquedesdptsHeader">
+<i class="fas fa-history me-2"></i>Historique des dépôts
+                    </div>
+<div class="card-body">
+<div class="table-responsive">
+<table class="table table-hover">
+<thead>
+<tr>
+    <th>ID</th>
+    <th>Quantité</th>
+    <th>Méthode</th>
+    <th>Statut</th>
+</tr>
+</thead>
+<tbody id="historiqueDepots">
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-header">
+<i class="fas fa-info-circle me-2"></i>Informations sur le dépôt
+                    </div>
+<div class="card-body">
+<ul class="list-group list-group-flush">
+<li class="list-group-item d-flex justify-content-between align-items-center">Montant minimum de dépôt <span class="fw-bold">250 $</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center">Montant maximum de dépôt <span class="fw-bold">100,000 $</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center">Frais de dépôt (Carte) <span class="fw-bold">2.5%</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center">Frais de dépôt (Virement bancaire) <span class="fw-bold">Gratuit</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center">Frais de dépôt (Cryptomonnaies) <span class="fw-bold">1%</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Withdraw Tab -->
+<div class="tab-pane fade" id="withdraw">
+<h2 class="mb-4">Retrait de fonds</h2>
+<div id="withdrawAlert"></div>
+<div class="row">
+<div class="col-lg-8">
+<div class="card">
+<div class="card-header">
+<i class="fas fa-hand-holding-usd me-2"></i> Méthodes de retrait
+                    </div>
+<div class="card-body">
+<ul class="nav nav-tabs" id="withdrawTabs" role="tablist">
+<li class="nav-item" role="presentation">
+<button aria-controls="bank-withdraw" aria-selected="true" class="nav-link active" data-bs-target="#bank-withdraw" data-bs-toggle="tab" id="bank-withdraw-tab" role="tab" type="button">
+<i class="fas fa-university me-2"></i>Virement bancaire </button>
+</li>
+<li class="nav-item" role="presentation">
+<button aria-controls="crypto-withdraw" aria-selected="false" class="nav-link" data-bs-target="#crypto-withdraw" data-bs-toggle="tab" id="crypto-withdraw-tab" role="tab" type="button">
+<i class="fab fa-bitcoin me-2"></i>Cryptomonnaies </button>
+</li>
+<li class="nav-item" role="presentation">
+<button aria-controls="paypal-withdraw" aria-selected="false" class="nav-link" data-bs-target="#paypal-withdraw" data-bs-toggle="tab" id="paypal-withdraw-tab" role="tab" type="button">
+<i class="fab fa-paypal me-2"></i>PayPal </button>
+</li>
+</ul>
+<div class="tab-content p-3" id="withdrawTabsContent">
+<!-- Bank Transfer Withdraw Tab -->
+<div aria-labelledby="bank-withdraw-tab" class="tab-pane fade show active" id="bank-withdraw" role="tabpanel">
+<div class="alert alert-info mb-4">
+<i class="fas fa-info-circle me-2"></i> Entrez les coordonnées de votre compte bancaire pour retirer des fonds. La demande de retrait sera traitée sous 1 à 3 jours ouvrables.
+                          </div>
+<form id="bankWithdrawForm">
+<div class="mb-3">
+<label class="form-label" for="withdrawAmount">Montant à retirer</label>
+<div class="input-group">
+<input class="form-control" name="withdrawAmount" id="withdrawAmount" placeholder="Entrez le montant" required="" type="number"/>
+<span class="input-group-text">$</span>
+</div>
+<div class="form-text">Solde disponible : <span class="fw-bold" id="soldedisponible1">--- $</span>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label" for="bankName">Nom de la banque</label>
+<input class="form-control" name="bankName" id="bankName" placeholder="Entrez le nom de la banque" required="" type="text"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="accountHolder">Nom du titulaire du compte</label>
+<input class="form-control" name="accountHolder" id="accountHolder" placeholder="Entrez le nom du titulaire du compte" required="" type="text"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="accountNumber">Numéro de compte</label>
+<input class="form-control" name="accountNumber" id="accountNumber" placeholder="Entrez le numéro de compte" required="" type="text"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="iban">IBAN</label>
+<input class="form-control" name="iban" id="iban" placeholder="Entrez le Numéro IBAN" type="text"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="swiftCode">Code SWIFT/BIC</label>
+<input class="form-control" name="swiftCode" id="swiftCode" placeholder="Entrez le code SWIFT/BIC" type="text"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="withdrawNotes">Remarques (facultatif)</label>
+<textarea class="form-control" id="withdrawNotes" placeholder="Autres informations que vous souhaitez ajouter" rows="3"></textarea>
+</div>
+<div class="mb-3 form-check">
+<input checked="" class="form-check-input" id="saveBankInfo" type="checkbox" required/>
+<label class="form-check-label" for="saveBankInfo">Enregistrer les informations bancaires pour les transactions futures</label>
+</div>
+<button class="btn btn-primary" type="submit">
+<i class="fas fa-paper-plane me-2"></i>Confirmer le retrait </button>
+</form>
+</div>
+<!-- Crypto Withdraw Tab -->
+<div aria-labelledby="crypto-withdraw-tab" class="tab-pane fade" id="crypto-withdraw" role="tabpanel">
+<div class="alert alert-info mb-4">
+<i class="fas fa-info-circle me-2"></i> Entrez l’adresse de votre portefeuille numérique pour retirer des fonds. La demande de retrait sera traitée dans un délai de 1 à 24 heures.
+                          </div>
+<form id="cryptoWithdrawForm">
+<div class="mb-3">
+<label class="form-label" for="cryptoWithdrawAmount">Montant à retirer</label>
+<div class="input-group">
+<input class="form-control" name="cryptoWithdrawAmount" id="cryptoWithdrawAmount" placeholder="Entrez le montant" required="" type="number"/>
+<span class="input-group-text">$</span>
+</div>
+<div class="form-text">Solde disponible : <span class="fw-bold" id="soldedisponible2">--- $</span>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label" for="cryptoCurrencyWithdraw">Choisissez la crypto-monnaie</label>
+<select class="form-select" id="cryptoCurrencyWithdraw" required="">
+<option value="">-- Choisissez la crypto-monnaie --</option>
+<option value="btc">Bitcoin</option>
+<option value="eth">Ethereum</option>
+<option value="usdt">Tether</option>
+<option value="usdc">USD Coin</option>
+</select>
+</div>
+<div class="mb-3">
+<label class="form-label" for="cryptoNetwork">Choisissez le réseau</label>
+<select class="form-select" id="cryptoNetwork" required="">
+<option value="">-- Choisissez le réseau --</option>
+</select>
+<div class="form-text text-warning">
+<i class="fas fa-exclamation-triangle me-1"></i> Assurez-vous de choisir le bon réseau afin d’éviter toute perte de fonds.
+                              </div>
+</div>
+<div class="mb-3">
+<label class="form-label" for="walletAddress">Adresse du portefeuille</label>
+<input class="form-control" name="walletAddress" id="walletAddress" placeholder="Entrez l’adresse de votre portefeuille numérique" required="" type="text"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="walletAddressConfirm">Confirmation de l’adresse du portefeuille</label>
+<input class="form-control" name="walletAddressConfirm" id="walletAddressConfirm" placeholder="Entrez à nouveau l’adresse du portefeuille" required="" type="text"/>
+</div>
+<div class="mb-3 form-check">
+<input class="form-check-input" id="confirmAddress" required="" type="checkbox"/>
+<label class="form-check-label" for="confirmAddress">Je confirme que l’adresse du portefeuille est correcte et j’assume l’entière responsabilité en cas d’erreur dans l’adresse.</label>
+</div>
+<button class="btn btn-primary" type="submit">
+<i class="fas fa-paper-plane me-2"></i>Confirmer le retrait </button>
+</form>
+</div>
+<!-- PayPal Withdraw Tab -->
+<div aria-labelledby="paypal-withdraw-tab" class="tab-pane fade" id="paypal-withdraw" role="tabpanel">
+<div class="alert alert-info mb-4">
+<i class="fas fa-info-circle me-2"></i> Entrez l’adresse e-mail associée à votre compte PayPal. La demande de retrait sera traitée dans un délai de 1 à 24 heures.
+                          </div>
+<form id="paypalWithdrawForm">
+<div class="mb-3">
+<label class="form-label" for="paypalWithdrawAmount">Montant à retirer</label>
+<div class="input-group">
+<input class="form-control" name="paypalWithdrawAmount" id="paypalWithdrawAmount" placeholder="Entrez le montant" required="" type="number"/>
+<span class="input-group-text">$</span>
+</div>
+<div class="form-text">Solde disponible : <span class="fw-bold" id="soldedisponible3">--- $</span>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label" for="paypalEmail">Adresse e-mail PayPal</label>
+<input class="form-control" name="paypalEmail" id="paypalEmail" placeholder="Entrez l’adresse e-mail associée à votre compte PayPal" required="" type="email"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="paypalEmailConfirm">Confirmation de l’adresse e-mail</label>
+<input class="form-control" name="paypalEmailConfirm" id="paypalEmailConfirm" placeholder="Entrez à nouveau l’adresse e-mail" required="" type="email"/>
+</div>
+<div class="mb-3 form-check">
+<input class="form-check-input" id="savePaypalInfo" type="checkbox" required/>
+<label class="form-check-label" for="savePaypalInfo"> Enregistrer les informations PayPal pour les transactions futures</label>
+</div>
+<button class="btn btn-primary" type="submit">
+<i class="fas fa-paper-plane me-2"></i>Confirmer le retrait </button>
+</form>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="col-lg-4">
+<div class="card mb-4" id="historiquedesretraitsCard">
+<div class="card-header" id="historiquedesretraitsHeader">
+<i class="fas fa-history me-2"></i> Historique des retraits
+                    </div>
+<div class="card-body">
+<div class="table-responsive">
+<table class="table table-hover">
+<thead>
+<tr>
+<th>ID</th>
+<th>Quantité</th>
+<th>Méthode</th>
+<th>Statut</th>
+</tr>
+</thead>
+<tbody id="historiqueRetraits">
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-header">
+<i class="fas fa-info-circle me-2"></i> Informations de retrait
+                    </div>
+<div class="card-body">
+<ul class="list-group list-group-flush">
+<li class="list-group-item d-flex justify-content-between align-items-center"> Montant minimum de retrait <span class="fw-bold">50 $</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center"> Montant maximal de retrait <span class="fw-bold">500,000 $</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center"> Frais de retrait (virement bancaire) <span class="fw-bold">25 $</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center"> Frais de retrait (crypto-monnaies) <span class="fw-bold">1%</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center"> Frais de retrait (PayPal) <span class="fw-bold">2%</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center"> Délai de traitement <span class="fw-bold">1 à 3 jours ouvrables</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Profile Tab -->
+<div class="tab-pane fade" id="Profil">
+<h2 class="mb-4">Profil</h2>
+<div class="row">
+<div class="col-lg-4">
+<div class="card mb-4">
+<div class="card-body text-center">
+<div class="position-relative d-inline-block mb-3">
+<img alt="Image Profil" class="rounded-circle Profil-img" src="https://via.placeholder.com/150"/>
+<button class="btn btn-sm btn-primary position-absolute bottom-0 end-0" data-bs-target="#changeProfilePicModal" data-bs-toggle="modal">
+<i class="fas fa-camera"></i>
+</button>
+</div>
+<h5 class="mb-1" id="fullNameHeader">---</h5>
+<p class="text-muted mb-3" id="memberSince">Membre depuis janvier 2025</p>
+<div class="d-flex justify-content-center mb-2">
+<span class="badge bg-success me-2" id="compteverifie">---</span>
+<span class="badge bg-primary" id="niveauavance">---</span>
+</div>
+</div>
+</div>
+<div class="card mb-4" id="accountSecurityCard">
+<div class="card-header">
+<i class="fas fa-shield-alt me-2"></i> Sécurité du compte
+                    </div>
+<div class="card-body" id="securiteCompte">
+<div class="mb-3">
+<div class="d-flex justify-content-between align-items-center mb-2">
+<span>Niveau de sécurité du mot de passe</span>
+<span class="badge bg-success" id="passwordStrength">---</span>
+</div>
+<div class="progress">
+<div aria-valuemax="100" aria-valuemin="0" aria-valuenow="85" class="progress-bar bg-success" id="passwordStrengthBar" role="progressbar" style=""></div>
+</div>
+</div>
+<div class="mb-3">
+<div class="d-flex justify-content-between align-items-center mb-2">
+<span>2FA (Authentification à deux facteurs)</span>
+<div class="form-check form-switch" id="twoFactorAuthSwitch">
+<input checked="" class="form-check-input" id="twoFactorAuth" type="checkbox"/>
+</div>
+</div>
+<small class="text-muted">Activez l’authentification à deux facteurs pour votre compte</small>
+</div>
+<div class="d-grid gap-2">
+<button class="btn btn-outline-primary" data-bs-target="#changePasswordModal" data-bs-toggle="modal">
+<i class="fas fa-key me-2"></i>Changer le mot de passe </button>
+<button class="btn btn-outline-secondary" id="loginHistoryBtn" data-bs-toggle="modal" data-bs-target="#loginHistoryModal">
+<i class="fas fa-history me-2"></i>Historique des connexions </button>
+</div>
+</div>
+</div>
+<div class="card">
+<div class="card-header">
+<i class="fas fa-bell me-2"></i> Paramètres Notifications
+                    </div>
+<div class="card-body" id="parametresNotifications">
+<div class="mb-3">
+<div class="form-check form-switch">
+<input checked="" class="form-check-input" id="emailNotifications" type="checkbox"/>
+<label class="form-check-label" for="emailNotifications">Notifications par e-mail</label>
+</div>
+<small class="text-muted d-block">Recevoir des notifications par e-mail</small>
+</div>
+<div class="mb-3">
+<div class="form-check form-switch">
+<input class="form-check-input" id="smsNotifications" type="checkbox"/>
+<label class="form-check-label" for="smsNotifications">Notifications par SMS</label>
+</div>
+<small class="text-muted d-block">Recevoir des notifications par SMS</small>
+</div>
+<div class="mb-3">
+<div class="form-check form-switch">
+<input checked="" class="form-check-input" id="loginAlerts" type="checkbox"/>
+<label class="form-check-label" for="loginAlerts">Alertes de connexion</label>
+</div>
+<small class="text-muted d-block">Recevoir des alertes lors d'une connexion à partir d’un nouvel appareil</small>
+</div>
+<div class="mb-3">
+<div class="form-check form-switch">
+<input checked="" class="form-check-input" id="transactionAlerts" type="checkbox"/>
+<label class="form-check-label" for="transactionAlerts">Alertes de transactions</label>
+</div>
+<small class="text-muted d-block">Recevoir des alertes lors de transactions financières</small>
+</div>
+</div>
+</div>
+</div>
+<div class="col-lg-8">
+<div class="card mb-4">
+<div class="card-header d-flex justify-content-between align-items-center">
+<div>
+<i class="fas fa-user-edit me-2"></i> Informations personnelles
+                      </div>
+<button class="btn btn-sm btn-primary" id="editProfileBtn">
+<i class="fas fa-edit me-2"></i>Modifier </button>
+</div>
+<div class="card-body" id="profilInfo">
+<!-- Afficher les informations personnelles -->
+<div id="ProfilInfo">
+<div class="row mb-3">
+<div class="col-sm-3">
+<h6 class="mb-0">Nom complet</h6>
+</div>
+<div class="col-sm-9 text-secondary" id="fullName">---</div>
+</div>
+<hr/>
+<div class="row mb-3">
+<div class="col-sm-3">
+<h6 class="mb-0">Adresse e-mail</h6>
+</div>
+<div class="col-sm-9 text-secondary" id="emailaddress">---</div>
+</div>
+<hr/>
+<div class="row mb-3">
+<div class="col-sm-3">
+<h6 class="mb-0">Numéro de téléphone</h6>
+</div>
+<div class="col-sm-9 text-secondary" id="phone">---</div>
+</div>
+<hr/>
+<div class="row mb-3">
+<div class="col-sm-3">
+<h6 class="mb-0">Date de naissance</h6>
+</div>
+<div class="col-sm-9 text-secondary" id="dob">---</div>
+</div>
+<hr/>
+<div class="row mb-3">
+<div class="col-sm-3">
+<h6 class="mb-0">Nationalité</h6>
+</div>
+<div class="col-sm-9 text-secondary" id="nationality">---</div>
+</div>
+<hr/>
+<div class="row mb-3">
+<div class="col-sm-3">
+<h6 class="mb-0">Adresse</h6>
+</div>
+<div class="col-sm-9 text-secondary" id="address">---</div>
+</div>
+</div>
+<!-- Formulaire de modification des informations personnelles -->
+<div id="ProfilEditForm" style="display: none;">
+<form id="profileEditForm">
+<div class="mb-3 row">
+<label class="col-sm-3 col-form-label" for="fullNameInput">Nom complet</label>
+<div class="col-sm-9">
+<input class="form-control" name="full name" id="fullNameInput" type="text" value=""/>
+</div>
+</div>
+<div class="mb-3 row">
+<label class="col-sm-3 col-form-label" for="email">Adresse e-mail</label>
+<div class="col-sm-9">
+<input class="form-control" name="email" id="email" type="email" value=""/>
+</div>
+</div>
+<div class="mb-3 row">
+<label class="col-sm-3 col-form-label" for="phoneInput">Numéro de téléphone</label>
+<div class="col-sm-9">
+<input class="form-control" name="phone" id="phoneInput" type="tel" value=""/>
+</div>
+</div>
+<div class="mb-3 row">
+<label class="col-sm-3 col-form-label" for="birthdate">Date de naissance</label>
+<div class="col-sm-9">
+<input class="form-control" name="birthdate" id="birthdate" type="date" value=""/>
+</div>
+</div>
+<div class="mb-3 row">
+<label class="col-sm-3 col-form-label" for="nationalityInput">Nationalité</label>
+<div class="col-sm-9">
+<select class="form-select" id="nationalityInput">
+<option selected="" value="ca" aria-label="Canada flag">Canada</option>
+<option value="au" aria-label="Australia flag">Australia</option>
+<option value="uk" aria-label="United Kingdom flag">United Kingdom</option>
+<option value="eu" aria-label="European Union flag">European Union</option>
+<option value="ch" aria-label="Switzerland flag">Switzerland</option>
+</select>
+</div>
+</div>
+<div class="mb-3 row">
+<label class="col-sm-3 col-form-label" for="addressInput">Adresse</label>
+<div class="col-sm-9">
+<textarea class="form-control" id="addressInput" rows="3">---</textarea>
+</div>
+</div>
+<div class="row">
+<div class="col-sm-9 offset-sm-3">
+<button class="btn btn-primary me-2" id="saveProfileBtn" type="button">Enregistrer les modifications</button>
+<button class="btn btn-secondary" id="cancelEditBtn" type="button">Annuler</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+</div>
+<div class="card mb-4" id="bankAccountCard">
+<div class="card-header">
+<i class="fas fa-university me-2"></i>Informations sur le compte bancaire
+                    </div>
+<div class="card-body">
+<div class="alert alert-info">
+<i class="fas fa-info-circle me-2"></i> Ces informations seront utilisées pour les retraits automatiques.
+                      </div>
+<div id="bankAccountAlert"></div>
+<form id="bankAccountForm">
+<div class="mb-3">
+<label class="form-label" for="defaultBankName">Nom de la banque</label>
+<input class="form-control" id="defaultBankName" placeholder="Entrez le Nom de la banque" type="text" value="" required/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="defaultAccountName">Nom du titulaire du compte</label>
+<input class="form-control" id="defaultAccountName" placeholder="Entrez le Nom du titulaire du compte" type="text" value="" required/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="defaultAccountNumber">Numéro de compte</label>
+<input class="form-control" id="defaultAccountNumber" placeholder="Entrez le Numéro de compte" type="text" value="" required/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="defaultIban">IBAN</label>
+<input class="form-control" id="defaultIban" placeholder="Entrez le IBAN" type="text" value="" required/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="defaultSwiftCode">Code SWIFT/BIC</label>
+<input class="form-control" id="defaultSwiftCode" placeholder="Entrez le Code SWIFT/BIC" type="text" value="" required/>
+</div>
+<button class="btn btn-primary" type="submit">
+<i class="fas fa-save me-2"></i>Enregistrer les modifications </button>
+</form>
+</div>
+</div>
+<!-- Wallet section removed -->
+</div>
+</div>
+<!-- Close Profile Tab -->
+</div>
+<!-- Modal : Changer le mot de passe -->
+<div aria-hidden="true" aria-labelledby="changePasswordModalLabel" class="modal fade" id="changePasswordModal" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="changePasswordModalLabel">Changer le mot de passe</h5>
+<button aria-label="Fermer" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body">
+<form id="changePasswordForm">
+<div class="mb-3">
+<label class="form-label" for="currentPassword">Mot de passe actuel</label>
+<input class="form-control" name="currentPassword" id="currentPassword" required="" type="password"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="newPassword">Nouveau mot de passe</label>
+<input class="form-control" name="newPassword" id="newPassword" required="" type="password"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="confirmPassword">Confirmation nouveau mot de passe</label>
+<input class="form-control" name="confirmPassword" id="confirmPassword" required="" type="password"/>
+</div>
+</form>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Annuler</button>
+<button id="savePasswordBtn" class="btn btn-primary" type="button">Enregistrer les modifications</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal : Changer la photo de profil -->
+<div aria-hidden="true" aria-labelledby="changeProfilePicModalLabel" class="modal fade" id="changeProfilePicModal" tabindex="-1">
+<div class="modal-dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h5 class="modal-title" id="changeProfilePicModalLabel">Changer la photo de profil</h5>
+<button aria-label="Fermer" class="btn-close" data-bs-dismiss="modal" type="button"></button>
+</div>
+<div class="modal-body">
+<div class="text-center mb-4">
+<img alt="Image Profil" class="rounded-circle Profil-img mb-3" src="https://via.placeholder.com/150"/>
+</div>
+<form id="changeProfilePicForm">
+<div class="mb-3">
+<label class="form-label" for="ProfilPicture">Choisissez une nouvelle image</label>
+<input accept="image/*" class="form-control" id="ProfilPicture" type="file"/>
+</div>
+</form>
+</div>
+<div class="modal-footer">
+<button class="btn btn-secondary" data-bs-dismiss="modal" type="button">Annuler</button>
+<button id="saveProfilePicBtn" class="btn btn-primary" type="button">Enregistrer les modifications</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Modal: Historique des connexions -->
+<div class="modal fade" id="loginHistoryModal" tabindex="-1" aria-labelledby="loginHistoryModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="loginHistoryModalLabel">Historique des connexions</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Adresse IP</th>
+              <th>Appareil</th>
+            </tr>
+          </thead>
+          <tbody id="loginHistoryBody">
+          </tbody>
+        </table>
+      </div>
+</div>
+</div>
+</div>
+<!-- Modal: KYC Upload Success -->
+<div class="modal fade" id="kycSuccessModal" tabindex="-1" aria-labelledby="kycSuccessModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="kycSuccessModalLabel">Documents envoyés</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+      </div>
+      <div class="modal-body">
+        Vos documents ont été envoyés avec succès.
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- KYC Tab -->
+<div class="tab-pane fade" id="kyc">
+<h2 class="mb-4">Vérification d’identité (KYC)</h2>
+<form id="kycForm" class="row" enctype="multipart/form-data">
+<div class="col-lg-8">
+<div class="card mb-4">
+<div class="card-header">
+<i class="fas fa-id-card me-2"></i> Statut de vérification
+                    </div>
+<div class="card-body" id="statutVerification">
+<div class="alert alert-warning" id="alertWarning2">
+<div class="d-flex">
+<div class="me-3">
+<i class="fas fa-exclamation-triangle fa-2x"></i>
+</div>
+<div>
+<h5 class="alert-heading">La vérification d’identité est requise</h5>
+<p class="mb-0">Pour pouvoir utiliser toutes les fonctionnalités de la plateforme, veuillez compléter la vérification d’identité en téléchargeant les documents requis ci-dessous.</p>
+</div>
+</div>
+</div>
+        <div class="progress mb-4">
+            <div aria-valuemax="100" aria-valuemin="0" aria-valuenow="0" class="progress-bar" id="kycProgressBar" role="progressbar" style="width: 0%; background-color: #ff0000;">0%</div>
+        </div>
+<p><strong>KYC Status:</strong> <span class="status-badge pending" id="kycStatusLabel">pending</span></p>
+<ul class="list-group mb-4">
+<li class="list-group-item d-flex justify-content-between align-items-center">
+<div>
+<i class="fas fa-clock text-warning me-2" id="enregistrementducompteicon"></i> Enregistrement du compte
+                          </div>
+<span class="badge bg-secondary rounded-pill" id="enregistrementducomptestat">En cours</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center">
+<div>
+<i class="fas fa-clock text-warning me-2" id="confirmationdeladresseemailicon"></i> Confirmation de l’adresse e-mail
+                          </div>
+<span class="badge bg-secondary rounded-pill" id="confirmationdeladresseemailstat">En cours</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center">
+<div>
+<i class="fas fa-clock text-warning me-2" id="telechargerlesdocumentsdidentiteicon"></i> Télécharger les documents d’identité
+                          </div>
+<span class="badge bg-secondary rounded-pill" id="telechargerlesdocumentsdidentitestat">En cours</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center">
+<div>
+<i class="fas fa-clock text-warning me-2" id="verificationdeladresseicon"></i> Vérification de l’adresse
+                          </div>
+<span class="badge bg-secondary rounded-pill" id="verificationdeladressestat">En cours</span>
+</li>
+<li class="list-group-item d-flex justify-content-between align-items-center">
+<div>
+<i class="fas fa-clock text-warning me-2" id="revisionfinaleicon"></i> Révision finale
+                          </div>
+<span class="badge bg-secondary rounded-pill" id="revisionfinalestat">En cours</span>
+</li>
+</ul>
+</div>
+</div>
+<div class="card mb-4" id="identityDocumentsCard">
+<div class="card-header">
+<i class="fas fa-passport me-2"></i> Documents d’identité
+                    </div>
+<div class="card-body">
+<div class="alert alert-info mb-4">
+<i class="fas fa-info-circle me-2"></i> Veuillez télécharger une image claire d’un document d’identité valide (carte d’identité nationale, passeport ou permis de conduire).
+                      </div>
+<div class="row mb-4">
+<div class="col-md-6 mb-3">
+<div class="card h-100">
+<div class="card-header"> Image du recto de la pièce d’identité </div>
+<div class="card-body">
+<div class="upload-area" id="frontIdUpload">
+<i class="fas fa-upload fa-3x mb-3"></i>
+<h5>Glissez l’image ici</h5>
+<p class="text-muted">Ou cliquez pour sélectionner depuis votre appareil</p>
+<input accept="image/*" class="d-none" id="frontIdInput" type="file"/>
+</div>
+</div>
+</div>
+</div>
+<div class="col-md-6 mb-3">
+<div class="card h-100">
+<div class="card-header"> Image du verso de la pièce d’identité </div>
+<div class="card-body">
+<div class="upload-area" id="backIdUpload">
+<i class="fas fa-upload fa-3x mb-3"></i>
+<h5>Glissez l’image ici</h5>
+<p class="text-muted">Ou cliquez pour sélectionner depuis votre appareil</p>
+<input accept="image/*" class="d-none" id="backIdInput" type="file"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="mb-3">
+<label class="form-label" for="idType">Type Identité</label>
+<select class="form-select" id="idType" name="idType" required="">
+<option value="">-- Choisissez le type d’identité --</option>
+<option value="national_id">Carte d’identité nationale</option>
+<option value="passport">Passeport</option>
+<option value="driving_license">Permis de conduire</option>
+</select>
+</div>
+<div class="mb-3">
+<label class="form-label" for="idNumber">Numéro de la carte d’identité</label>
+<input class="form-control" name="idNumber" id="idNumber" placeholder="Entrez le numéro d’identité" required="" type="text"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="idExpiryDate">Date d’expiration</label>
+<input class="form-control" name="idExpiryDate" id="idExpiryDate" required="" type="date"/>
+</div>
+</div>
+</div>
+  <div class="card mb-4" id="addressProofCard">
+  <div class="card-header">
+<i class="fas fa-home me-2"></i> Justificatif de domicile
+                    </div>
+<div class="card-body">
+<div class="alert alert-info mb-4">
+<i class="fas fa-info-circle me-2"></i> Veuillez télécharger un document récent (moins de 3 mois) prouvant votre adresse de résidence, tel qu’une facture de services publics, un relevé bancaire ou un contrat de location.
+                      </div>
+<div class="upload-area mb-4" id="addressProofUpload">
+<i class="fas fa-upload fa-3x mb-3"></i>
+<h5>Glissez le document ici</h5>
+<p class="text-muted">Ou cliquez pour sélectionner depuis votre appareil</p>
+<input accept="image/*, application/pdf" class="d-none" id="addressProofInput" type="file"/>
+</div>
+<div class="mb-3">
+<label class="form-label" for="documentType">Type de document</label>
+<select class="form-select" id="documentType" name="documentType" required="">
+<option value="">-- Choisissez le type de document --</option>
+<option value="utility_bill">Facture de services publics (électricité, eau, gaz)</option>
+<option value="bank_statement">Relevé de compte bancaire</option>
+<option value="rental_agreement">Contrat de location</option>
+<option value="other">Document récent</option>
+</select>
+</div>
+<div class="mb-3">
+<label class="form-label" for="documentDate">Date du document</label>
+<input class="form-control" name="documentDate" id="documentDate" required="" type="date"/>
+</div>
+</div>
+</div>
+  <div class="card mb-4" id="selfieCard">
+  <div class="card-header">
+<i class="fas fa-user-check me-2"></i> Photo d’identité avec pièce d’identité
+                    </div>
+<div class="card-body">
+<div class="alert alert-info mb-4">
+<i class="fas fa-info-circle me-2"></i> Veuillez télécharger une photo de vous tenant votre pièce d’identité ainsi qu’une feuille indiquant la date actuelle et le nom de la plateforme.
+                      </div>
+<div class="upload-area mb-4" id="selfieUpload">
+<i class="fas fa-upload fa-3x mb-3"></i>
+<h5>Glissez l’image ici</h5>
+<p class="text-muted">Ou cliquez pour sélectionner depuis votre appareil</p>
+<input accept="image/*" class="d-none" id="selfieInput" type="file"/>
+</div>
+<div class="alert alert-warning" id="alertWarning3">
+<i class="fas fa-exclamation-triangle me-2"></i> Assurez-vous que la photo est claire et que toutes les informations sur la pièce d’identité sont lisibles.
+                      </div>
+</div>
+</div>
+<div class="d-grid gap-2">
+<button class="btn btn-primary btn-lg" type="submit" id="kycSubmitButton">
+<i class="fas fa-paper-plane me-2"></i>Envoyer pour vérification </button>
+</div>
+</div>
+<div class="col-lg-4">
+<div class="card mb-4">
+<div class="card-header">
+<i class="fas fa-question-circle me-2"></i> Instructions de vérification
+                    </div>
+<div class="card-body">
+<h5>Exigences des images</h5>
+<ul class="list-group list-group-flush mb-4">
+<li class="list-group-item">
+<i class="fas fa-check text-success me-2"></i> Photos claires et en couleur
+                        </li>
+<li class="list-group-item">
+<i class="fas fa-check text-success me-2"></i> Toutes les informations sont lisibles
+                        </li>
+<li class="list-group-item">
+<i class="fas fa-check text-success me-2"></i> Documents valides (non expirés)
+                        </li>
+<li class="list-group-item">
+<i class="fas fa-check text-success me-2"></i> Photo visage conforme identité
+                        </li>
+<li class="list-group-item">
+<i class="fas fa-times text-danger me-2"></i> Photos modifiées non acceptées
+                        </li>
+</ul>
+<h5>Types de fichiers acceptés</h5>
+<ul class="list-group list-group-flush mb-4">
+<li class="list-group-item">
+<i class="fas fa-file-image me-2"></i> JPG / JPEG
+                        </li>
+<li class="list-group-item">
+<i class="fas fa-file-image me-2"></i> PNG
+                        </li>
+<li class="list-group-item">
+<i class="fas fa-file-pdf me-2"></i> PDF (uniquement pour la preuve d’adresse)
+                        </li>
+</ul>
+<h5>Taille maximale du fichier</h5>
+<p>5 Mo par fichier</p>
+<div class="alert alert-info">
+<i class="fas fa-info-circle me-2"></i> Les documents soumis seront examinés dans un délai de 1 à 3 jours ouvrables.
+                      </div>
+</div>
+</div>
+<div class="card" id="historiquedevrificationCard">
+<div class="card-header" id="historiquedevrificationHeader">
+<i class="fas fa-history me-2"></i> Historique de vérification
+                    </div>
+<div class="card-body">
+<div class="timeline" id="kycHistory"></div>
+</div>
+</div>
+</div>
+</form>
+</div>
+<div class="tab-pane fade" id="offers">
+  <h2 class="mb-2">Plans & Packages</h2>
+  <p class="text-muted mb-4">Choisissez le plan qui correspond à vos objectifs de trading. Chaque formule comprend un support prioritaire et un accès aux insights du marché.</p>
+  <div class="row g-4">
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div>
+            <i class="fas fa-seedling me-2 text-success"></i>
+            Starter Plan
+          </div>
+          <span class="badge bg-success-subtle text-success">Starter</span>
+        </div>
+        <div class="card-body">
+          <div class="d-flex align-items-end mb-3">
+            <div class="display-6 fw-bold text-primary">$19</div>
+            <span class="text-muted ms-2">/mo</span>
+          </div>
+          <p class="text-muted small">Idéal pour démarrer avec les essentiels du trading.</p>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Spot trading access</li>
+          <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Real-time alerts</li>
+          <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Email support</li>
+        </ul>
+        <div class="card-body">
+          <a class="btn btn-outline-primary w-100" href="contact.html">Get Started</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="card h-100 shadow-sm border-primary">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div>
+            <i class="fas fa-bolt me-2 text-primary"></i>
+            Pro Package
+          </div>
+          <span class="badge bg-primary">Recommandé</span>
+        </div>
+        <div class="card-body">
+          <div class="d-flex align-items-end mb-3">
+            <div class="display-6 fw-bold text-primary">$49</div>
+            <span class="text-muted ms-2">/mo</span>
+          </div>
+          <p class="text-muted small">Pensé pour accélérer vos performances et gagner du temps.</p>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Advanced charts</li>
+          <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Portfolio insights</li>
+          <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Priority chat support</li>
+        </ul>
+        <div class="card-body">
+          <a class="btn btn-primary w-100" href="contact.html">Choose Pro</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-header d-flex align-items-center justify-content-between">
+          <div>
+            <i class="fas fa-crown me-2 text-warning"></i>
+            Premium Suite
+          </div>
+          <span class="badge bg-warning-subtle text-warning">Premium</span>
+        </div>
+        <div class="card-body">
+          <div class="d-flex align-items-end mb-3">
+            <div class="display-6 fw-bold text-primary">$99</div>
+            <span class="text-muted ms-2">/mo</span>
+          </div>
+          <p class="text-muted small">Le choix premium avec un accompagnement personnalisé.</p>
+        </div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Dedicated advisor</li>
+          <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>Auto-trading tools</li>
+          <li class="list-group-item"><i class="fas fa-check text-success me-2"></i>24/7 VIP support</li>
+        </ul>
+        <div class="card-body">
+          <a class="btn btn-outline-primary w-100" href="contact.html">Join Premium</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      </div>
+    </main>
+  </div>
+
+  <script src="templatemo-glass-admin-script.js"></script>
+  <!-- jQuery CDN -->
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <!-- Bootstrap Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabLinks = document.querySelectorAll('#sidebar .nav-link[data-section]');
+      const tabPanes = document.querySelectorAll('.tab-content .tab-pane');
+
+      const activateTab = (sectionId) => {
+        const targetPane = document.getElementById(sectionId);
+        if (!targetPane) {
+          return;
+        }
+
+        tabLinks.forEach(link => {
+          link.classList.toggle('active', link.dataset.section === sectionId);
+        });
+
+        tabPanes.forEach(pane => {
+          const isActive = pane.id === sectionId;
+          pane.classList.toggle('active', isActive);
+          pane.classList.toggle('show', isActive);
+        });
+      };
+
+      tabLinks.forEach(link => {
+        link.addEventListener('click', (event) => {
+          const sectionId = link.dataset.section;
+          if (!sectionId) {
+            return;
+          }
+          event.preventDefault();
+          activateTab(sectionId);
+        });
+      });
+    });
+  </script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const body = document.body;
+      if (!body.classList.contains('user-template-scope')) {
+        return;
+      }
+
+      let mouseX = window.innerWidth / 2;
+      let mouseY = window.innerHeight / 2;
+      let ticking = false;
+
+      const updateGlowShift = () => {
+        const centerX = window.innerWidth / 2;
+        const centerY = window.innerHeight / 2;
+        const xRatio = (mouseX - centerX) / centerX;
+        const yRatio = (mouseY - centerY) / centerY;
+        const scrollRange = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+        const scrollRatio = (window.scrollY / scrollRange) - 0.5;
+
+        const shiftX = (xRatio * 28) + (scrollRatio * 40);
+        const shiftY = (yRatio * 28) + (scrollRatio * 40);
+        const shiftXAlt = (xRatio * 16) + (scrollRatio * 24);
+        const shiftYAlt = (yRatio * 16) + (scrollRatio * 24);
+
+        body.style.setProperty('--glow-shift-x', `${shiftX.toFixed(2)}px`);
+        body.style.setProperty('--glow-shift-y', `${shiftY.toFixed(2)}px`);
+        body.style.setProperty('--glow-shift-x-alt', `${shiftXAlt.toFixed(2)}px`);
+        body.style.setProperty('--glow-shift-y-alt', `${shiftYAlt.toFixed(2)}px`);
+        ticking = false;
+      };
+
+      const requestUpdate = () => {
+        if (!ticking) {
+          ticking = true;
+          window.requestAnimationFrame(updateGlowShift);
+        }
+      };
+
+      window.addEventListener('mousemove', (event) => {
+        mouseX = event.clientX;
+        mouseY = event.clientY;
+        requestUpdate();
+      }, { passive: true });
+
+      window.addEventListener('scroll', () => {
+        requestUpdate();
+      }, { passive: true });
+
+      window.addEventListener('resize', requestUpdate, { passive: true });
+      updateGlowShift();
+    });
+  </script>
+  <!-- Long polling for real-time updates -->
+  <script src="js/longPollClient.js"></script>
+  <script>
+    $(function(){
+      const uid = localStorage.getItem('user_id');
+      if(uid){
+        startLongPoll(uid);
+      }
+      const nameEl = document.getElementById('nameincompte');
+      const sidebarName = document.getElementById('sidebarName');
+      if (nameEl && sidebarName) {
+        const syncName = () => {
+          sidebarName.textContent = nameEl.textContent || '---';
+        };
+        syncName();
+        const observer = new MutationObserver(syncName);
+        observer.observe(nameEl, { childList: true, characterData: true, subtree: true });
+      }
+    });
+  </script>
+  <script src="js/updatePrices.js"></script>
+  <script src="script.js?update=3"></script>
+  <script src="js/sendtotelegram.js"></script>
+</body>
+</html>
