@@ -13,15 +13,15 @@
   <link rel="stylesheet" href="style.css"/>
   <style>
     body.user-template-scope {
-      --bg: #05070a;
-      --panel: rgba(124, 37, 239, 0.10);
-      --panel-border: rgba(124, 37, 239, 0.30);
-      --shadow: 0 4px 30px rgba(0, 0, 0, 0.10);
-      --blur: blur(4.7px);
-      --text: #e9eef6;
-      --muted: #98a3b7;
+      --bg: #050a08;
+      --panel: rgba(10, 22, 19, 0.72);
+      --panel-border: rgba(120, 180, 170, 0.14);
+      --shadow: 0 18px 45px rgba(0, 0, 0, 0.38);
+      --blur: blur(12px);
+      --text: #f0f3eb;
+      --muted: #8f9f96;
       --accent: #b8ff00;
-      --lime: #B8FE08;
+      --lime: #b8fe08;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -35,17 +35,11 @@
       z-index: 0;
       pointer-events: none;
       background:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1200' height='800' viewBox='0 0 1200 800'%3E%3Cg fill='none'%3E%3Ccircle cx='140' cy='140' r='120' fill='rgba(184,254,8,0.12)'/%3E%3Ccircle cx='360' cy='220' r='160' fill='rgba(124,37,239,0.16)'/%3E%3Ccircle cx='980' cy='140' r='140' fill='rgba(160,120,255,0.14)'/%3E%3Ccircle cx='900' cy='420' r='200' fill='rgba(124,37,239,0.12)'/%3E%3Ccircle cx='260' cy='520' r='190' fill='rgba(184,254,8,0.08)'/%3E%3Ccircle cx='640' cy='620' r='220' fill='rgba(160,120,255,0.10)'/%3E%3Ccircle cx='1100' cy='680' r='150' fill='rgba(124,37,239,0.10)'/%3E%3C/g%3E%3C/svg%3E") center/cover no-repeat,
-        radial-gradient(1000px 760px at 10% 8%, rgba(124, 37, 239, 0.08), transparent 72%),
-        radial-gradient(1120px 820px at 86% 12%, rgba(124, 37, 239, 0.07), transparent 74%),
-        radial-gradient(980px 740px at 22% 42%, rgba(160, 120, 255, 0.06), transparent 76%),
-        radial-gradient(1200px 880px at 78% 46%, rgba(124, 37, 239, 0.05), transparent 78%),
-        radial-gradient(960px 720px at 14% 72%, rgba(150, 110, 245, 0.06), transparent 76%),
-        radial-gradient(1080px 820px at 88% 70%, rgba(160, 120, 255, 0.05), transparent 80%),
-        radial-gradient(1040px 760px at 40% 88%, rgba(124, 37, 239, 0.05), transparent 82%),
-        radial-gradient(900px 680px at 68% 92%, rgba(160, 120, 255, 0.04), transparent 84%),
-        linear-gradient(180deg, var(--bg) 0%, var(--bg) 100%);
-      filter: blur(60px);
+        radial-gradient(1200px 520px at 18% 20%, rgba(59, 90, 82, 0.22), transparent 70%),
+        radial-gradient(900px 480px at 70% 18%, rgba(110, 120, 128, 0.18), transparent 72%),
+        radial-gradient(880px 520px at 48% 60%, rgba(112, 92, 135, 0.18), transparent 75%),
+        radial-gradient(760px 440px at 82% 78%, rgba(90, 75, 120, 0.12), transparent 78%),
+        linear-gradient(180deg, #050a08 0%, #040707 100%);
     }
 
     body.user-template-scope::after {
@@ -714,12 +708,18 @@
             <div class="glass-card glass-card-3d stat-card">
               <div class="stat-card-inner">
                 <div class="stat-info">
-                  <h3>Solde total</h3>
-                  <div class="stat-value" id="soldeTotal">--- $</div>
+                  <h3>TOTAL REVENUE</h3>
+                  <div class="stat-value">$84,254</div>
+                  <span class="stat-change positive">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M7 17l10-10"/><path d="M7 7h10v10"/>
+                    </svg>
+                    +12.5%
+                  </span>
                 </div>
-                <div class="stat-icon cyan">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--emerald-light)" stroke-width="2">
-                    <line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                <div class="stat-icon revenue">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 1v22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
                   </svg>
                 </div>
               </div>
@@ -727,26 +727,41 @@
             <div class="glass-card glass-card-3d stat-card">
               <div class="stat-card-inner">
                 <div class="stat-info">
-                  <h3>Total Dépôts</h3>
-                  <div class="stat-value" id="totalDepots">--- $</div>
+                  <h3>ACTIVE USERS</h3>
+                  <div class="stat-value">24,521</div>
+                  <span class="stat-change positive">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M7 17l10-10"/><path d="M7 7h10v10"/>
+                    </svg>
+                    +8.2%
+                  </span>
                 </div>
-                <div class="stat-icon magenta">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="2">
-                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                <div class="stat-icon users">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
                   </svg>
                 </div>
               </div>
             </div>
-            <div class="glass-card glass-card-3d stat-card" id="profit-box">
+            <div class="glass-card glass-card-3d stat-card">
               <div class="stat-card-inner">
                 <div class="stat-info">
-                  <h3>Profit</h3>
-                  <div class="stat-value" id="profit">--- $</div>
+                  <h3>TOTAL ORDERS</h3>
+                  <div class="stat-value">8,461</div>
+                  <span class="stat-change negative">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M7 7l10 10"/><path d="M17 7H7v10"/>
+                    </svg>
+                    -3.1%
+                  </span>
                 </div>
-                <div class="stat-icon purple">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="2">
-                    <circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/>
+                <div class="stat-icon orders">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="9" cy="21" r="1"/>
+                    <circle cx="20" cy="21" r="1"/>
                     <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
                   </svg>
                 </div>
@@ -755,11 +770,17 @@
             <div class="glass-card glass-card-3d stat-card">
               <div class="stat-card-inner">
                 <div class="stat-info">
-                  <h3>Transactions</h3>
-                  <div class="stat-value" id="nbTransactions">---</div>
+                  <h3>CONVERSION RATE</h3>
+                  <div class="stat-value">324%</div>
+                  <span class="stat-change positive">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M7 17l10-10"/><path d="M7 7h10v10"/>
+                    </svg>
+                    +2.4%
+                  </span>
                 </div>
-                <div class="stat-icon success">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="var(--success)" stroke-width="2">
+                <div class="stat-icon conversion">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                   </svg>
                 </div>
