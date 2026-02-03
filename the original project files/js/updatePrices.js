@@ -832,10 +832,12 @@ function initializeUI() {
     if (dashboardData.notifications?.length > 0) {
         dashboardData.notifications.slice(0, 4).forEach(n => {
             $notifications.append(`
-                <div class="alert ${escapeHtml(n.alertClass)}">
-                    <strong>${escapeHtml(n.title)}</strong>
-                    <p class="mb-0">${escapeHtml(n.message)}</p>
-                    <div class="notification-time text-muted small">${escapeHtml(n.time)}</div>
+                <div class="notification-row ${escapeHtml(n.alertClass)}">
+                    <div class="notification-content">
+                        <span class="notification-title">${escapeHtml(n.title)}</span>
+                        <p class="notification-message">${escapeHtml(n.message)}</p>
+                    </div>
+                    <div class="notification-time">${escapeHtml(n.time)}</div>
                 </div>`);
         });
     } else {
