@@ -13,29 +13,18 @@
   <link rel="stylesheet" href="style.css"/>
   <style>
     body.user-template-scope {
-      --accent: GREEN_HEX_HERE;
-      --accent-soft: color-mix(in srgb, var(--accent) 22%, transparent);
-      --accent-border: color-mix(in srgb, var(--accent) 32%, transparent);
-      --accent-strong: color-mix(in srgb, var(--accent) 48%, transparent);
-      --glass-bg: rgba(12, 22, 18, 0.48);
-      --glass-bg-2: rgba(80, 255, 200, 0.1);
-      --glass-border: color-mix(in srgb, var(--accent) 18%, transparent);
-      --glass-border-strong: color-mix(in srgb, var(--accent) 28%, transparent);
-      --glass-shadow: 0 18px 40px rgba(3, 8, 12, 0.6);
-      --glass-blur: 16px;
-      --glass-sat: 155%;
-      --glass-highlight: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(120, 255, 210, 0.04));
-      --glass-text: #e6f7f2;
-      --glass-muted: rgba(230, 247, 242, 0.7);
-      --emerald: var(--accent);
-      --emerald-light: var(--accent);
-      --success: var(--accent);
-      background:
-        radial-gradient(900px 500px at 25% 0%, color-mix(in srgb, var(--accent) 18%, transparent), transparent 55%),
-        radial-gradient(700px 500px at 20% 85%, rgba(255, 170, 90, 0.1), transparent 60%),
-        radial-gradient(700px 500px at 60% 75%, rgba(160, 120, 255, 0.08), transparent 60%),
-        linear-gradient(180deg, #0a1410 0%, #07100c 100%);
-      color: var(--glass-text);
+      --bg: #05070a;
+      --panel: rgba(124, 37, 239, 0.10);
+      --panel-border: rgba(124, 37, 239, 0.30);
+      --shadow: 0 4px 30px rgba(0, 0, 0, 0.10);
+      --blur: blur(4.7px);
+      --text: #e9eef6;
+      --muted: #98a3b7;
+      --accent: #b8ff00;
+      --lime: #B8FE08;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
     }
 
     body.user-template-scope .glass-card,
@@ -43,43 +32,40 @@
     body.user-template-scope .modal-content,
     body.user-template-scope .dropdown-menu,
     body.user-template-scope .sidebar,
+    body.user-template-scope .navbar,
     body.user-template-scope .nav-btn,
     body.user-template-scope .search-input,
-    body.user-template-scope .login-card {
-      position: relative;
-      overflow: hidden;
-      background: var(--glass-bg), var(--glass-bg-2) !important;
-      color: var(--glass-text);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-shadow);
-      backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-sat));
+    body.user-template-scope .login-card,
+    body.user-template-scope .table-wrapper,
+    body.user-template-scope .table-responsive,
+    body.user-template-scope .pagination .page-link,
+    body.user-template-scope .btn,
+    body.user-template-scope .card-btn {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      box-shadow: var(--shadow);
+      backdrop-filter: var(--blur);
+      -webkit-backdrop-filter: var(--blur);
+      color: var(--text);
     }
 
-    body.user-template-scope .glass-card::before,
-    body.user-template-scope .card::before,
-    body.user-template-scope .modal-content::before,
-    body.user-template-scope .dropdown-menu::before,
-    body.user-template-scope .sidebar::before,
-    body.user-template-scope .login-card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: var(--glass-highlight);
-      opacity: 0.35;
-      pointer-events: none;
+    body.user-template-scope .background,
+    body.user-template-scope .orb {
+      display: none;
     }
 
-    body.user-template-scope .navbar,
-    body.user-template-scope .sidebar {
-      background: var(--glass-bg), var(--glass-bg-2) !important;
-      border: 1px solid var(--glass-border);
-    }
-
-    body.user-template-scope .navbar {
+    body.user-template-scope .glass-card .glass-card,
+    body.user-template-scope .glass-card .card,
+    body.user-template-scope .card .glass-card,
+    body.user-template-scope .card .card,
+    body.user-template-scope .glass-card .table-wrapper,
+    body.user-template-scope .card .table-wrapper,
+    body.user-template-scope .glass-card .table-responsive,
+    body.user-template-scope .card .table-responsive {
       background: transparent !important;
-      border: none;
-      box-shadow: none;
-      backdrop-filter: none;
+      border: 0 !important;
+      box-shadow: none !important;
+      backdrop-filter: none !important;
     }
 
     body.user-template-scope .main-content {
@@ -90,8 +76,14 @@
     body.user-template-scope .card-header *,
     body.user-template-scope .card-body,
     body.user-template-scope .tab-content,
-    body.user-template-scope .tab-pane {
+    body.user-template-scope .tab-pane,
+    body.user-template-scope .alert,
+    body.user-template-scope .dropdown-item,
+    body.user-template-scope .list-group-item,
+    body.user-template-scope .bg-light,
+    body.user-template-scope .bg-white {
       background: transparent !important;
+      border: 0 !important;
       box-shadow: none !important;
       backdrop-filter: none !important;
     }
@@ -125,38 +117,37 @@
     body.user-template-scope .data-table th,
     body.user-template-scope .data-table td {
       background: transparent !important;
-      border-color: var(--glass-border);
+      border-color: var(--panel-border);
     }
 
     body.user-template-scope .table-striped > tbody > tr:nth-of-type(odd) > * {
-      background: rgba(12, 22, 18, 0.35) !important;
+      background: transparent !important;
     }
 
     body.user-template-scope .nav-tabs .nav-link.active,
-    body.user-template-scope .dropdown-menu .dropdown-item.active,
-    body.user-template-scope .pagination .page-link.active {
-      background: var(--glass-bg), var(--glass-bg-2) !important;
-      color: #f7fffb;
-      border-color: var(--glass-border-strong);
+    body.user-template-scope .dropdown-menu .dropdown-item.active {
+      background: transparent !important;
+      color: var(--accent);
+      border-color: var(--panel-border);
     }
 
     body.user-template-scope .dropdown-divider,
     body.user-template-scope .list-group-item {
-      border-color: var(--glass-border);
+      border-color: var(--panel-border);
     }
 
     body.user-template-scope .badge,
     body.user-template-scope .badge.bg-success-subtle,
     body.user-template-scope .badge.bg-warning-subtle {
-      background: rgba(12, 22, 18, 0.55) !important;
-      color: #f7fffb !important;
-      border: 1px solid var(--glass-border);
+      background: var(--accent) !important;
+      color: #0b0d10 !important;
+      border: 1px solid var(--panel-border);
     }
 
     body.user-template-scope .form-control::placeholder,
     body.user-template-scope .form-input::placeholder,
     body.user-template-scope .search-input::placeholder {
-      color: var(--glass-muted);
+      color: var(--muted);
     }
 
     body.user-template-scope .dashboard {
@@ -170,14 +161,15 @@
 
     body.user-template-scope .btn-primary,
     body.user-template-scope .btn-success {
-      background-color: var(--accent) !important;
-      border-color: var(--accent) !important;
-      color: #f7fffb;
+      background: var(--panel) !important;
+      border-color: var(--panel-border) !important;
+      color: var(--text);
     }
 
     body.user-template-scope .btn-primary:hover,
     body.user-template-scope .btn-success:hover {
-      filter: brightness(1.06);
+      border-color: var(--accent) !important;
+      color: var(--accent);
     }
 
     body.user-template-scope .btn-primary:focus,
@@ -185,6 +177,7 @@
     body.user-template-scope .btn-primary:active,
     body.user-template-scope .btn-success:active {
       box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--accent) 40%, transparent);
+      border-color: var(--accent) !important;
     }
 
     body.user-template-scope .text-success,
@@ -192,18 +185,17 @@
       color: var(--accent) !important;
     }
 
-    body.user-template-scope .bg-success,
-    body.user-template-scope .badge.bg-success {
-      background-color: var(--accent) !important;
+    body.user-template-scope .bg-success {
+      background-color: transparent !important;
       border-color: var(--accent) !important;
-      color: #0b1511 !important;
+      color: var(--accent) !important;
     }
 
     body.user-template-scope .bg-success-subtle,
     body.user-template-scope .badge.bg-success-subtle {
-      background-color: color-mix(in srgb, var(--accent) 16%, transparent) !important;
-      border-color: color-mix(in srgb, var(--accent) 35%, transparent) !important;
-      color: #f7fffb !important;
+      background-color: color-mix(in srgb, var(--accent) 22%, transparent) !important;
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
+      color: var(--text) !important;
     }
 
     body.user-template-scope .progress-bar.bg-success {
@@ -217,8 +209,8 @@
 
     body.user-template-scope .btn-outline-primary:hover,
     body.user-template-scope .btn-outline-primary:focus {
-      background-color: color-mix(in srgb, var(--accent) 16%, transparent) !important;
-      color: #f7fffb !important;
+      background-color: transparent !important;
+      color: var(--accent) !important;
     }
 
     body.user-template-scope .form-control:focus,
@@ -235,15 +227,14 @@
 
     body.user-template-scope .nav-btn:hover {
       border-color: var(--accent);
+      color: var(--accent);
     }
 
     body.user-template-scope .alert {
       border-radius: 14px;
       padding: 14px 16px;
       margin-bottom: 14px;
-      border: 1px solid var(--glass-border);
-      background: rgba(12, 22, 18, 0.28) !important;
-      color: rgba(255, 255, 255, 0.92);
+      color: var(--text);
     }
 
     body.user-template-scope .alert + .alert {
@@ -252,22 +243,21 @@
 
     body.user-template-scope .alert .alert-heading,
     body.user-template-scope .alert strong {
-      color: #f7fffb;
+      color: var(--text);
       font-weight: 600;
     }
 
     body.user-template-scope .alert .text-muted,
     body.user-template-scope .alert small {
-      color: rgba(255, 255, 255, 0.55) !important;
+      color: var(--muted) !important;
     }
 
     body.user-template-scope .alert-info,
     body.user-template-scope .alert-success,
     body.user-template-scope .alert-warning,
     body.user-template-scope .alert-danger {
-      border-color: var(--glass-border) !important;
-      background: rgba(12, 22, 18, 0.28) !important;
-      color: rgba(255, 255, 255, 0.92) !important;
+      background: transparent !important;
+      color: var(--text) !important;
     }
 
     body.user-template-scope .pagination {
@@ -279,29 +269,26 @@
     }
 
     body.user-template-scope .pagination .page-link {
-      border: 1px solid var(--glass-border);
+      border: 1px solid var(--panel-border);
       border-radius: 999px;
       padding: 6px 14px;
       min-width: 36px;
       text-align: center;
       font-weight: 500;
-      color: rgba(255, 255, 255, 0.6);
-      background: rgba(12, 22, 18, 0.2) !important;
+      color: var(--muted);
       transition: all 0.2s ease;
     }
 
     body.user-template-scope .pagination .page-link:hover {
-      color: #f7fffb;
-      border-color: var(--glass-border-strong);
-      background: rgba(12, 22, 18, 0.32) !important;
+      color: var(--text);
+      border-color: var(--accent);
     }
 
     body.user-template-scope .pagination .page-item.active .page-link,
     body.user-template-scope .pagination .page-link.active {
-      color: #f7fffb;
-      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
-      background: color-mix(in srgb, var(--accent) 16%, transparent) !important;
-      box-shadow: 0 10px 18px rgba(3, 8, 12, 0.35);
+      color: var(--accent);
+      border-color: var(--accent);
+      background: var(--panel) !important;
     }
 
     body.user-template-scope .pagination .page-link:focus {
@@ -337,7 +324,7 @@
       width: 44px;
       height: 44px;
       border-radius: 50%;
-      border: 2px solid color-mix(in srgb, var(--accent) 45%, transparent);
+      border: 2px solid var(--panel-border);
       object-fit: cover;
     }
 
@@ -348,12 +335,12 @@
 
     body.user-template-scope .account-balance {
       padding: 10px 18px 4px;
-      color: rgba(255, 255, 255, 0.65);
+      color: var(--muted);
     }
 
     body.user-template-scope .account-balance-label {
       font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.55);
+      color: var(--muted);
     }
 
     body.user-template-scope .account-balance-value {
@@ -362,11 +349,11 @@
     }
 
     body.user-template-scope .account-logout {
-      color: rgba(255, 255, 255, 0.7) !important;
+      color: var(--muted) !important;
     }
 
     body.user-template-scope .account-logout:hover {
-      color: #f7fffb !important;
+      color: var(--text) !important;
     }
 
     body.user-template-scope .activity-list {
@@ -381,7 +368,7 @@
       border-radius: 0;
       padding: 14px 2px;
       background: transparent !important;
-      border-bottom: 1px solid var(--glass-border);
+      border-bottom: 1px solid var(--panel-border);
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
@@ -395,20 +382,46 @@
     }
 
     body.user-template-scope .activity-list .notification-title {
-      color: rgba(255, 255, 255, 0.92);
+      color: var(--text);
       font-weight: 600;
     }
 
     body.user-template-scope .activity-list .notification-message {
       margin: 0;
-      color: rgba(255, 255, 255, 0.55);
+      color: var(--muted);
     }
 
     body.user-template-scope .activity-list .notification-time {
-      color: rgba(255, 255, 255, 0.55);
+      color: var(--muted);
       font-size: 0.85rem;
       white-space: nowrap;
       text-align: right;
+    }
+
+    body.user-template-scope .text-muted,
+    body.user-template-scope .card-subtitle,
+    body.user-template-scope .nav-section-title,
+    body.user-template-scope .form-text,
+    body.user-template-scope small {
+      color: var(--muted) !important;
+    }
+
+    body.user-template-scope .nav-link.active,
+    body.user-template-scope .nav-link:hover,
+    body.user-template-scope .nav-tabs .nav-link.active {
+      color: var(--accent) !important;
+    }
+
+    body.user-template-scope .nav-link,
+    body.user-template-scope .nav-tabs .nav-link {
+      background: transparent !important;
+    }
+
+    body.user-template-scope .dashboard,
+    body.user-template-scope .main-content,
+    body.user-template-scope .table,
+    body.user-template-scope .data-table {
+      background: transparent;
     }
 
     body.user-template-scope .activity-list .notification-row:last-child {
