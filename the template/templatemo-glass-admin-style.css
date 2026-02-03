@@ -576,6 +576,22 @@ a {
     background-size: cover;
 }
 
+.stats-grid .stat-card:nth-child(1)::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 60' fill='none'%3E%3Cpath d='M0 50L40 22L80 52L120 20L160 50L200 18L240 46L280 16L320 42' stroke='%2334d399' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M0 54L40 30L80 56L120 26L160 54L200 24L240 52L280 22L320 46' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' opacity='0.6'/%3E%3C/svg%3E");
+}
+
+.stats-grid .stat-card:nth-child(2)::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 60' fill='none'%3E%3Cpath d='M0 40L32 20L64 44L96 18L128 40L160 16L192 38L224 22L256 42L288 20L320 36' stroke='%2334d399' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M0 46L32 26L64 50L96 24L128 46L160 22L192 44L224 28L256 48L288 26L320 42' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' opacity='0.6'/%3E%3C/svg%3E");
+}
+
+.stats-grid .stat-card:nth-child(3)::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 60' fill='none'%3E%3Cpath d='M0 48L36 14L72 50L108 18L144 46L180 12L216 44L252 20L288 48L320 26' stroke='%2334d399' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M0 54L36 22L72 56L108 24L144 52L180 20L216 50L252 26L288 54L320 32' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' opacity='0.6'/%3E%3C/svg%3E");
+}
+
+.stats-grid .stat-card:nth-child(4)::after {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 320 60' fill='none'%3E%3Cpath d='M0 42L28 18L56 46L84 14L112 44L140 20L168 48L196 16L224 40L252 22L280 46L308 18L320 34' stroke='%2334d399' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M0 50L28 26L56 52L84 22L112 50L140 28L168 54L196 24L224 48L252 30L280 52L308 26L320 40' stroke='%23f59e0b' stroke-width='2' stroke-linecap='round' opacity='0.6'/%3E%3C/svg%3E");
+}
+
 .stat-card-inner {
     display: flex;
     align-items: flex-start;
