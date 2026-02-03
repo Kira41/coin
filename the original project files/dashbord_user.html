@@ -151,6 +151,86 @@
     body.user-template-scope .search-input::placeholder {
       color: var(--glass-muted);
     }
+
+    body.user-template-scope .dashboard {
+      gap: 0;
+    }
+
+    body.user-template-scope .main-content {
+      margin-left: var(--sidebar-width);
+      padding: 30px 30px 30px 22px;
+    }
+
+    body.user-template-scope .alert {
+      border-radius: 14px;
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      border: 1px solid rgba(160, 255, 220, 0.18);
+      background: rgba(12, 22, 18, 0.28) !important;
+      color: rgba(255, 255, 255, 0.92);
+    }
+
+    body.user-template-scope .alert + .alert {
+      border-top-color: rgba(255, 255, 255, 0.12);
+    }
+
+    body.user-template-scope .alert .alert-heading,
+    body.user-template-scope .alert strong {
+      color: #f7fffb;
+      font-weight: 600;
+    }
+
+    body.user-template-scope .alert .text-muted,
+    body.user-template-scope .alert small {
+      color: rgba(255, 255, 255, 0.55) !important;
+    }
+
+    body.user-template-scope .alert-info,
+    body.user-template-scope .alert-success,
+    body.user-template-scope .alert-warning,
+    body.user-template-scope .alert-danger {
+      border-color: rgba(160, 255, 220, 0.18) !important;
+      background: rgba(12, 22, 18, 0.28) !important;
+      color: rgba(255, 255, 255, 0.92) !important;
+    }
+
+    body.user-template-scope .pagination {
+      gap: 8px;
+    }
+
+    body.user-template-scope .pagination .page-item {
+      margin: 0;
+    }
+
+    body.user-template-scope .pagination .page-link {
+      border: 1px solid rgba(160, 255, 220, 0.18);
+      border-radius: 999px;
+      padding: 6px 14px;
+      min-width: 36px;
+      text-align: center;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.6);
+      background: rgba(12, 22, 18, 0.2) !important;
+      transition: all 0.2s ease;
+    }
+
+    body.user-template-scope .pagination .page-link:hover {
+      color: #f7fffb;
+      border-color: rgba(160, 255, 220, 0.35);
+      background: rgba(12, 22, 18, 0.32) !important;
+    }
+
+    body.user-template-scope .pagination .page-item.active .page-link,
+    body.user-template-scope .pagination .page-link.active {
+      color: #f7fffb;
+      border-color: rgba(190, 255, 230, 0.45);
+      background: rgba(80, 255, 200, 0.12) !important;
+      box-shadow: 0 10px 18px rgba(3, 8, 12, 0.35);
+    }
+
+    body.user-template-scope .pagination .page-link:focus {
+      box-shadow: 0 0 0 2px rgba(120, 255, 210, 0.18);
+    }
   </style>
 </head>
 <body class="user-template-scope">
