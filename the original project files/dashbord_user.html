@@ -32,26 +32,23 @@
       content: "";
       position: fixed;
       inset: 0;
-      background:
-        radial-gradient(900px 520px at 18% 6%, rgba(124, 37, 239, 0.20), transparent 62%),
-        radial-gradient(760px 460px at 82% 12%, rgba(124, 37, 239, 0.14), transparent 64%),
-        radial-gradient(640px 420px at 28% 68%, rgba(160, 120, 255, 0.12), transparent 66%),
-        radial-gradient(700px 520px at 72% 86%, rgba(124, 37, 239, 0.12), transparent 70%),
-        radial-gradient(520px 360px at 55% 40%, rgba(170, 140, 255, 0.08), transparent 68%),
-        linear-gradient(180deg, var(--bg) 0%, var(--bg) 100%);
       z-index: 0;
       pointer-events: none;
+      background:
+        radial-gradient(1000px 760px at 10% 8%, rgba(124, 37, 239, 0.08), transparent 72%),
+        radial-gradient(1120px 820px at 86% 12%, rgba(124, 37, 239, 0.07), transparent 74%),
+        radial-gradient(980px 740px at 22% 42%, rgba(160, 120, 255, 0.06), transparent 76%),
+        radial-gradient(1200px 880px at 78% 46%, rgba(124, 37, 239, 0.05), transparent 78%),
+        radial-gradient(960px 720px at 14% 72%, rgba(150, 110, 245, 0.06), transparent 76%),
+        radial-gradient(1080px 820px at 88% 70%, rgba(160, 120, 255, 0.05), transparent 80%),
+        radial-gradient(1040px 760px at 40% 88%, rgba(124, 37, 239, 0.05), transparent 82%),
+        radial-gradient(900px 680px at 68% 92%, rgba(160, 120, 255, 0.04), transparent 84%),
+        linear-gradient(180deg, var(--bg) 0%, var(--bg) 100%);
+      filter: blur(60px);
     }
 
     body.user-template-scope::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background: radial-gradient(520px 320px at 50% 20%, rgba(124, 37, 239, 0.10), transparent 70%);
-      filter: blur(30px);
-      opacity: 0.32;
-      z-index: 0;
-      pointer-events: none;
+      content: none;
     }
 
     body.user-template-scope > * {
@@ -104,9 +101,16 @@
       background: transparent !important;
       background-color: transparent !important;
       box-shadow: none !important;
-      border-color: rgba(255, 255, 255, 0.08);
+      border: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
     }
 
+    body.user-template-scope .navbar::before,
+    body.user-template-scope .navbar::after {
+      content: none !important;
+      display: none !important;
+    }
     body.user-template-scope .main-content {
       padding: 30px;
     }
