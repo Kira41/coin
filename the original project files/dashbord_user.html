@@ -17,8 +17,8 @@
       --accent-soft: color-mix(in srgb, var(--accent) 22%, transparent);
       --accent-border: color-mix(in srgb, var(--accent) 32%, transparent);
       --accent-strong: color-mix(in srgb, var(--accent) 48%, transparent);
-      --glass-bg: rgba(12, 22, 18, 0.5);
-      --glass-bg-2: rgba(80, 255, 200, 0.08);
+      --glass-bg: rgba(12, 22, 18, 0.48);
+      --glass-bg-2: rgba(80, 255, 200, 0.1);
       --glass-border: color-mix(in srgb, var(--accent) 18%, transparent);
       --glass-border-strong: color-mix(in srgb, var(--accent) 28%, transparent);
       --glass-shadow: 0 18px 40px rgba(3, 8, 12, 0.6);
@@ -321,6 +321,12 @@
       gap: 22px;
     }
 
+    body.user-template-scope .nav-section-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
     body.user-template-scope .account-link {
       display: flex;
       align-items: center;
@@ -369,16 +375,43 @@
       gap: 0;
     }
 
-    body.user-template-scope .activity-list .alert {
+    body.user-template-scope .activity-list .notification-row {
       margin: 0;
       border: none;
       border-radius: 0;
       padding: 14px 2px;
       background: transparent !important;
       border-bottom: 1px solid var(--glass-border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
     }
 
-    body.user-template-scope .activity-list .alert:last-child {
+    body.user-template-scope .activity-list .notification-content {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    body.user-template-scope .activity-list .notification-title {
+      color: rgba(255, 255, 255, 0.92);
+      font-weight: 600;
+    }
+
+    body.user-template-scope .activity-list .notification-message {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.55);
+    }
+
+    body.user-template-scope .activity-list .notification-time {
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 0.85rem;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    body.user-template-scope .activity-list .notification-row:last-child {
       border-bottom: none;
     }
   </style>
@@ -449,7 +482,7 @@
       </div>
 
       <ul class="nav-menu">
-        <li class="nav-section">
+        <li class="nav-section nav-section-main">
           <span class="nav-section-title">Main Menu</span>
           <ul>
             <li class="nav-item">
