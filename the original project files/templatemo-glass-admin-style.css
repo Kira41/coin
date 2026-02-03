@@ -608,28 +608,6 @@ a {
     overflow: hidden;
 }
 
-.glass-card.glass-card-3d.stat-card::before {
-    content: '';
-    position: absolute;
-    left: -10px;
-    right: -10px;
-    bottom: -8px;
-    height: 140px;
-    background:
-        repeating-linear-gradient(
-            135deg,
-            rgba(10, 18, 10, 0.35) 0,
-            rgba(10, 18, 10, 0.35) 8px,
-            transparent 8px,
-            transparent 16px
-        ),
-        linear-gradient(180deg, rgba(184, 255, 0, 0.95), rgba(156, 255, 0, 0.85));
-    border-radius: inherit;
-    opacity: 0.22;
-    pointer-events: none;
-    filter: blur(0.4px);
-}
-
 .stat-card::after {
     content: '';
     position: absolute;
