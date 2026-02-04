@@ -275,7 +275,7 @@ body.user-template-scope #notificationsRecentes .notification-icon {
 }
 
 body.user-template-scope #notificationsRecentes .notification-icon i {
-    color: #fff !important;
+    color: inherit;
 }
 
 body.user-template-scope #notificationsRecentes .dropdown-divider {
@@ -579,10 +579,27 @@ body.user-template-scope .activity-list .notification-row {
     gap: 18px;
 }
 
+body.user-template-scope .activity-list .notification-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--panel-border);
+    flex-shrink: 0;
+}
+
+body.user-template-scope .activity-list .notification-icon i {
+    font-size: 0.95rem;
+}
+
 body.user-template-scope .activity-list .notification-content {
     display: flex;
     flex-direction: column;
     gap: 4px;
+    flex: 1;
 }
 
 body.user-template-scope .activity-list .notification-title {
