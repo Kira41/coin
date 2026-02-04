@@ -947,43 +947,42 @@ function initializeUI() {
     function generateNotificationDropdownItems(notifications) {
         return notifications.map(notification => {
             const iconClass = notificationIcons[notification.type] || notificationIcons.default;
+            const alertClass = notification.alertClass ? ` ${notification.alertClass}` : '';
             return `
-                <li>
-                    <a class="dropdown-item" href="#">
-                        <div class="d-flex">
-                            <div class="flex-shrink-0">
+                <li class="notification-item${escapeHtml(alertClass)}">
+                    <a class="dropdown-item notification-link" href="#">
+                        <div class="d-flex gap-3">
+                            <div class="notification-icon">
                                 <i class="${escapeHtml(iconClass)}"></i>
                             </div>
-                            <div class="flex-grow-1 ms-3">
-                                <div class="fw-bold">${escapeHtml(notification.title)}</div>
-                                <div class="small text-muted">${escapeHtml(notification.message)}</div>
-                                <div class="notification-time small text-muted">${escapeHtml(notification.time)}</div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-start justify-content-between gap-2">
+                                    <span class="fw-semibold notification-title">${escapeHtml(notification.title)}</span>
+                                    <span class="notification-time small text-muted">${escapeHtml(notification.time)}</span>
+                                </div>
+                                <div class="small text-muted notification-message">${escapeHtml(notification.message)}</div>
                             </div>
                         </div>
                     </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>`;
+                </li>`;
         }).join('');
     }
 
     const notifications = (dashboardData.notifications || []).slice(0, 4);
     $('#notificationCount').text(notifications.length);
+    $('#notificationsCountBadge').text(notifications.length);
     const $dropdown = $('#notificationsDropdown');
     $dropdown.empty();
     if (notifications.length > 0) {
         $dropdown.append(generateNotificationDropdownItems(notifications));
-        $dropdown.append(`
-            <li class="text-center">
-                <a class="dropdown-item small" href="#">Afficher toutes les notifications</a>
-            </li>`);
     } else {
         $dropdown.append(`
-            <li class="text-center text-muted py-3">
-                <p class="m-0 fw-semibold" style="font-size: 0.95rem;">Aucune donnée disponible actuellement</p>
-            </li>
-            <li><hr class="dropdown-divider"></li>
-            <li class="text-center">
-                <a class="dropdown-item small" href="#">Afficher toutes les notifications</a>
+            <li class="notification-empty text-center text-muted">
+                <div class="py-3 px-2">
+                    <i class="fas fa-inbox fa-lg mb-2"></i>
+                    <p class="m-0 fw-semibold">Aucune donnée disponible actuellement</p>
+                    <small>Vous verrez ici vos alertes importantes.</small>
+                </div>
             </li>`);
     }
 
