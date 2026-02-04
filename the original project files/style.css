@@ -234,11 +234,12 @@
   border-radius: 14px;
   padding: 0.35rem 0;
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+  color: #ffffff;
 }
 
 .notifications-dropdown .dropdown-header {
   font-weight: 600;
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .notifications-dropdown .notifications-list {
@@ -278,15 +279,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #2563eb;
+  color: #ffffff;
 }
 
 .notifications-dropdown .notification-title {
-  color: #0f172a;
+  color: #ffffff;
 }
 
 .notifications-dropdown .notification-message {
   margin-top: 0.2rem;
+}
+
+.notifications-dropdown .notification-time,
+.notifications-dropdown .notification-message,
+.notifications-dropdown .notification-empty,
+.notifications-dropdown .dropdown-item {
+  color: #ffffff;
 }
 
 .notifications-dropdown .notification-item.alert-success {
