@@ -109,7 +109,7 @@
     body.user-template-scope .table-responsive,
     body.user-template-scope .pagination .page-link,
     body.user-template-scope .btn,
-    body.user-template-scope .card-btn {
+    body.user-template-scope .insight-toggle {
       background: var(--panel);
       border: 1px solid var(--panel-border);
       box-shadow: var(--shadow);
@@ -207,41 +207,40 @@
       box-shadow: 0 12px 30px rgba(8, 14, 28, 0.45);
     }
 
-    body.user-template-scope .card-btn {
+    body.user-template-scope .insight-toggle {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       gap: 6px;
-      min-width: 88px;
-      padding: 10px 18px;
-      border-radius: 999px;
-      border: 1px solid var(--panel-border);
-      background: linear-gradient(150deg, rgba(184, 254, 8, 0.12), rgba(124, 37, 239, 0.10));
-      background-clip: padding-box;
-      color: var(--text);
+      min-width: 96px;
+      padding: 10px 20px;
+      border-radius: 14px;
+      border: 1px solid rgba(110, 224, 255, 0.35);
+      background: linear-gradient(135deg, rgba(18, 32, 58, 0.85), rgba(37, 54, 96, 0.65));
+      color: #e5f6ff;
       font-weight: 600;
-      letter-spacing: 0.2px;
+      letter-spacing: 0.3px;
       text-transform: uppercase;
-      font-size: 12px;
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+      font-size: 11px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
 
-    body.user-template-scope .card-btn:hover {
+    body.user-template-scope .insight-toggle:hover {
       transform: translateY(-1px);
-      border-color: rgba(184, 254, 8, 0.6);
-      box-shadow: 0 12px 20px rgba(184, 254, 8, 0.18);
+      border-color: rgba(110, 224, 255, 0.7);
+      box-shadow: 0 12px 18px rgba(66, 148, 255, 0.25);
     }
 
-    body.user-template-scope .card-btn:focus-visible {
-      outline: 2px solid rgba(184, 254, 8, 0.8);
+    body.user-template-scope .insight-toggle:focus-visible {
+      outline: 2px solid rgba(110, 224, 255, 0.8);
       outline-offset: 2px;
     }
 
-    body.user-template-scope .card-btn.active {
-      background: linear-gradient(150deg, rgba(184, 254, 8, 0.85), rgba(124, 37, 239, 0.35));
+    body.user-template-scope .insight-toggle.active {
+      background: linear-gradient(135deg, rgba(110, 224, 255, 0.85), rgba(85, 133, 255, 0.8));
       color: #0b1322;
-      border-color: rgba(184, 254, 8, 0.75);
-      box-shadow: 0 14px 28px rgba(184, 254, 8, 0.35);
+      border-color: rgba(110, 224, 255, 0.9);
+      box-shadow: 0 14px 26px rgba(66, 148, 255, 0.35);
     }
 
     body.user-template-scope .table th,
@@ -1076,9 +1075,9 @@
                   <p class="card-subtitle">Monthly revenue overview</p>
                 </div>
                 <div class="card-actions">
-                  <button class="card-btn active">Monthly</button>
-                  <button class="card-btn">Weekly</button>
-                  <button class="card-btn">Daily</button>
+                  <button class="insight-toggle active">Overview</button>
+                  <button class="insight-toggle">Performance</button>
+                  <button class="insight-toggle">Forecast</button>
                 </div>
               </div>
               <div class="chart-wrapper">
