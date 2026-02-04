@@ -60,6 +60,611 @@
     --transition-fast: 0.2s ease;
     --transition-normal: 0.3s ease;
     --transition-slow: 0.5s ease;
+    --curve: #a3ec01;
+}
+
+body.user-template-scope {
+    --bg: #0b1322;
+    --panel: rgba(124, 37, 239, 0.10);
+    --panel-border: rgba(124, 37, 239, 0.30);
+    --shadow: 0 4px 30px rgba(0, 0, 0, 0.10);
+    --blur: blur(4.7px);
+    --text: #e9eef6;
+    --muted: #98a3b7;
+    --accent: #b8ff00;
+    --lime: #B8FE08;
+    --glow-shift-x: 0px;
+    --glow-shift-y: 0px;
+    --glow-shift-x-alt: 0px;
+    --glow-shift-y-alt: 0px;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    position: relative;
+}
+
+body.user-template-scope::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background:
+        linear-gradient(140deg, rgba(120, 180, 255, 0.20) 0%, rgba(120, 180, 255, 0.0) 48%),
+        linear-gradient(220deg, rgba(100, 255, 215, 0.14) 0%, rgba(100, 255, 215, 0.0) 55%),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0.0) 42%),
+        linear-gradient(180deg, #0b1322 0%, #0a0f1a 100%);
+    background-position:
+        0% 0%,
+        0% 0%,
+        0% 0%,
+        0% 0%;
+    filter: blur(26px);
+    opacity: 0.95;
+    animation: floatGlow 20s ease-in-out infinite;
+}
+
+body.user-template-scope::after {
+    content: none;
+}
+
+@keyframes floatGlow {
+    0% {
+        background-position:
+            0% 0%,
+            0% 0%,
+            0% 0%,
+            0% 0%;
+    }
+    50% {
+        background-position:
+            6% -4%,
+            -5% 8%,
+            4% -6%,
+            0% 0%;
+    }
+    100% {
+        background-position:
+            0% 0%,
+            0% 0%,
+            0% 0%,
+            0% 0%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body.user-template-scope::before {
+        animation: none;
+    }
+}
+
+body.user-template-scope > * {
+    position: relative;
+    z-index: 1;
+}
+
+body.user-template-scope .glass-card,
+body.user-template-scope .card,
+body.user-template-scope .modal-content,
+body.user-template-scope .dropdown-menu,
+body.user-template-scope .sidebar,
+body.user-template-scope .navbar,
+body.user-template-scope .nav-btn,
+body.user-template-scope .search-input,
+body.user-template-scope .login-card,
+body.user-template-scope .table-wrapper,
+body.user-template-scope .table-responsive,
+body.user-template-scope .pagination .page-link,
+body.user-template-scope .btn,
+body.user-template-scope .insight-toggle {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    box-shadow: var(--shadow);
+    backdrop-filter: var(--blur);
+    -webkit-backdrop-filter: var(--blur);
+    color: var(--text);
+}
+
+body.user-template-scope .background,
+body.user-template-scope .orb {
+    display: none;
+}
+
+body.user-template-scope .navbar {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+}
+
+body.user-template-scope .navbar::before,
+body.user-template-scope .navbar::after {
+    content: none !important;
+    display: none !important;
+}
+
+body.user-template-scope .glass-card .glass-card,
+body.user-template-scope .glass-card .card,
+body.user-template-scope .card .glass-card,
+body.user-template-scope .card .card,
+body.user-template-scope .glass-card .table-wrapper,
+body.user-template-scope .card .table-wrapper,
+body.user-template-scope .glass-card .table-responsive,
+body.user-template-scope .card .table-responsive {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+body.user-template-scope .card-header,
+body.user-template-scope .card-header *,
+body.user-template-scope .card-body,
+body.user-template-scope .tab-content,
+body.user-template-scope .tab-pane,
+body.user-template-scope .alert,
+body.user-template-scope .dropdown-item,
+body.user-template-scope .list-group-item,
+body.user-template-scope .bg-light,
+body.user-template-scope .bg-white {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+body.user-template-scope .tab-content::before {
+    content: none !important;
+}
+
+body.user-template-scope .dropdown-item,
+body.user-template-scope .list-group-item,
+body.user-template-scope .table,
+body.user-template-scope .data-table,
+body.user-template-scope .table th,
+body.user-template-scope .table td,
+body.user-template-scope .data-table th,
+body.user-template-scope .data-table td,
+body.user-template-scope .pagination .page-link,
+body.user-template-scope .alert {
+    background: transparent !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+body.user-template-scope .activity-item {
+    background: transparent;
+    box-shadow: none;
+}
+
+body.user-template-scope .card-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px;
+    border-radius: 999px;
+    border: 1px solid rgba(184, 254, 8, 0.25);
+    background: rgba(10, 18, 32, 0.55);
+    box-shadow: 0 12px 30px rgba(8, 14, 28, 0.45);
+}
+
+body.user-template-scope .insight-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 96px;
+    padding: 10px 24px;
+    border-radius: 999px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(255, 255, 255, 0.35);
+    background: linear-gradient(135deg, rgba(34, 80, 118, 0.55), rgba(18, 44, 72, 0.25));
+    color: #e9f7ff;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    font-size: 11px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.45),
+        inset 0 -1px 6px rgba(0, 0, 0, 0.3),
+        0 12px 24px rgba(4, 18, 36, 0.35);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease,
+        background 0.2s ease;
+}
+
+body.user-template-scope .insight-toggle.interval-toggle {
+    border-color: rgba(184, 254, 8, 0.6);
+}
+
+body.user-template-scope .insight-toggle:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.7);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.6),
+        0 14px 26px rgba(66, 148, 255, 0.28);
+}
+
+body.user-template-scope .insight-toggle.interval-toggle:hover {
+    border-color: rgba(184, 254, 8, 0.95);
+}
+
+body.user-template-scope .insight-toggle:focus-visible {
+    outline: 2px solid rgba(110, 224, 255, 0.8);
+    outline-offset: 2px;
+}
+
+body.user-template-scope .insight-toggle.active {
+    background: linear-gradient(135deg, rgba(148, 233, 255, 0.8), rgba(92, 160, 255, 0.75));
+    color: #0b1322;
+    border-color: rgba(255, 255, 255, 0.8);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        0 16px 28px rgba(66, 148, 255, 0.4);
+}
+
+body.user-template-scope .insight-toggle.interval-toggle.active {
+    border-color: rgba(184, 254, 8, 0.9);
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        0 14px 26px rgba(184, 254, 8, 0.28);
+}
+
+body.user-template-scope .table th,
+body.user-template-scope .table td,
+body.user-template-scope .data-table th,
+body.user-template-scope .data-table td {
+    background: transparent !important;
+    border-color: var(--panel-border);
+}
+
+body.user-template-scope .table-striped > tbody > tr:nth-of-type(odd) > * {
+    background: transparent !important;
+}
+
+body.user-template-scope .nav-tabs .nav-link.active,
+body.user-template-scope .dropdown-menu .dropdown-item.active {
+    background: transparent !important;
+    color: var(--accent);
+    border-color: var(--panel-border);
+}
+
+body.user-template-scope .dropdown-divider,
+body.user-template-scope .list-group-item {
+    border-color: var(--panel-border);
+}
+
+body.user-template-scope .badge,
+body.user-template-scope .badge.bg-success-subtle,
+body.user-template-scope .badge.bg-warning-subtle {
+    background: var(--accent) !important;
+    color: #0b0d10 !important;
+    border: 1px solid var(--panel-border);
+}
+
+body.user-template-scope .form-control::placeholder,
+body.user-template-scope .form-input::placeholder,
+body.user-template-scope .search-input::placeholder {
+    color: var(--muted);
+}
+
+body.user-template-scope .dashboard {
+    gap: 0;
+}
+
+body.user-template-scope .main-content {
+    margin-left: var(--sidebar-width);
+    padding: 30px 30px 30px 22px;
+}
+
+body.user-template-scope .btn-primary,
+body.user-template-scope .btn-success {
+    background: var(--panel) !important;
+    border-color: var(--panel-border) !important;
+    color: var(--text);
+}
+
+body.user-template-scope .btn-primary:hover,
+body.user-template-scope .btn-success:hover {
+    border-color: var(--accent) !important;
+    color: var(--accent);
+}
+
+body.user-template-scope .btn-primary:focus,
+body.user-template-scope .btn-success:focus,
+body.user-template-scope .btn-primary:active,
+body.user-template-scope .btn-success:active {
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--accent) 40%, transparent);
+    border-color: var(--accent) !important;
+}
+
+body.user-template-scope .text-success,
+body.user-template-scope .text-success-emphasis {
+    color: var(--accent) !important;
+}
+
+body.user-template-scope .bg-success {
+    background-color: transparent !important;
+    border-color: var(--accent) !important;
+    color: var(--accent) !important;
+}
+
+body.user-template-scope .bg-success-subtle,
+body.user-template-scope .badge.bg-success-subtle {
+    background-color: color-mix(in srgb, var(--accent) 22%, transparent) !important;
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent) !important;
+    color: var(--text) !important;
+}
+
+body.user-template-scope .progress-bar.bg-success {
+    background-color: var(--accent) !important;
+}
+
+body.user-template-scope .btn-outline-primary {
+    color: var(--accent) !important;
+    border-color: var(--accent) !important;
+}
+
+body.user-template-scope .btn-outline-primary:hover,
+body.user-template-scope .btn-outline-primary:focus {
+    background-color: transparent !important;
+    color: var(--accent) !important;
+}
+
+body.user-template-scope .form-control:focus,
+body.user-template-scope .form-select:focus,
+body.user-template-scope .form-check-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--accent) 35%, transparent);
+}
+
+body.user-template-scope .form-check-input:checked {
+    background-color: var(--accent);
+    border-color: var(--accent);
+}
+
+body.user-template-scope .nav-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+body.user-template-scope .alert {
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin-bottom: 14px;
+    color: var(--text);
+}
+
+body.user-template-scope .alert + .alert {
+    border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+body.user-template-scope .alert .alert-heading,
+body.user-template-scope .alert strong {
+    color: var(--text);
+    font-weight: 600;
+}
+
+body.user-template-scope .alert .text-muted,
+body.user-template-scope .alert small {
+    color: var(--muted) !important;
+}
+
+body.user-template-scope .alert-info,
+body.user-template-scope .alert-success,
+body.user-template-scope .alert-warning,
+body.user-template-scope .alert-danger {
+    background: transparent !important;
+    color: var(--text) !important;
+}
+
+body.user-template-scope .pagination {
+    gap: 8px;
+}
+
+body.user-template-scope .pagination .page-item {
+    margin: 0;
+}
+
+body.user-template-scope .pagination .page-link {
+    border: 1px solid var(--panel-border);
+    border-radius: 999px;
+    padding: 6px 14px;
+    min-width: 36px;
+    text-align: center;
+    font-weight: 500;
+    color: var(--muted);
+    transition: all 0.2s ease;
+}
+
+body.user-template-scope .pagination .page-link:hover {
+    color: var(--text);
+    border-color: var(--accent);
+}
+
+body.user-template-scope .pagination .page-item.active .page-link,
+body.user-template-scope .pagination .page-link.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: var(--panel) !important;
+}
+
+body.user-template-scope .pagination .page-link:focus {
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+body.user-template-scope .sidebar {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+body.user-template-scope .nav-menu {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+
+body.user-template-scope .nav-section-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+body.user-template-scope .account-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+body.user-template-scope .account-link .user-avatar {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px solid var(--panel-border);
+    object-fit: cover;
+}
+
+body.user-template-scope .account-details {
+    display: flex;
+    flex-direction: column;
+}
+
+body.user-template-scope .account-balance {
+    padding: 10px 18px 4px;
+    color: var(--muted);
+}
+
+body.user-template-scope .account-balance-label {
+    font-size: 0.85rem;
+    color: var(--muted);
+}
+
+body.user-template-scope .account-balance-value {
+    font-weight: 600;
+    color: var(--accent) !important;
+}
+
+body.user-template-scope .account-logout {
+    color: var(--muted) !important;
+}
+
+body.user-template-scope .account-logout:hover {
+    color: var(--text) !important;
+}
+
+body.user-template-scope .activity-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+body.user-template-scope .activity-list .notification-row {
+    margin: 0;
+    border: none;
+    border-radius: 0;
+    padding: 14px 2px;
+    background: transparent !important;
+    border-bottom: 1px solid var(--panel-border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+body.user-template-scope .activity-list .notification-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+body.user-template-scope .activity-list .notification-title {
+    color: var(--text);
+    font-weight: 600;
+}
+
+body.user-template-scope .activity-list .notification-message {
+    margin: 0;
+    color: var(--muted);
+}
+
+body.user-template-scope .activity-list .notification-time {
+    color: var(--muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    text-align: right;
+}
+
+body.user-template-scope .text-muted,
+body.user-template-scope .card-subtitle,
+body.user-template-scope .nav-section-title,
+body.user-template-scope .form-text,
+body.user-template-scope small {
+    color: var(--muted) !important;
+}
+
+body.user-template-scope .nav-link.active,
+body.user-template-scope .nav-link:hover,
+body.user-template-scope .nav-tabs .nav-link.active {
+    color: var(--accent) !important;
+}
+
+body.user-template-scope .nav-link,
+body.user-template-scope .nav-tabs .nav-link {
+    background: transparent !important;
+}
+
+body.user-template-scope .dashboard,
+body.user-template-scope .main-content,
+body.user-template-scope .table,
+body.user-template-scope .data-table {
+    background: transparent;
+}
+
+body.user-template-scope .activity-list .notification-row:last-child {
+    border-bottom: none;
+}
+
+body.user-template-scope .greenCurve {
+    position: relative;
+    overflow: hidden;
+    border-radius: 16px;
+    min-height: 220px;
+    background: rgba(124, 37, 239, 0.10);
+    border: 1px solid rgba(124, 37, 239, 0.30);
+}
+
+body.user-template-scope .greenCurve__wave {
+    position: absolute;
+    left: -15%;
+    width: 130%;
+    bottom: -26px;
+    height: 58%;
+    opacity: 1;
+    pointer-events: none;
+    filter: drop-shadow(0 -18px 40px rgba(163, 236, 1, 0.18));
+}
+
+body.user-template-scope .greenCurve__fill {
+    opacity: .55;
+}
+
+body.user-template-scope .greenCurve__stripes {
+    opacity: .14;
+}
+
+body.user-template-scope .greenCurve__line {
+    opacity: .9;
+}
+
+body.user-template-scope .greenCurve .stat-card-inner {
+    position: relative;
+    z-index: 1;
 }
 
 /* Light Mode */
