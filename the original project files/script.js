@@ -119,4 +119,94 @@ $(function() {
     updateStopLossFields();
     updateTradeAmountCurrency();
     updateTradeAmountEquivalent();
+
+    const revenueCard = document.querySelector('.chart-card');
+    if (revenueCard) {
+        const subtitle = document.getElementById('revenueSubtitle');
+        const periodButtons = Array.from(document.querySelectorAll('.period-button-group .glassy-btn'));
+        const chartGroups = Array.from(document.querySelectorAll('.chart-placeholder .chart-bar-group'));
+        const yAxisLabels = Array.from(document.querySelectorAll('.chart-y-axis .y-value'));
+        const defaultPeriod = periodButtons.find(button => button.classList.contains('is-active'))?.dataset.period || 'monthly';
+        const periodCopy = {
+            monthly: 'Monthly revenue overview',
+            weekly: 'Weekly revenue overview',
+            daily: 'Daily revenue overview',
+        };
+
+        const formatCurrency = (value) => {
+            if (value >= 1000) {
+                return `$${Math.round(value / 1000)}K`;
+            }
+            return `$${Math.round(value)}`;
+        };
+
+        const updateYAxis = (maxValue) => {
+            const rawStep = Math.max(1, Math.ceil(maxValue / 5));
+            const step = maxValue > 1000 ? Math.ceil(rawStep / 1000) * 1000 : rawStep;
+            const top = step * 5;
+            yAxisLabels.forEach((label, index) => {
+                const value = top - (step * index);
+                label.textContent = formatCurrency(Math.max(0, value));
+            });
+        };
+
+        const updateBars = (labels, values) => {
+            const maxValue = Math.max(...values, 1);
+            chartGroups.forEach((group, index) => {
+                const bar = group.querySelector('.chart-bar');
+                const label = group.querySelector('.chart-label');
+                const value = values[index] ?? 0;
+                if (bar) {
+                    const height = Math.max(16, Math.round((value / maxValue) * 200));
+                    bar.style.height = `${height}px`;
+                    bar.setAttribute('data-value', value.toFixed(2));
+                }
+                if (label) {
+                    label.textContent = labels[index] ?? '';
+                }
+            });
+            updateYAxis(maxValue);
+        };
+
+        const setActiveButton = (period) => {
+            periodButtons.forEach(button => {
+                button.classList.toggle('is-active', button.dataset.period === period);
+            });
+        };
+
+        const loadRevenueData = async (period) => {
+            const userId = localStorage.getItem('user_id') || 1;
+            const response = await fetch(`php/revenue_analytics.php?period=${encodeURIComponent(period)}&user_id=${encodeURIComponent(userId)}`);
+            if (!response.ok) {
+                throw new Error('Failed to load revenue analytics');
+            }
+            return response.json();
+        };
+
+        const refreshRevenueAnalytics = (period) => {
+            setActiveButton(period);
+            if (subtitle) {
+                subtitle.textContent = periodCopy[period] || periodCopy.monthly;
+            }
+
+            loadRevenueData(period)
+                .then((data) => {
+                    if (Array.isArray(data.labels) && Array.isArray(data.values)) {
+                        updateBars(data.labels, data.values);
+                    }
+                })
+                .catch(() => {
+                    updateBars(chartGroups.map(() => ''), chartGroups.map(() => 0));
+                });
+        };
+
+        periodButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const period = button.dataset.period || 'monthly';
+                refreshRevenueAnalytics(period);
+            });
+        });
+
+        refreshRevenueAnalytics(defaultPeriod);
+    }
 });
