@@ -214,6 +214,15 @@ body.user-template-scope .bg-white {
     backdrop-filter: none !important;
 }
 
+body.user-template-scope .card-header .glassy-btn {
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.08)) !important;
+    border: 1px solid rgba(255, 255, 255, 0.5) !important;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.6),
+        inset 0 -3px 8px rgba(0, 0, 0, 0.25),
+        0 8px 16px rgba(10, 24, 38, 0.25) !important;
+}
+
 body.user-template-scope .tab-content::before {
     content: none !important;
 }
