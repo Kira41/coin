@@ -193,19 +193,24 @@
               </svg>
               <span class="notification-dot" id="notificationCount">0</span>
             </button>
-            <ul aria-labelledby="notificationsDropdownButton" class="dropdown-menu dropdown-menu-end" id="notificationsRecentes" style="min-width: 300px;">
-              <li class="dropdown-header">
+            <ul aria-labelledby="notificationsDropdownButton" class="dropdown-menu dropdown-menu-end notifications-dropdown" id="notificationsRecentes" style="min-width: 320px;">
+              <li class="dropdown-header d-flex align-items-center justify-content-between">
+                <span>
                 <svg class="me-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
                   <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                   <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                 </svg>
                 Notifications récentes
+                </span>
+                <span class="badge bg-primary-subtle text-primary" id="notificationsCountBadge">0</span>
               </li>
               <li><hr class="dropdown-divider"/></li>
-              <li id="notificationsDropdown" class="text-center text-muted py-3"></li>
+              <li class="px-2">
+                <ul class="list-unstyled mb-0 notifications-list" id="notificationsDropdown" aria-live="polite"></ul>
+              </li>
               <li><hr class="dropdown-divider"/></li>
               <li class="text-center">
-                <a class="dropdown-item small" href="#"></a>
+                <a class="dropdown-item small" href="#" id="notificationsViewAll">Afficher toutes les notifications</a>
               </li>
             </ul>
           </div>
