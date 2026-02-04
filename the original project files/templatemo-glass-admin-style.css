@@ -1320,6 +1320,45 @@ a {
     color: var(--text-primary);
 }
 
+.revenue-analytics-header {
+    justify-content: flex-start;
+}
+
+.revenue-header-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.glassy-btn {
+    padding: 10px 26px;
+    border-radius: 999px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), rgba(255, 255, 255, 0.08));
+    color: #f5fbff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.6),
+        inset 0 -3px 8px rgba(0, 0, 0, 0.25),
+        0 8px 16px rgba(10, 24, 38, 0.25);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    transition: transform var(--transition-fast), box-shadow var(--transition-fast), border-color var(--transition-fast);
+}
+
+.glassy-btn:hover {
+    transform: translateY(-1px);
+    border-color: rgba(255, 255, 255, 0.75);
+    box-shadow:
+        inset 0 1px 1px rgba(255, 255, 255, 0.7),
+        inset 0 -3px 8px rgba(0, 0, 0, 0.3),
+        0 10px 18px rgba(10, 24, 38, 0.3);
+}
+
 /* Chart Container */
 .chart-wrapper {
     overflow-x: auto;
