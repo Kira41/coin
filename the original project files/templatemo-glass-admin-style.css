@@ -1027,7 +1027,11 @@ a {
     transform: translateY(-50%);
     width: 20px;
     height: 20px;
+    font-size: 20px;
+    line-height: 1;
     color: var(--text-muted);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
 }
 
 .nav-btn {
