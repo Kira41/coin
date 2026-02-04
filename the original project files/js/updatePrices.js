@@ -532,6 +532,75 @@ function initializeUI() {
         $('#nbTransactions').text(dashboardData.personalData.nbTransactions);
     }
 
+    const notificationStyles = {
+        info: {
+            iconClass: "fas fa-chart-line text-primary",
+            titleClass: "text-primary"
+        },
+        success: {
+            iconClass: "fas fa-money-bill-wave text-success",
+            titleClass: "text-success"
+        },
+        warning: {
+            iconClass: "fas fa-exclamation-triangle text-warning",
+            titleClass: "text-warning"
+        },
+        error: {
+            iconClass: "fas fa-times-circle text-danger",
+            titleClass: "text-danger"
+        },
+        kyc: {
+            iconClass: "fas fa-user-check text-info",
+            titleClass: "text-info"
+        },
+        default: {
+            iconClass: "fas fa-bill text-secondary",
+            titleClass: "text-secondary"
+        }
+    };
+
+    function resolveNotificationType(notification) {
+        const type = String(notification?.type || '').toLowerCase();
+        if (type) {
+            return type;
+        }
+        const alertClass = String(notification?.alertClass || '').toLowerCase();
+        if (alertClass.includes('success')) return 'success';
+        if (alertClass.includes('warning')) return 'warning';
+        if (alertClass.includes('danger') || alertClass.includes('error')) return 'error';
+        if (alertClass.includes('info')) return 'info';
+        return 'default';
+    }
+
+    function getNotificationStyle(notification) {
+        const type = resolveNotificationType(notification);
+        return notificationStyles[type] || notificationStyles.default;
+    }
+
+    function generateNotificationDropdownItems(notifications) {
+        return notifications.map(notification => {
+            const style = getNotificationStyle(notification);
+            const alertClass = notification.alertClass ? ` ${notification.alertClass}` : '';
+            return `
+                <li class="notification-item${escapeHtml(alertClass)}">
+                    <a class="dropdown-item notification-link" href="#">
+                        <div class="d-flex gap-3">
+                            <div class="notification-icon">
+                                <i class="${escapeHtml(style.iconClass)}"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <div class="d-flex align-items-start justify-content-between gap-2">
+                                    <span class="fw-semibold notification-title ${escapeHtml(style.titleClass)}">${escapeHtml(notification.title)}</span>
+                                    <span class="notification-time small text-muted">${escapeHtml(notification.time)}</span>
+                                </div>
+                                <div class="small text-muted notification-message">${escapeHtml(notification.message)}</div>
+                            </div>
+                        </div>
+                    </a>
+                </li>`;
+        }).join('');
+    }
+
     function updateKYCProgress() {
         hideKycCards();
         const steps = Object.values(dashboardData.defaultKYCStatus);
@@ -937,75 +1006,6 @@ function initializeUI() {
         } catch (err) {
             console.error('Failed to load transactions', err);
         }
-    }
-
-    const notificationStyles = {
-        info: {
-            iconClass: "fas fa-chart-line text-primary",
-            titleClass: "text-primary"
-        },
-        success: {
-            iconClass: "fas fa-money-bill-wave text-success",
-            titleClass: "text-success"
-        },
-        warning: {
-            iconClass: "fas fa-exclamation-triangle text-warning",
-            titleClass: "text-warning"
-        },
-        error: {
-            iconClass: "fas fa-times-circle text-danger",
-            titleClass: "text-danger"
-        },
-        kyc: {
-            iconClass: "fas fa-user-check text-info",
-            titleClass: "text-info"
-        },
-        default: {
-            iconClass: "fas fa-bill text-secondary",
-            titleClass: "text-secondary"
-        }
-    };
-
-    function resolveNotificationType(notification) {
-        const type = String(notification?.type || '').toLowerCase();
-        if (type) {
-            return type;
-        }
-        const alertClass = String(notification?.alertClass || '').toLowerCase();
-        if (alertClass.includes('success')) return 'success';
-        if (alertClass.includes('warning')) return 'warning';
-        if (alertClass.includes('danger') || alertClass.includes('error')) return 'error';
-        if (alertClass.includes('info')) return 'info';
-        return 'default';
-    }
-
-    function getNotificationStyle(notification) {
-        const type = resolveNotificationType(notification);
-        return notificationStyles[type] || notificationStyles.default;
-    }
-
-    function generateNotificationDropdownItems(notifications) {
-        return notifications.map(notification => {
-            const style = getNotificationStyle(notification);
-            const alertClass = notification.alertClass ? ` ${notification.alertClass}` : '';
-            return `
-                <li class="notification-item${escapeHtml(alertClass)}">
-                    <a class="dropdown-item notification-link" href="#">
-                        <div class="d-flex gap-3">
-                            <div class="notification-icon">
-                                <i class="${escapeHtml(style.iconClass)}"></i>
-                            </div>
-                            <div class="flex-grow-1">
-                                <div class="d-flex align-items-start justify-content-between gap-2">
-                                    <span class="fw-semibold notification-title ${escapeHtml(style.titleClass)}">${escapeHtml(notification.title)}</span>
-                                    <span class="notification-time small text-muted">${escapeHtml(notification.time)}</span>
-                                </div>
-                                <div class="small text-muted notification-message">${escapeHtml(notification.message)}</div>
-                            </div>
-                        </div>
-                    </a>
-                </li>`;
-        }).join('');
     }
 
     const notifications = (dashboardData.notifications || []).slice(0, 4);
