@@ -1007,6 +1007,8 @@ a {
     color: var(--text-primary);
     font-family: inherit;
     font-size: 14px;
+    position: relative;
+    z-index: 1;
     transition: all var(--transition-fast);
 }
 
@@ -1030,6 +1032,8 @@ a {
     font-size: 20px;
     line-height: 1;
     color: var(--text-muted);
+    pointer-events: none;
+    z-index: 2;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
 }
